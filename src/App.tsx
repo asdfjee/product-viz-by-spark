@@ -1617,9 +1617,9 @@ function App() {
             </Button>
           </div>
         </div>
+
+        <Footer />
       </div>
-      
-      <Footer />
     )
   }
 
