@@ -161,7 +161,7 @@ function App() {
           <nav className="hidden md:flex items-center gap-8">
             <a 
               href="#"
-              className="text-foreground hover:text-primary transition-colors font-medium"
+              className="text-foreground hover:text-primary transition-colors font-medium text-sm"
               onClick={(e) => {
                 e.preventDefault()
                 setCurrentView('landing')
@@ -171,7 +171,7 @@ function App() {
             </a>
             <a 
               href="#"
-              className="text-foreground hover:text-primary transition-colors font-medium"
+              className="text-foreground hover:text-primary transition-colors font-medium text-sm"
               onClick={(e) => {
                 e.preventDefault()
                 setCurrentView('dashboard')
@@ -181,7 +181,7 @@ function App() {
             </a>
             <a 
               href="#"
-              className="text-foreground hover:text-primary transition-colors font-medium"
+              className="text-foreground hover:text-primary transition-colors font-medium text-sm"
               onClick={(e) => {
                 e.preventDefault()
                 setCurrentView('gallery')
@@ -191,7 +191,7 @@ function App() {
             </a>
             <a 
               href="#"
-              className="text-foreground hover:text-primary transition-colors font-medium"
+              className="text-foreground hover:text-primary transition-colors font-medium text-sm"
               onClick={(e) => {
                 e.preventDefault()
                 setCurrentView('about')
@@ -236,7 +236,7 @@ function App() {
             <div className="flex flex-col gap-4 pt-6">
               <a 
                 href="#"
-                className="text-foreground hover:text-primary transition-colors font-medium text-center py-2"
+                className="text-foreground hover:text-primary transition-colors font-medium text-center py-2 text-sm"
                 onClick={(e) => {
                   e.preventDefault()
                   setCurrentView('landing')
@@ -247,7 +247,7 @@ function App() {
               </a>
               <a 
                 href="#"
-                className="text-foreground hover:text-primary transition-colors font-medium text-center py-2"
+                className="text-foreground hover:text-primary transition-colors font-medium text-center py-2 text-sm"
                 onClick={(e) => {
                   e.preventDefault()
                   setCurrentView('dashboard')
@@ -258,7 +258,7 @@ function App() {
               </a>
               <a 
                 href="#"
-                className="text-foreground hover:text-primary transition-colors font-medium text-center py-2"
+                className="text-foreground hover:text-primary transition-colors font-medium text-center py-2 text-sm"
                 onClick={(e) => {
                   e.preventDefault()
                   setCurrentView('gallery')
@@ -269,7 +269,7 @@ function App() {
               </a>
               <a 
                 href="#"
-                className="text-foreground hover:text-primary transition-colors font-medium text-center py-2"
+                className="text-foreground hover:text-primary transition-colors font-medium text-center py-2 text-sm"
                 onClick={(e) => {
                   e.preventDefault()
                   setCurrentView('about')
