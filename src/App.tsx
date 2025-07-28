@@ -157,19 +157,6 @@ function App() {
     <header className="bg-card border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-6 py-6">
         <div className="flex items-center justify-between">
-          {/* Logo/Brand */}
-          <div 
-            className="flex items-center gap-3 cursor-pointer"
-            onClick={() => setCurrentView('landing')}
-          >
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">
-              PRODUCT VIZ
-            </h1>
-          </div>
-
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <a 
@@ -231,6 +218,16 @@ function App() {
               <List className="w-6 h-6 text-foreground" />
             )}
           </button>
+
+          {/* Logo/Brand */}
+          <div 
+            className="flex items-center cursor-pointer"
+            onClick={() => setCurrentView('landing')}
+          >
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">
+              PRODUCT VIZ
+            </h1>
+          </div>
         </div>
 
         {/* Mobile Navigation */}
