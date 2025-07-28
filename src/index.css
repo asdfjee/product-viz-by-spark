@@ -4,44 +4,44 @@
 @layer base {
   * {
     @apply border-border;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Lato', sans-serif;
   }
 }
 
 :root {
-  /* Core brand colors for sophisticated, gallery-like experience */
-  --background: oklch(0.98 0.01 100);  /* Warm white background */
-  --foreground: oklch(0.15 0.02 260);  /* Deep charcoal text */
+  /* Warm, inviting color scheme based on user specifications */
+  --background: #fff5ed;               /* Warm cream background */
+  --foreground: #333;                  /* Dark gray text for readability */
 
-  --card: oklch(0.95 0.01 100);        /* Light gray card background */
-  --card-foreground: oklch(0.15 0.02 260); /* Dark charcoal on cards */
+  --card: #ffffff;                     /* Pure white cards for contrast */
+  --card-foreground: #333;             /* Dark text on white cards */
   
-  --popover: oklch(0.98 0.01 100);     /* Same as background */
-  --popover-foreground: oklch(0.15 0.02 260); /* Dark charcoal */
+  --popover: #ffffff;                  /* White popover backgrounds */
+  --popover-foreground: #333;          /* Dark text on popovers */
 
-  /* Action colors that guide user through creative process */
-  --primary: oklch(0.15 0.02 260);     /* Deep charcoal for primary actions */
-  --primary-foreground: oklch(0.98 0.01 100); /* White text on primary */
+  /* Action colors using the brown accent from specifications */
+  --primary: #523b36;                  /* Rich brown for primary actions */
+  --primary-foreground: #ffffff;       /* White text on brown */
   
-  --secondary: oklch(0.85 0.01 100);   /* Medium gray for secondary actions */
-  --secondary-foreground: oklch(0.15 0.02 260); /* Dark text on secondary */
+  --secondary: #f8f9fa;                /* Light gray for secondary actions */
+  --secondary-foreground: #523b36;     /* Brown text on light gray */
   
-  --accent: oklch(0.64 0.16 180);      /* Vibrant teal for interactive elements */
-  --accent-foreground: oklch(0.98 0.01 100); /* White text on accent */
+  --accent: #523b36;                   /* Brown accent for highlights */
+  --accent-foreground: #ffffff;        /* White text on brown accent */
   
-  --destructive: oklch(0.55 0.20 25);  /* Warm red for destructive actions */
-  --destructive-foreground: oklch(0.98 0.01 100); /* White text on destructive */
+  --destructive: #dc3545;              /* Standard red for destructive actions */
+  --destructive-foreground: #ffffff;   /* White text on red */
 
-  /* Supporting UI colors for professional interface */
-  --muted: oklch(0.92 0.01 100);       /* Very light gray for muted backgrounds */
-  --muted-foreground: oklch(0.45 0.02 260); /* Medium gray text on muted */
+  /* Supporting UI colors */
+  --muted: #f5fcf7;                    /* Very light green for muted backgrounds */
+  --muted-foreground: #6c757d;         /* Medium gray text */
   
-  --border: oklch(0.88 0.01 100);      /* Light gray borders */
-  --input: oklch(0.88 0.01 100);       /* Light gray input borders */
-  --ring: oklch(0.64 0.16 180);        /* Teal focus rings */
+  --border: #e9ecef;                   /* Light gray borders */
+  --input: #ccc;                       /* Light gray input borders */
+  --ring: #523b36;                     /* Brown focus rings */
 
-  /* Consistent border radius for modern, friendly feel */
-  --radius: 0.75rem;
+  /* Consistent border radius */
+  --radius: 0.5rem;
 }
 
 /* Map CSS variables to Tailwind theme system */
@@ -75,5 +75,5 @@
   --radius-full: 9999px;
 
   /* Custom font family */
-  --font-family-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-family-sans: 'Lato', ui-sans-serif, system-ui, sans-serif;
 }
