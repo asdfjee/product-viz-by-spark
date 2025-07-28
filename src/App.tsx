@@ -80,6 +80,59 @@ const featuredVisualizationsData = [
   }
 ]
 
+// Toggle Comparison Component for the detail modal
+const ToggleComparison = ({ transformation }: { transformation: any }) => {
+  const [showAfter, setShowAfter] = useState(false)
+
+  return (
+    <div className="relative h-full">
+      {/* Image Display */}
+      <div className="absolute inset-0">
+        {showAfter ? (
+          <div className="w-full h-full bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center">
+            <ImageIcon className="w-16 h-16 text-accent" />
+          </div>
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-muted-foreground/20 to-muted-foreground/5 flex items-center justify-center">
+            <ImageIcon className="w-16 h-16 text-muted-foreground" />
+          </div>
+        )}
+      </div>
+
+      {/* Toggle Controls */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+        <div className="bg-white/90 backdrop-blur-sm rounded-full p-1 shadow-lg border">
+          <div className="flex items-center gap-1">
+            <Button
+              size="sm"
+              variant={!showAfter ? 'default' : 'ghost'}
+              onClick={() => setShowAfter(false)}
+              className="rounded-full px-4 h-8"
+            >
+              Before
+            </Button>
+            <Button
+              size="sm"
+              variant={showAfter ? 'default' : 'ghost'}
+              onClick={() => setShowAfter(true)}
+              className="rounded-full px-4 h-8"
+            >
+              After
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Current State Label */}
+      <div className="absolute top-4 left-4">
+        <Badge className={showAfter ? "bg-accent text-accent-foreground" : "bg-black/70 text-white"}>
+          {showAfter ? 'After' : 'Before'}
+        </Badge>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   // App state management
   const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'workspace' | 'gallery' | 'about'>('landing')
@@ -864,6 +917,29 @@ function App() {
   const GalleryPage = () => {
     const [activeRoomFilter, setActiveRoomFilter] = useState('All Rooms')
     const [activeStyleFilter, setActiveStyleFilter] = useState('All Styles')
+    const [selectedTransformation, setSelectedTransformation] = useState<any>(null)
+    const [comparisonMode, setComparisonMode] = useState<'split' | 'slide' | 'toggle'>('split')
+    const [sliderPosition, setSliderPosition] = useState(50) // For the slider comparison
+
+    // Handle keyboard shortcuts for modal
+    React.useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (!selectedTransformation) return
+        
+        if (e.key === 'Escape') {
+          setSelectedTransformation(null)
+        } else if (e.key === '1') {
+          setComparisonMode('split')
+        } else if (e.key === '2') {
+          setComparisonMode('slide')
+        } else if (e.key === '3') {
+          setComparisonMode('toggle')
+        }
+      }
+
+      document.addEventListener('keydown', handleKeyDown)
+      return () => document.removeEventListener('keydown', handleKeyDown)
+    }, [selectedTransformation])
 
     const galleryItems = [
       {
@@ -874,7 +950,13 @@ function App() {
         title: 'Modern Living Room Transformation',
         description: 'A complete makeover featuring contemporary furniture and warm lighting',
         style: 'Modern Minimalist',
-        room: 'Living Room'
+        room: 'Living Room',
+        keyFeatures: ['Modern Furniture', 'Natural Light', 'Neutral Palette', 'Clean Lines'],
+        items: [
+          { name: 'Modern Sectional Sofa', price: '$1,299', brand: 'West Elm' },
+          { name: 'Glass Coffee Table', price: '$449', brand: 'CB2' },
+          { name: 'Floor Lamp', price: '$189', brand: 'IKEA' }
+        ]
       },
       {
         id: '2',
@@ -884,7 +966,13 @@ function App() {
         title: 'Scandinavian Bedroom Retreat',
         description: 'Cozy bedroom design with natural textures and clean lines',
         style: 'Scandinavian',
-        room: 'Bedroom'
+        room: 'Bedroom',
+        keyFeatures: ['Natural Textures', 'Hygge Vibes', 'Light Woods', 'Minimal Clutter'],
+        items: [
+          { name: 'Platform Bed Frame', price: '$899', brand: 'MUJI' },
+          { name: 'Wool Throw Blanket', price: '$129', brand: 'Parachute' },
+          { name: 'Bedside Table', price: '$299', brand: 'HAY' }
+        ]
       },
       {
         id: '3',
@@ -894,7 +982,13 @@ function App() {
         title: 'Industrial Kitchen Design',
         description: 'Bold kitchen featuring exposed elements and modern appliances',
         style: 'Industrial',
-        room: 'Kitchen'
+        room: 'Kitchen',
+        keyFeatures: ['Exposed Brick', 'Metal Accents', 'Open Shelving', 'Dark Palette'],
+        items: [
+          { name: 'Industrial Bar Stools', price: '$349', brand: 'Restoration Hardware' },
+          { name: 'Pendant Light Fixtures', price: '$229', brand: 'CB2' },
+          { name: 'Open Shelving Unit', price: '$399', brand: 'West Elm' }
+        ]
       },
       {
         id: '4',
@@ -904,7 +998,13 @@ function App() {
         title: 'Bohemian Chic Dining Room',
         description: 'Eclectic dining space with vibrant colors and mixed textures',
         style: 'Bohemian',
-        room: 'Dining Room'
+        room: 'Dining Room',
+        keyFeatures: ['Mixed Patterns', 'Vibrant Colors', 'Vintage Pieces', 'Global Textiles'],
+        items: [
+          { name: 'Moroccan Dining Table', price: '$799', brand: 'World Market' },
+          { name: 'Mixed Dining Chairs', price: '$199', brand: 'Anthropologie' },
+          { name: 'Persian Area Rug', price: '$549', brand: 'Rugs USA' }
+        ]
       },
       {
         id: '5',
@@ -914,7 +1014,13 @@ function App() {
         title: 'Mid-Century Modern Office',
         description: 'Productive workspace with vintage-inspired furniture',
         style: 'Mid-Century Modern',
-        room: 'Office'
+        room: 'Office',
+        keyFeatures: ['Vintage Style', 'Rich Woods', 'Geometric Patterns', 'Bold Colors'],
+        items: [
+          { name: 'Walnut Desk', price: '$1,199', brand: 'Article' },
+          { name: 'Ergonomic Office Chair', price: '$459', brand: 'Herman Miller' },
+          { name: 'Geometric Bookshelf', price: '$399', brand: 'Design Within Reach' }
+        ]
       },
       {
         id: '6',
@@ -924,7 +1030,13 @@ function App() {
         title: 'Cozy Farmhouse Living Room',
         description: 'Rustic charm meets modern comfort in this inviting space',
         style: 'Farmhouse',
-        room: 'Living Room'
+        room: 'Living Room',
+        keyFeatures: ['Rustic Woods', 'Neutral Tones', 'Vintage Accents', 'Cozy Textiles'],
+        items: [
+          { name: 'Reclaimed Wood Coffee Table', price: '$649', brand: 'Pottery Barn' },
+          { name: 'Linen Sectional Sofa', price: '$1,499', brand: 'Restoration Hardware' },
+          { name: 'Vintage Table Lamps', price: '$229', brand: 'Wayfair' }
+        ]
       },
       {
         id: '7',
@@ -934,7 +1046,13 @@ function App() {
         title: 'Minimalist Bedroom Sanctuary',
         description: 'Clean lines and neutral tones create a peaceful retreat',
         style: 'Modern Minimalist',
-        room: 'Bedroom'
+        room: 'Bedroom',
+        keyFeatures: ['Clean Lines', 'Neutral Palette', 'Quality Materials', 'Functional Design'],
+        items: [
+          { name: 'Platform Bed', price: '$999', brand: 'Floyd' },
+          { name: 'Organic Cotton Bedding', price: '$199', brand: 'Brooklinen' },
+          { name: 'Minimalist Nightstand', price: '$349', brand: 'Blu Dot' }
+        ]
       },
       {
         id: '8',
@@ -944,7 +1062,13 @@ function App() {
         title: 'Rustic Kitchen Renovation',
         description: 'Farmhouse elements meet modern functionality',
         style: 'Farmhouse',
-        room: 'Kitchen'
+        room: 'Kitchen',
+        keyFeatures: ['Shaker Cabinets', 'Butcher Block', 'Vintage Hardware', 'Subway Tile'],
+        items: [
+          { name: 'Farmhouse Sink', price: '$799', brand: 'Kohler' },
+          { name: 'Butcher Block Island', price: '$1,299', brand: 'IKEA' },
+          { name: 'Vintage Pendant Lights', price: '$179', brand: 'Rejuvenation' }
+        ]
       },
       {
         id: '9',
@@ -954,7 +1078,13 @@ function App() {
         title: 'Contemporary Dining Space',
         description: 'Sleek design perfect for entertaining guests',
         style: 'Modern Minimalist',
-        room: 'Dining Room'
+        room: 'Dining Room',
+        keyFeatures: ['Sleek Design', 'Statement Lighting', 'Quality Materials', 'Entertainment Ready'],
+        items: [
+          { name: 'Live Edge Dining Table', price: '$1,899', brand: 'Room & Board' },
+          { name: 'Modern Dining Chairs', price: '$299', brand: 'Design Within Reach' },
+          { name: 'Statement Chandelier', price: '$699', brand: 'West Elm' }
+        ]
       }
     ]
 
@@ -1102,6 +1232,7 @@ function App() {
                       <Button 
                         size="lg" 
                         className="opacity-0 group-hover:opacity-100 transition-opacity transform scale-95 group-hover:scale-100"
+                        onClick={() => setSelectedTransformation(item)}
                       >
                         <Play className="w-5 h-5 mr-2" />
                         View Transformation
@@ -1132,7 +1263,11 @@ function App() {
                     </p>
 
                     <div className="flex items-center justify-between mt-4">
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setSelectedTransformation(item)}
+                      >
                         View Details
                       </Button>
                       <div className="flex items-center gap-2">
@@ -1189,6 +1324,252 @@ function App() {
             </div>
           )}
         </div>
+
+        {/* Transformation Detail Modal */}
+        <Dialog open={!!selectedTransformation} onOpenChange={() => setSelectedTransformation(null)}>
+          <DialogContent className="max-w-6xl w-full h-[90vh] p-0">
+            {selectedTransformation && (
+              <div className="flex flex-col h-full">
+                {/* Modal Header */}
+                <div className="flex items-center justify-between p-6 border-b">
+                  <div>
+                    <DialogTitle className="text-2xl font-bold">
+                      {selectedTransformation.title}
+                    </DialogTitle>
+                    <DialogDescription className="text-lg mt-1">
+                      {selectedTransformation.description}
+                    </DialogDescription>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Badge variant="secondary">{selectedTransformation.room}</Badge>
+                    <Badge variant="outline">{selectedTransformation.style}</Badge>
+                  </div>
+                </div>
+
+                {/* Comparison Controls */}
+                <div className="flex items-center justify-between px-6 py-4 border-b bg-muted/30">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-muted-foreground">Comparison Mode:</span>
+                    <div className="flex rounded-lg border p-1">
+                      <Button
+                        size="sm"
+                        variant={comparisonMode === 'split' ? 'default' : 'ghost'}
+                        onClick={() => setComparisonMode('split')}
+                        className="rounded-md px-3 h-7"
+                      >
+                        Split View
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={comparisonMode === 'slide' ? 'default' : 'ghost'}
+                        onClick={() => setComparisonMode('slide')}
+                        className="rounded-md px-3 h-7"
+                      >
+                        Slider
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={comparisonMode === 'toggle' ? 'default' : 'ghost'}
+                        onClick={() => setComparisonMode('toggle')}
+                        className="rounded-md px-3 h-7"
+                      >
+                        Toggle
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <ShoppingBag className="w-4 h-4 mr-2" />
+                      Shop Look
+                    </Button>
+                    <div className="text-xs text-muted-foreground ml-2">
+                      Press 1-3 to change view • ESC to close
+                    </div>
+                  </div>
+                </div>
+
+                {/* Main Comparison Area */}
+                <div className="flex-1 p-6">
+                  <div className="grid lg:grid-cols-3 gap-6 h-full">
+                    {/* Before/After Comparison */}
+                    <div className="lg:col-span-2">
+                      <div className="h-full bg-muted rounded-lg relative overflow-hidden">
+                        {comparisonMode === 'split' && (
+                          <div className="grid grid-cols-2 h-full">
+                            <div className="relative border-r border-border">
+                              <div className="absolute top-4 left-4 z-10">
+                                <Badge className="bg-black/70 text-white">Before</Badge>
+                              </div>
+                              <div className="w-full h-full bg-gradient-to-br from-muted-foreground/20 to-muted-foreground/5 flex items-center justify-center">
+                                <ImageIcon className="w-16 h-16 text-muted-foreground" />
+                              </div>
+                            </div>
+                            <div className="relative">
+                              <div className="absolute top-4 right-4 z-10">
+                                <Badge className="bg-accent text-accent-foreground">After</Badge>
+                              </div>
+                              <div className="w-full h-full bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center">
+                                <ImageIcon className="w-16 h-16 text-accent" />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {comparisonMode === 'slide' && (
+                          <div className="relative h-full">
+                            {/* Before Image */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-muted-foreground/20 to-muted-foreground/5 flex items-center justify-center">
+                              <ImageIcon className="w-16 h-16 text-muted-foreground" />
+                            </div>
+                            
+                            {/* After Image with slider overlay */}
+                            <div 
+                              className="absolute inset-0 bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center"
+                              style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
+                            >
+                              <ImageIcon className="w-16 h-16 text-accent" />
+                            </div>
+                            
+                            {/* Slider Handle */}
+                            <div 
+                              className="absolute top-0 bottom-0 w-1 bg-white shadow-lg cursor-col-resize"
+                              style={{ left: `${sliderPosition}%` }}
+                              onMouseDown={(e) => {
+                                const startX = e.clientX
+                                const rect = e.currentTarget.parentElement?.getBoundingClientRect()
+                                if (!rect) return
+                                
+                                const handleMouseMove = (e: MouseEvent) => {
+                                  const newPosition = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100))
+                                  setSliderPosition(newPosition)
+                                }
+                                
+                                const handleMouseUp = () => {
+                                  document.removeEventListener('mousemove', handleMouseMove)
+                                  document.removeEventListener('mouseup', handleMouseUp)
+                                }
+                                
+                                document.addEventListener('mousemove', handleMouseMove)
+                                document.addEventListener('mouseup', handleMouseUp)
+                              }}
+                            >
+                              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg border-2 border-gray-300 flex items-center justify-center cursor-grab">
+                                <div className="w-1 h-4 bg-gray-400 rounded"></div>
+                              </div>
+                            </div>
+                            
+                            {/* Labels */}
+                            <div className="absolute top-4 left-4">
+                              <Badge className="bg-black/70 text-white">Before</Badge>
+                            </div>
+                            <div className="absolute top-4 right-4">
+                              <Badge className="bg-accent text-accent-foreground">After</Badge>
+                            </div>
+                          </div>
+                        )}
+
+                        {comparisonMode === 'toggle' && (
+                          <ToggleComparison transformation={selectedTransformation} />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Details Sidebar */}
+                    <div className="space-y-6">
+                      {/* Transformation Details */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg">Transformation Details</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div>
+                            <Label className="text-sm font-medium text-muted-foreground">Room Type</Label>
+                            <p className="font-medium">{selectedTransformation.room}</p>
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-muted-foreground">Design Style</Label>
+                            <p className="font-medium">{selectedTransformation.style}</p>
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-muted-foreground">Key Features</Label>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {(selectedTransformation.keyFeatures || ['Modern Furniture', 'Natural Light', 'Neutral Palette', 'Clean Lines']).map((feature) => (
+                                <Badge key={feature} variant="outline" className="text-xs">
+                                  {feature}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Featured Items */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg">Featured Items</CardTitle>
+                          <CardDescription>
+                            Key pieces from this transformation
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            {(selectedTransformation.items || [
+                              { name: 'Modern Sectional Sofa', price: '$1,299', brand: 'West Elm' },
+                              { name: 'Glass Coffee Table', price: '$449', brand: 'CB2' },
+                              { name: 'Floor Lamp', price: '$189', brand: 'IKEA' }
+                            ]).map((item, index) => (
+                              <div key={index} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 bg-muted rounded"></div>
+                                  <div>
+                                    <p className="font-medium text-sm">{item.name}</p>
+                                    <p className="text-xs text-muted-foreground">{item.brand}</p>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-bold text-sm">{item.price}</p>
+                                  <Button size="sm" variant="outline" className="mt-1 h-6 px-2 text-xs">
+                                    <ShoppingBag className="w-3 h-3 mr-1" />
+                                    Buy
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Actions */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg">Get This Look</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <Button className="w-full">
+                            <ShoppingBag className="w-4 h-4 mr-2" />
+                            Shop Complete Look
+                          </Button>
+                          <Button variant="outline" className="w-full">
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Create Similar Design
+                          </Button>
+                          <Button variant="outline" className="w-full">
+                            <Download className="w-4 h-4 mr-2" />
+                            Save Inspiration
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* CTA Section */}
         <div className="bg-accent text-accent-foreground py-16">
