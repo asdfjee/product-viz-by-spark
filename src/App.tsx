@@ -82,7 +82,7 @@ const featuredVisualizationsData = [
 
 function App() {
   // App state management
-  const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'workspace'>('landing')
+  const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'workspace' | 'gallery' | 'about'>('landing')
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false)
   const [workspaceTab, setWorkspaceTab] = useState('upload')
@@ -142,12 +142,20 @@ function App() {
             <a 
               href="#"
               className="text-foreground hover:text-primary transition-colors font-medium"
+              onClick={(e) => {
+                e.preventDefault()
+                setCurrentView('gallery')
+              }}
             >
               Gallery
             </a>
             <a 
               href="#"
               className="text-foreground hover:text-primary transition-colors font-medium"
+              onClick={(e) => {
+                e.preventDefault()
+                setCurrentView('about')
+              }}
             >
               About
             </a>
@@ -201,14 +209,22 @@ function App() {
               <a 
                 href="#"
                 className="text-foreground hover:text-primary transition-colors font-medium text-center py-2"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={(e) => {
+                  e.preventDefault()
+                  setCurrentView('gallery')
+                  setIsMobileMenuOpen(false)
+                }}
               >
                 Gallery
               </a>
               <a 
                 href="#"
                 className="text-foreground hover:text-primary transition-colors font-medium text-center py-2"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={(e) => {
+                  e.preventDefault()
+                  setCurrentView('about')
+                  setIsMobileMenuOpen(false)
+                }}
               >
                 About
               </a>
@@ -844,10 +860,382 @@ function App() {
     </div>
   )
 
+  // Gallery Page Component
+  const GalleryPage = () => {
+    const galleryItems = [
+      {
+        id: '1',
+        before: '/api/placeholder/400/300',
+        after: '/api/placeholder/400/300',
+        video: '/api/placeholder/800/600/video',
+        title: 'Modern Living Room Transformation',
+        description: 'A complete makeover featuring contemporary furniture and warm lighting',
+        style: 'Modern Minimalist',
+        room: 'Living Room'
+      },
+      {
+        id: '2',
+        before: '/api/placeholder/400/300',
+        after: '/api/placeholder/400/300',
+        video: '/api/placeholder/800/600/video',
+        title: 'Scandinavian Bedroom Retreat',
+        description: 'Cozy bedroom design with natural textures and clean lines',
+        style: 'Scandinavian',
+        room: 'Bedroom'
+      },
+      {
+        id: '3',
+        before: '/api/placeholder/400/300',
+        after: '/api/placeholder/400/300',
+        video: '/api/placeholder/800/600/video',
+        title: 'Industrial Kitchen Design',
+        description: 'Bold kitchen featuring exposed elements and modern appliances',
+        style: 'Industrial',
+        room: 'Kitchen'
+      },
+      {
+        id: '4',
+        before: '/api/placeholder/400/300',
+        after: '/api/placeholder/400/300',
+        video: '/api/placeholder/800/600/video',
+        title: 'Bohemian Chic Dining Room',
+        description: 'Eclectic dining space with vibrant colors and mixed textures',
+        style: 'Bohemian',
+        room: 'Dining Room'
+      },
+      {
+        id: '5',
+        before: '/api/placeholder/400/300',
+        after: '/api/placeholder/400/300',
+        video: '/api/placeholder/800/600/video',
+        title: 'Mid-Century Modern Office',
+        description: 'Productive workspace with vintage-inspired furniture',
+        style: 'Mid-Century Modern',
+        room: 'Office'
+      },
+      {
+        id: '6',
+        before: '/api/placeholder/400/300',
+        after: '/api/placeholder/400/300',
+        video: '/api/placeholder/800/600/video',
+        title: 'Cozy Farmhouse Living Room',
+        description: 'Rustic charm meets modern comfort in this inviting space',
+        style: 'Farmhouse',
+        room: 'Living Room'
+      }
+    ]
+
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        
+        {/* Gallery Header */}
+        <div className="bg-muted/30 py-16">
+          <div className="container mx-auto px-6 text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Transformation Gallery
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Discover amazing room transformations created with our AI-powered interior design platform. 
+              Get inspired by real makeovers from our community.
+            </p>
+          </div>
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex flex-wrap justify-center gap-2 mb-8">
+            {['All Rooms', 'Living Room', 'Bedroom', 'Kitchen', 'Dining Room', 'Office'].map((filter) => (
+              <Button
+                key={filter}
+                variant={filter === 'All Rooms' ? 'default' : 'outline'}
+                size="sm"
+                className="rounded-full"
+              >
+                {filter}
+              </Button>
+            ))}
+          </div>
+
+          {/* Gallery Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {galleryItems.map((item) => (
+              <Card key={item.id} className="overflow-hidden group cursor-pointer hover:shadow-xl transition-all duration-300">
+                <div className="relative">
+                  {/* Video/Image Display */}
+                  <div className="aspect-[4/3] bg-muted relative overflow-hidden">
+                    <video 
+                      className="w-full h-full object-cover"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                    >
+                      <source src={item.video} type="video/mp4" />
+                      {/* Fallback */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-muted to-accent/20" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <ImageIcon className="w-16 h-16 text-muted-foreground" />
+                      </div>
+                    </video>
+                  </div>
+                  
+                  {/* Overlay on hover */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                    <Button 
+                      size="lg" 
+                      className="opacity-0 group-hover:opacity-100 transition-opacity transform scale-95 group-hover:scale-100"
+                    >
+                      <Play className="w-5 h-5 mr-2" />
+                      View Transformation
+                    </Button>
+                  </div>
+
+                  {/* Style Badge */}
+                  <div className="absolute top-4 right-4">
+                    <Badge variant="secondary" className="bg-white/90 text-foreground">
+                      {item.style}
+                    </Badge>
+                  </div>
+                </div>
+
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                    <span>{item.room}</span>
+                    <span>•</span>
+                    <div className="flex items-center">
+                      <Star className="w-3 h-3 mr-1 fill-current text-accent" />
+                      <span>Featured</span>
+                    </div>
+                  </div>
+                  
+                  <h3 className="font-bold text-lg mb-2">{item.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {item.description}
+                  </p>
+
+                  <div className="flex items-center justify-between mt-4">
+                    <Button variant="outline" size="sm">
+                      View Details
+                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm">
+                        <ShoppingBag className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Load More */}
+          <div className="text-center mt-12">
+            <Button variant="outline" size="lg">
+              Load More Transformations
+            </Button>
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div className="bg-accent text-accent-foreground py-16">
+          <div className="container mx-auto px-6 text-center">
+            <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Space?</h2>
+            <p className="text-xl mb-8 opacity-90">
+              Join thousands of users who have redesigned their homes with AI
+            </p>
+            <Button 
+              size="lg" 
+              variant="secondary"
+              onClick={() => setCurrentView('dashboard')}
+            >
+              Start Your Project
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // About Page Component  
+  const AboutPage = () => (
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      {/* Hero Section */}
+      <div className="bg-muted/30 py-20">
+        <div className="container mx-auto px-6 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            About Product Viz
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            We're revolutionizing interior design by making it accessible, interactive, and instant. 
+            Our AI-powered platform empowers anyone to visualize and shop for home furnishings 
+            within their own space, transforming interior design from guesswork into creativity.
+          </p>
+        </div>
+      </div>
+
+      {/* Mission Section */}
+      <div className="container mx-auto px-6 py-20">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              To democratize interior design by providing cutting-edge AI tools that help everyone 
+              create beautiful, personalized spaces they love to live in.
+            </p>
+          </div>
+
+          {/* Feature Cards */}
+          <div className="grid md:grid-cols-3 gap-8 mb-20">
+            <Card className="text-center p-8 border-0 shadow-lg">
+              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Sparkles className="w-8 h-8 text-accent" />
+              </div>
+              <h3 className="text-xl font-bold mb-4">AI-Powered Design</h3>
+              <p className="text-muted-foreground">
+                Advanced machine learning algorithms understand your space and preferences 
+                to generate realistic, contextual design solutions.
+              </p>
+            </Card>
+
+            <Card className="text-center p-8 border-0 shadow-lg">
+              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Camera className="w-8 h-8 text-accent" />
+              </div>
+              <h3 className="text-xl font-bold mb-4">Photo-Realistic Results</h3>
+              <p className="text-muted-foreground">
+                See exactly how furniture will look in your actual room with 
+                accurate lighting, scale, and perspective rendering.
+              </p>
+            </Card>
+
+            <Card className="text-center p-8 border-0 shadow-lg">
+              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <ShoppingBag className="w-8 h-8 text-accent" />
+              </div>
+              <h3 className="text-xl font-bold mb-4">Instant Shopping</h3>
+              <p className="text-muted-foreground">
+                Seamlessly purchase any item from your design with direct links 
+                to trusted retailers and real-time pricing.
+              </p>
+            </Card>
+          </div>
+
+          {/* How It Works */}
+          <div className="bg-card rounded-2xl p-8 md:p-12">
+            <h2 className="text-3xl font-bold text-center mb-12">How Product Viz Works</h2>
+            
+            <div className="space-y-12">
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-10 h-10 bg-accent text-accent-foreground rounded-full flex items-center justify-center font-bold">
+                      1
+                    </div>
+                    <h3 className="text-xl font-bold">Upload Your Space</h3>
+                  </div>
+                  <p className="text-muted-foreground">
+                    Simply take a photo of your room using your phone or camera. Our AI analyzes 
+                    the lighting, dimensions, and existing elements to understand your space.
+                  </p>
+                </div>
+                <div className="w-full md:w-80 h-48 bg-muted rounded-lg flex items-center justify-center">
+                  <Camera className="w-12 h-12 text-muted-foreground" />
+                </div>
+              </div>
+
+              <div className="flex flex-col md:flex-row-reverse items-center gap-8">
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-10 h-10 bg-accent text-accent-foreground rounded-full flex items-center justify-center font-bold">
+                      2
+                    </div>
+                    <h3 className="text-xl font-bold">Describe Your Vision</h3>
+                  </div>
+                  <p className="text-muted-foreground">
+                    Tell us what you want in natural language or upload specific furniture photos. 
+                    Our AI understands style preferences, colors, and design concepts.
+                  </p>
+                </div>
+                <div className="w-full md:w-80 h-48 bg-muted rounded-lg flex items-center justify-center">
+                  <Type className="w-12 h-12 text-muted-foreground" />
+                </div>
+              </div>
+
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-10 h-10 bg-accent text-accent-foreground rounded-full flex items-center justify-center font-bold">
+                      3
+                    </div>
+                    <h3 className="text-xl font-bold">See & Shop Results</h3>
+                  </div>
+                  <p className="text-muted-foreground">
+                    Receive realistic visualizations of your redesigned space and instantly shop 
+                    for every item with real products from trusted retailers.
+                  </p>
+                </div>
+                <div className="w-full md:w-80 h-48 bg-muted rounded-lg flex items-center justify-center">
+                  <ShoppingBag className="w-12 h-12 text-muted-foreground" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="grid md:grid-cols-4 gap-8 mt-20 text-center">
+            <div>
+              <div className="text-4xl font-bold text-accent mb-2">10K+</div>
+              <p className="text-muted-foreground">Rooms Transformed</p>
+            </div>
+            <div>
+              <div className="text-4xl font-bold text-accent mb-2">25K+</div>
+              <p className="text-muted-foreground">Happy Users</p>
+            </div>
+            <div>
+              <div className="text-4xl font-bold text-accent mb-2">50+</div>
+              <p className="text-muted-foreground">Retail Partners</p>
+            </div>
+            <div>
+              <div className="text-4xl font-bold text-accent mb-2">98%</div>
+              <p className="text-muted-foreground">Satisfaction Rate</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="bg-accent text-accent-foreground py-16">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
+          <p className="text-xl mb-8 opacity-90">
+            Transform your space today with the power of AI interior design
+          </p>
+          <Button 
+            size="lg" 
+            variant="secondary"
+            onClick={() => setCurrentView('dashboard')}
+          >
+            Start Designing Now
+            <ArrowRight className="ml-2 w-5 h-5" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+
   // Render current view
   if (currentView === 'landing') return <LandingPage />
   if (currentView === 'dashboard') return <ProjectDashboard />
   if (currentView === 'workspace') return <VisualizationWorkspace />
+  if (currentView === 'gallery') return <GalleryPage />
+  if (currentView === 'about') return <AboutPage />
   
   return <LandingPage />
 }
