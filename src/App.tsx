@@ -27,7 +27,9 @@ import {
   Type,
   Wand2,
   Download,
-  RefreshCw
+  RefreshCw,
+  List,
+  X
 } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
@@ -84,6 +86,7 @@ function App() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false)
   const [workspaceTab, setWorkspaceTab] = useState('upload')
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   
   // User data persistence
   const [user, setUser] = useKV('user-profile', null)
@@ -96,9 +99,140 @@ function App() {
   const [itemDescription, setItemDescription] = useState('')
   const [styleDescription, setStyleDescription] = useState('')
 
+  // Header component with navigation
+  const Header = () => (
+    <header className="bg-card border-b border-border sticky top-0 z-50">
+      <div className="container mx-auto px-6 py-6">
+        <div className="flex items-center justify-between">
+          {/* Logo/Brand */}
+          <div 
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => setCurrentView('landing')}
+          >
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">
+              PRODUCT VIZ
+            </h1>
+          </div>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-8">
+            <a 
+              href="#"
+              className="text-foreground hover:text-primary transition-colors font-medium"
+              onClick={(e) => {
+                e.preventDefault()
+                setCurrentView('landing')
+              }}
+            >
+              Home
+            </a>
+            <a 
+              href="#"
+              className="text-foreground hover:text-primary transition-colors font-medium"
+              onClick={(e) => {
+                e.preventDefault()
+                setCurrentView('dashboard')
+              }}
+            >
+              Projects
+            </a>
+            <a 
+              href="#"
+              className="text-foreground hover:text-primary transition-colors font-medium"
+            >
+              Gallery
+            </a>
+            <a 
+              href="#"
+              className="text-foreground hover:text-primary transition-colors font-medium"
+            >
+              About
+            </a>
+            <Button 
+              className="ml-4"
+              onClick={() => setCurrentView('dashboard')}
+            >
+              Get Started
+            </Button>
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden flex flex-col justify-around w-6 h-5 bg-transparent border-none cursor-pointer"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? (
+              <X className="w-6 h-6 text-foreground" />
+            ) : (
+              <List className="w-6 h-6 text-foreground" />
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Navigation */}
+        {isMobileMenuOpen && (
+          <nav className="md:hidden mt-6 pb-6 border-t border-border">
+            <div className="flex flex-col gap-4 pt-6">
+              <a 
+                href="#"
+                className="text-foreground hover:text-primary transition-colors font-medium text-center py-2"
+                onClick={(e) => {
+                  e.preventDefault()
+                  setCurrentView('landing')
+                  setIsMobileMenuOpen(false)
+                }}
+              >
+                Home
+              </a>
+              <a 
+                href="#"
+                className="text-foreground hover:text-primary transition-colors font-medium text-center py-2"
+                onClick={(e) => {
+                  e.preventDefault()
+                  setCurrentView('dashboard')
+                  setIsMobileMenuOpen(false)
+                }}
+              >
+                Projects
+              </a>
+              <a 
+                href="#"
+                className="text-foreground hover:text-primary transition-colors font-medium text-center py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Gallery
+              </a>
+              <a 
+                href="#"
+                className="text-foreground hover:text-primary transition-colors font-medium text-center py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                About
+              </a>
+              <Button 
+                className="mt-2"
+                onClick={() => {
+                  setCurrentView('dashboard')
+                  setIsMobileMenuOpen(false)
+                }}
+              >
+                Get Started
+              </Button>
+            </div>
+          </nav>
+        )}
+      </div>
+    </header>
+  )
+
   // Landing Page Component
   const LandingPage = () => (
     <div className="min-h-screen bg-background">
+      <Header />
+      
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="container mx-auto px-6 py-20">
@@ -248,39 +382,26 @@ function App() {
   // Project Dashboard Component
   const ProjectDashboard = () => (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b bg-card">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold">Product Viz 2.0</h1>
-              <Badge variant="secondary">AI Interior Design</Badge>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <Button 
-                onClick={() => setIsCreateProjectOpen(true)}
-                className="gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                New Project
-              </Button>
-              
-              <Avatar>
-                <AvatarFallback>U</AvatarFallback>
-              </Avatar>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <Header />
+      
       {/* Projects Grid */}
       <div className="container mx-auto px-6 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Your Projects</h2>
-          <p className="text-muted-foreground">
-            Create and manage your interior design projects
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold mb-2">Your Projects</h2>
+              <p className="text-muted-foreground">
+                Create and manage your interior design projects
+              </p>
+            </div>
+            <Button 
+              onClick={() => setIsCreateProjectOpen(true)}
+              className="gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              New Project
+            </Button>
+          </div>
         </div>
 
         {projects.length === 0 ? (
@@ -417,7 +538,9 @@ function App() {
   // Workspace Component (Visualization Interface)
   const VisualizationWorkspace = () => (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      <Header />
+      
+      {/* Workspace Header */}
       <div className="border-b bg-card">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
