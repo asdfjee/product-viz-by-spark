@@ -59,18 +59,21 @@ const featuredVisualizationsData = [
     id: '1',
     before: '/api/placeholder/300/200',
     after: '/api/placeholder/300/200',
+    video: '/api/placeholder/600/400/video', // Optional video showing transformation
     description: 'Modern living room transformation'
   },
   {
     id: '2', 
     before: '/api/placeholder/300/200',
     after: '/api/placeholder/300/200',
+    video: '/api/placeholder/600/400/video',
     description: 'Cozy bedroom makeover'
   },
   {
     id: '3',
     before: '/api/placeholder/300/200', 
     after: '/api/placeholder/300/200',
+    video: '/api/placeholder/600/400/video',
     description: 'Minimalist kitchen design'
   }
 ]
@@ -202,13 +205,29 @@ function App() {
               <Card key={viz.id} className="overflow-hidden border-0 shadow-lg group cursor-pointer hover:shadow-xl transition-shadow">
                 <div className="relative">
                   <div className="aspect-video bg-muted relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-muted to-accent/20" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <ImageIcon className="w-12 h-12 text-muted-foreground" />
-                    </div>
+                    <video 
+                      className="w-full h-full object-cover"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                    >
+                      <source src={viz.video} type="video/mp4" />
+                      {/* Fallback for browsers that don't support video */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-muted to-accent/20" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <ImageIcon className="w-12 h-12 text-muted-foreground" />
+                      </div>
+                    </video>
                   </div>
                   <div className="absolute top-4 right-4">
                     <Badge className="bg-white/90 text-foreground">Before → After</Badge>
+                  </div>
+                  {/* Play overlay for visual indication */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Play className="w-6 h-6 text-white ml-1" />
+                    </div>
                   </div>
                 </div>
                 <CardContent className="p-6">
