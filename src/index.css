@@ -1,1 +1,79 @@
-/* This is where custom CSS goes */
+@import 'tailwindcss';
+@import "tw-animate-css";
+
+@layer base {
+  * {
+    @apply border-border;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+:root {
+  /* Core brand colors for sophisticated, gallery-like experience */
+  --background: oklch(0.98 0.01 100);  /* Warm white background */
+  --foreground: oklch(0.15 0.02 260);  /* Deep charcoal text */
+
+  --card: oklch(0.95 0.01 100);        /* Light gray card background */
+  --card-foreground: oklch(0.15 0.02 260); /* Dark charcoal on cards */
+  
+  --popover: oklch(0.98 0.01 100);     /* Same as background */
+  --popover-foreground: oklch(0.15 0.02 260); /* Dark charcoal */
+
+  /* Action colors that guide user through creative process */
+  --primary: oklch(0.15 0.02 260);     /* Deep charcoal for primary actions */
+  --primary-foreground: oklch(0.98 0.01 100); /* White text on primary */
+  
+  --secondary: oklch(0.85 0.01 100);   /* Medium gray for secondary actions */
+  --secondary-foreground: oklch(0.15 0.02 260); /* Dark text on secondary */
+  
+  --accent: oklch(0.64 0.16 180);      /* Vibrant teal for interactive elements */
+  --accent-foreground: oklch(0.98 0.01 100); /* White text on accent */
+  
+  --destructive: oklch(0.55 0.20 25);  /* Warm red for destructive actions */
+  --destructive-foreground: oklch(0.98 0.01 100); /* White text on destructive */
+
+  /* Supporting UI colors for professional interface */
+  --muted: oklch(0.92 0.01 100);       /* Very light gray for muted backgrounds */
+  --muted-foreground: oklch(0.45 0.02 260); /* Medium gray text on muted */
+  
+  --border: oklch(0.88 0.01 100);      /* Light gray borders */
+  --input: oklch(0.88 0.01 100);       /* Light gray input borders */
+  --ring: oklch(0.64 0.16 180);        /* Teal focus rings */
+
+  /* Consistent border radius for modern, friendly feel */
+  --radius: 0.75rem;
+}
+
+/* Map CSS variables to Tailwind theme system */
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Consistent radius system */
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) * 1.5);
+  --radius-xl: calc(var(--radius) * 2);
+  --radius-2xl: calc(var(--radius) * 3);
+  --radius-full: 9999px;
+
+  /* Custom font family */
+  --font-family-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
