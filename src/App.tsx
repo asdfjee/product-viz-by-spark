@@ -157,13 +157,10 @@ function App() {
 
   // Footer component for consistency across pages
   const Footer = () => (
-    <footer className="bg-card border-t py-12">
+    <footer className="py-8 text-center">
       <div className="container mx-auto px-6">
-        <div className="flex flex-col md:flex-row items-center justify-center md:justify-between text-center">
-          <div className="text-sm text-muted-foreground">
-            <p>© 2024 Product Viz. All rights reserved.</p>
-            <p>Contact us: <a href="mailto:hello@productviz.com" className="text-accent hover:underline">hello@productviz.com</a></p>
-          </div>
+        <div className="text-sm text-muted-foreground">
+          © 2024 Product Viz. All rights reserved. • Contact us: <a href="mailto:hello@productviz.com" className="text-accent hover:underline">hello@productviz.com</a>
         </div>
       </div>
     </footer>
