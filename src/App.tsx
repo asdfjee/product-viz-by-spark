@@ -159,19 +159,10 @@ function App() {
   const Footer = () => (
     <footer className="bg-card border-t py-12">
       <div className="container mx-auto px-6">
-        <div className="flex flex-col md:flex-row items-center justify-between">
-          <div className="flex items-center gap-8 mb-6 md:mb-0">
-            <div>
-              <h3 className="text-xl font-bold text-foreground">PRODUCT VIZ</h3>
-              <p className="text-sm text-muted-foreground">AI-Powered Interior Design</p>
-            </div>
-          </div>
-          
-          <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-right">
-            <div className="text-sm text-muted-foreground">
-              <p>© 2024 Product Viz. All rights reserved.</p>
-              <p>Contact us: <a href="mailto:hello@productviz.com" className="text-accent hover:underline">hello@productviz.com</a></p>
-            </div>
+        <div className="flex flex-col md:flex-row items-center justify-center md:justify-between text-center">
+          <div className="text-sm text-muted-foreground">
+            <p>© 2024 Product Viz. All rights reserved.</p>
+            <p>Contact us: <a href="mailto:hello@productviz.com" className="text-accent hover:underline">hello@productviz.com</a></p>
           </div>
         </div>
       </div>
@@ -1877,25 +1868,7 @@ function App() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-card border-t py-12">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="flex items-center gap-8 mb-6 md:mb-0">
-              <div>
-                <h3 className="text-xl font-bold text-foreground">PRODUCT VIZ</h3>
-                <p className="text-sm text-muted-foreground">AI-Powered Interior Design</p>
-              </div>
-            </div>
-            
-            <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-right">
-              <div className="text-sm text-muted-foreground">
-                <p>© 2024 Product Viz. All rights reserved.</p>
-                <p>Contact us: <a href="mailto:hello@productviz.com" className="text-accent hover:underline">hello@productviz.com</a></p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 
