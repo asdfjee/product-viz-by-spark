@@ -29,7 +29,10 @@ import {
   Download,
   RefreshCw,
   List,
-  X
+  X,
+  Envelope,
+  MapPin,
+  Phone
 } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
@@ -151,6 +154,29 @@ function App() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [itemDescription, setItemDescription] = useState('')
   const [styleDescription, setStyleDescription] = useState('')
+
+  // Footer component for consistency across pages
+  const Footer = () => (
+    <footer className="bg-card border-t py-12">
+      <div className="container mx-auto px-6">
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="flex items-center gap-8 mb-6 md:mb-0">
+            <div>
+              <h3 className="text-xl font-bold text-foreground">PRODUCT VIZ</h3>
+              <p className="text-sm text-muted-foreground">AI-Powered Interior Design</p>
+            </div>
+          </div>
+          
+          <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-right">
+            <div className="text-sm text-muted-foreground">
+              <p>© 2024 Product Viz. All rights reserved.</p>
+              <p>Contact us: <a href="mailto:hello@productviz.com" className="text-accent hover:underline">hello@productviz.com</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  )
 
   // Header component with navigation
   const Header = () => (
@@ -442,6 +468,8 @@ function App() {
           </div>
         </div>
       </div>
+      
+      <Footer />
     </div>
   )
 
@@ -598,6 +626,8 @@ function App() {
           </div>
         </DialogContent>
       </Dialog>
+      
+      <Footer />
     </div>
   )
 
@@ -907,6 +937,8 @@ function App() {
           </TabsContent>
         </Tabs>
       </div>
+      
+      <Footer />
     </div>
   )
 
@@ -1586,6 +1618,8 @@ function App() {
           </div>
         </div>
       </div>
+      
+      <Footer />
     )
   }
 
@@ -1738,23 +1772,130 @@ function App() {
         </div>
       </div>
 
-      {/* CTA Section */}
-      <div className="bg-accent text-accent-foreground py-16">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
-          <p className="text-xl mb-8 opacity-90">
-            Transform your space today with the power of AI interior design
-          </p>
-          <Button 
-            size="lg" 
-            variant="secondary"
-            onClick={() => setCurrentView('dashboard')}
-          >
-            Start Designing Now
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
+      {/* Contact Section */}
+      <div className="bg-muted/30 py-20">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Get in Touch</h2>
+              <p className="text-lg text-muted-foreground">
+                Have questions about Product Viz or need help with your design project? We'd love to hear from you.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-12">
+              {/* Contact Form */}
+              <Card className="p-8">
+                <h3 className="text-xl font-bold mb-6">Send us a message</h3>
+                <form className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input id="firstName" placeholder="John" />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input id="lastName" placeholder="Doe" />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" type="email" placeholder="john@example.com" />
+                  </div>
+                  <div>
+                    <Label htmlFor="subject">Subject</Label>
+                    <Input id="subject" placeholder="How can we help?" />
+                  </div>
+                  <div>
+                    <Label htmlFor="message">Message</Label>
+                    <Textarea id="message" rows={4} placeholder="Tell us about your project or question..." />
+                  </div>
+                  <Button className="w-full">
+                    <Envelope className="w-4 h-4 mr-2" />
+                    Send Message
+                  </Button>
+                </form>
+              </Card>
+
+              {/* Contact Information */}
+              <div className="space-y-8">
+                <div>
+                  <h3 className="text-xl font-bold mb-6">Contact Information</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center">
+                        <Envelope className="w-6 h-6 text-accent" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Email</p>
+                        <a href="mailto:hello@productviz.com" className="text-accent hover:underline">
+                          hello@productviz.com
+                        </a>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center">
+                        <MapPin className="w-6 h-6 text-accent" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Office</p>
+                        <p className="text-muted-foreground">San Francisco, CA</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center">
+                        <Phone className="w-6 h-6 text-accent" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Response Time</p>
+                        <p className="text-muted-foreground">Within 24 hours</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <Card className="p-6 bg-accent/5 border-accent/20">
+                  <h4 className="font-bold mb-3">Need immediate help?</h4>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Check out our comprehensive help documentation or browse our community forum for quick answers.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      Help Center
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      Community
+                    </Button>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-card border-t py-12">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-center justify-between">
+            <div className="flex items-center gap-8 mb-6 md:mb-0">
+              <div>
+                <h3 className="text-xl font-bold text-foreground">PRODUCT VIZ</h3>
+                <p className="text-sm text-muted-foreground">AI-Powered Interior Design</p>
+              </div>
+            </div>
+            
+            <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-right">
+              <div className="text-sm text-muted-foreground">
+                <p>© 2024 Product Viz. All rights reserved.</p>
+                <p>Contact us: <a href="mailto:hello@productviz.com" className="text-accent hover:underline">hello@productviz.com</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 
