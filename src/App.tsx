@@ -313,7 +313,7 @@ function App() {
             
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8">
               Visualize Your
-              <span className="block" style={{ color: '#F0F8FF' }}>Dream Space</span>
+              <span className="block" style={{ color: '#798ab5' }}>Dream Space</span>
             </h1>
             
             <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
