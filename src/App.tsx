@@ -862,6 +862,9 @@ function App() {
 
   // Gallery Page Component
   const GalleryPage = () => {
+    const [activeRoomFilter, setActiveRoomFilter] = useState('All Rooms')
+    const [activeStyleFilter, setActiveStyleFilter] = useState('All Styles')
+
     const galleryItems = [
       {
         id: '1',
@@ -922,8 +925,49 @@ function App() {
         description: 'Rustic charm meets modern comfort in this inviting space',
         style: 'Farmhouse',
         room: 'Living Room'
+      },
+      {
+        id: '7',
+        before: '/api/placeholder/400/300',
+        after: '/api/placeholder/400/300',
+        video: '/api/placeholder/800/600/video',
+        title: 'Minimalist Bedroom Sanctuary',
+        description: 'Clean lines and neutral tones create a peaceful retreat',
+        style: 'Modern Minimalist',
+        room: 'Bedroom'
+      },
+      {
+        id: '8',
+        before: '/api/placeholder/400/300',
+        after: '/api/placeholder/400/300',
+        video: '/api/placeholder/800/600/video',
+        title: 'Rustic Kitchen Renovation',
+        description: 'Farmhouse elements meet modern functionality',
+        style: 'Farmhouse',
+        room: 'Kitchen'
+      },
+      {
+        id: '9',
+        before: '/api/placeholder/400/300',
+        after: '/api/placeholder/400/300',
+        video: '/api/placeholder/800/600/video',
+        title: 'Contemporary Dining Space',
+        description: 'Sleek design perfect for entertaining guests',
+        style: 'Modern Minimalist',
+        room: 'Dining Room'
       }
     ]
+
+    // Filter rooms and styles arrays
+    const roomTypes = ['All Rooms', 'Living Room', 'Bedroom', 'Kitchen', 'Dining Room', 'Office']
+    const styleTypes = ['All Styles', 'Modern Minimalist', 'Scandinavian', 'Industrial', 'Bohemian', 'Mid-Century Modern', 'Farmhouse']
+
+    // Filter gallery items based on active filters
+    const filteredItems = galleryItems.filter(item => {
+      const roomMatch = activeRoomFilter === 'All Rooms' || item.room === activeRoomFilter
+      const styleMatch = activeStyleFilter === 'All Styles' || item.style === activeStyleFilter
+      return roomMatch && styleMatch
+    })
 
     return (
       <div className="min-h-screen bg-background">
@@ -942,102 +986,208 @@ function App() {
           </div>
         </div>
 
-        {/* Filter Tabs */}
+        {/* Filters Section */}
         <div className="container mx-auto px-6 py-8">
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
-            {['All Rooms', 'Living Room', 'Bedroom', 'Kitchen', 'Dining Room', 'Office'].map((filter) => (
-              <Button
-                key={filter}
-                variant={filter === 'All Rooms' ? 'default' : 'outline'}
-                size="sm"
-                className="rounded-full"
-              >
-                {filter}
-              </Button>
-            ))}
+          {/* Filter Controls */}
+          <div className="bg-card rounded-lg p-6 mb-8 shadow-sm border">
+            <div className="flex flex-col lg:flex-row gap-6">
+              {/* Room Type Filters */}
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-muted-foreground mb-3">Filter by Room</h3>
+                <div className="flex flex-wrap gap-2">
+                  {roomTypes.map((room) => (
+                    <Button
+                      key={room}
+                      variant={activeRoomFilter === room ? 'default' : 'outline'}
+                      size="sm"
+                      className="rounded-full"
+                      onClick={() => setActiveRoomFilter(room)}
+                    >
+                      {room}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Style Filters */}
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-muted-foreground mb-3">Filter by Style</h3>
+                <div className="flex flex-wrap gap-2">
+                  {styleTypes.map((style) => (
+                    <Button
+                      key={style}
+                      variant={activeStyleFilter === style ? 'default' : 'outline'}
+                      size="sm"
+                      className="rounded-full"
+                      onClick={() => setActiveStyleFilter(style)}
+                    >
+                      {style}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Active Filters & Results Count */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-6 pt-4 border-t">
+              <div className="flex flex-wrap gap-2 mb-3 sm:mb-0">
+                {activeRoomFilter !== 'All Rooms' && (
+                  <Badge variant="secondary" className="gap-1">
+                    {activeRoomFilter}
+                    <button 
+                      onClick={() => setActiveRoomFilter('All Rooms')}
+                      className="ml-1 hover:bg-secondary-foreground/20 rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                )}
+                {activeStyleFilter !== 'All Styles' && (
+                  <Badge variant="secondary" className="gap-1">
+                    {activeStyleFilter}
+                    <button 
+                      onClick={() => setActiveStyleFilter('All Styles')}
+                      className="ml-1 hover:bg-secondary-foreground/20 rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                )}
+                {(activeRoomFilter !== 'All Rooms' || activeStyleFilter !== 'All Styles') && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setActiveRoomFilter('All Rooms')
+                      setActiveStyleFilter('All Styles')
+                    }}
+                    className="text-xs h-6 px-2"
+                  >
+                    Clear all
+                  </Button>
+                )}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {filteredItems.length} {filteredItems.length === 1 ? 'transformation' : 'transformations'} found
+              </div>
+            </div>
           </div>
 
           {/* Gallery Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {galleryItems.map((item) => (
-              <Card key={item.id} className="overflow-hidden group cursor-pointer hover:shadow-xl transition-all duration-300">
-                <div className="relative">
-                  {/* Video/Image Display */}
-                  <div className="aspect-[4/3] bg-muted relative overflow-hidden">
-                    <video 
-                      className="w-full h-full object-cover"
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                    >
-                      <source src={item.video} type="video/mp4" />
-                      {/* Fallback */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-muted to-accent/20" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <ImageIcon className="w-16 h-16 text-muted-foreground" />
+            {filteredItems.length > 0 ? (
+              filteredItems.map((item) => (
+                <Card key={item.id} className="overflow-hidden group cursor-pointer hover:shadow-xl transition-all duration-300">
+                  <div className="relative">
+                    {/* Video/Image Display */}
+                    <div className="aspect-[4/3] bg-muted relative overflow-hidden">
+                      <video 
+                        className="w-full h-full object-cover"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                      >
+                        <source src={item.video} type="video/mp4" />
+                        {/* Fallback */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-muted to-accent/20" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <ImageIcon className="w-16 h-16 text-muted-foreground" />
+                        </div>
+                      </video>
+                    </div>
+                    
+                    {/* Overlay on hover */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                      <Button 
+                        size="lg" 
+                        className="opacity-0 group-hover:opacity-100 transition-opacity transform scale-95 group-hover:scale-100"
+                      >
+                        <Play className="w-5 h-5 mr-2" />
+                        View Transformation
+                      </Button>
+                    </div>
+
+                    {/* Style Badge */}
+                    <div className="absolute top-4 right-4">
+                      <Badge variant="secondary" className="bg-white/90 text-foreground">
+                        {item.style}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                      <span>{item.room}</span>
+                      <span>•</span>
+                      <div className="flex items-center">
+                        <Star className="w-3 h-3 mr-1 fill-current text-accent" />
+                        <span>Featured</span>
                       </div>
-                    </video>
-                  </div>
-                  
-                  {/* Overlay on hover */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                    </div>
+                    
+                    <h3 className="font-bold text-lg mb-2">{item.title}</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {item.description}
+                    </p>
+
+                    <div className="flex items-center justify-between mt-4">
+                      <Button variant="outline" size="sm">
+                        View Details
+                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm">
+                          <ShoppingBag className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Download className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              /* No Results State */
+              <div className="col-span-full">
+                <Card className="text-center py-16">
+                  <CardContent>
+                    <ImageIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <CardTitle className="mb-2">No transformations found</CardTitle>
+                    <CardDescription className="mb-6">
+                      Try adjusting your filters to see more results, or{' '}
+                      <button 
+                        onClick={() => {
+                          setActiveRoomFilter('All Rooms')
+                          setActiveStyleFilter('All Styles')
+                        }}
+                        className="text-accent hover:underline"
+                      >
+                        clear all filters
+                      </button>
+                    </CardDescription>
                     <Button 
-                      size="lg" 
-                      className="opacity-0 group-hover:opacity-100 transition-opacity transform scale-95 group-hover:scale-100"
+                      onClick={() => {
+                        setActiveRoomFilter('All Rooms')
+                        setActiveStyleFilter('All Styles')
+                      }}
                     >
-                      <Play className="w-5 h-5 mr-2" />
-                      View Transformation
+                      Show All Transformations
                     </Button>
-                  </div>
-
-                  {/* Style Badge */}
-                  <div className="absolute top-4 right-4">
-                    <Badge variant="secondary" className="bg-white/90 text-foreground">
-                      {item.style}
-                    </Badge>
-                  </div>
-                </div>
-
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                    <span>{item.room}</span>
-                    <span>•</span>
-                    <div className="flex items-center">
-                      <Star className="w-3 h-3 mr-1 fill-current text-accent" />
-                      <span>Featured</span>
-                    </div>
-                  </div>
-                  
-                  <h3 className="font-bold text-lg mb-2">{item.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {item.description}
-                  </p>
-
-                  <div className="flex items-center justify-between mt-4">
-                    <Button variant="outline" size="sm">
-                      View Details
-                    </Button>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm">
-                        <ShoppingBag className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Download className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </div>
 
-          {/* Load More */}
-          <div className="text-center mt-12">
-            <Button variant="outline" size="lg">
-              Load More Transformations
-            </Button>
-          </div>
+          {/* Load More - Only show if there are results */}
+          {filteredItems.length > 0 && (
+            <div className="text-center mt-12">
+              <Button variant="outline" size="lg">
+                Load More Transformations
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* CTA Section */}
