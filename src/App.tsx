@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -153,6 +153,15 @@ function App() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [itemDescription, setItemDescription] = useState('')
   const [styleDescription, setStyleDescription] = useState('')
+
+  // Memoized callbacks to prevent re-renders
+  const handleStyleDescriptionChange = useCallback((value: string) => {
+    setStyleDescription(value)
+  }, [])
+
+  const handleItemDescriptionChange = useCallback((value: string) => {
+    setItemDescription(value)
+  }, [])
 
   // Footer component for consistency across pages
   const Footer = () => (
@@ -371,7 +380,7 @@ function App() {
                 createdAt: new Date().toISOString(),
                 visualizations: []
               }
-              setProjects(currentProjects => [...currentProjects, newProject])
+              setProjects(currentProjects => [...(currentProjects || []), newProject])
               setSelectedProject(newProject)
               setTimeout(() => {
                 setCurrentView('workspace')
@@ -409,11 +418,11 @@ function App() {
                 createdAt: new Date().toISOString(),
                 visualizations: []
               }
-              setProjects(currentProjects => [...currentProjects, newProject])
+              setProjects(currentProjects => [...(currentProjects || []), newProject])
               setSelectedProject(newProject)
               setTimeout(() => {
                 setCurrentView('workspace')
-                setWorkspaceTab('specific')
+                setWorkspaceTab('style')
               }, 100)
             }}
           >
@@ -517,7 +526,7 @@ function App() {
   )
 
   // Create Project Dialog Component
-  const CreateProjectDialog = () => {
+  const CreateProjectDialog = React.memo(() => {
     const [projectForm, setProjectForm] = useState({ name: '', description: '' })
 
     const handleCreate = () => {
@@ -530,7 +539,7 @@ function App() {
           visualizations: []
         }
         
-        setProjects(currentProjects => [...currentProjects, newProject])
+        setProjects(currentProjects => [...(currentProjects || []), newProject])
         setSelectedProject(newProject)
         setProjectForm({ name: '', description: '' })
         setIsCreateProjectOpen(false)
@@ -588,7 +597,7 @@ function App() {
         </DialogContent>
       </Dialog>
     )
-  }
+  })
 
   // Project Dashboard Component
   const ProjectDashboard = () => (
@@ -719,7 +728,12 @@ function App() {
       </div>
 
       <div className="container mx-auto px-6 py-8">
-        <Tabs value={workspaceTab} onValueChange={setWorkspaceTab} className="w-full">
+        <Tabs 
+          key={selectedProject?.id} 
+          value={workspaceTab} 
+          onValueChange={setWorkspaceTab} 
+          className="w-full"
+        >
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="upload">Upload Scene</TabsTrigger>
             <TabsTrigger value="specific">Specific Item</TabsTrigger>
@@ -781,7 +795,7 @@ function App() {
           </TabsContent>
           
           {/* Specific Item Tab */}
-          <TabsContent value="specific" className="space-y-6">
+          <TabsContent key="specific-tab" value="specific" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -806,7 +820,7 @@ function App() {
                       <Textarea
                         id="item-description"
                         value={itemDescription}
-                        onChange={(e) => setItemDescription(e.target.value)}
+                        onChange={(e) => handleItemDescriptionChange(e.target.value)}
                         placeholder="e.g., A modern gray sectional sofa with clean lines and metal legs"
                         rows={4}
                       />
@@ -842,7 +856,7 @@ function App() {
           </TabsContent>
           
           {/* Style Brainstorm Tab */}
-          <TabsContent value="style" className="space-y-6">
+          <TabsContent key="style-tab" value="style" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -860,7 +874,7 @@ function App() {
                   <Textarea
                     id="style-description"
                     value={styleDescription}
-                    onChange={(e) => setStyleDescription(e.target.value)}
+                    onChange={(e) => handleStyleDescriptionChange(e.target.value)}
                     placeholder="e.g., Cozy Scandinavian living room with warm textures and natural wood accents"
                     rows={4}
                   />
@@ -872,7 +886,7 @@ function App() {
                       key={style}
                       variant="outline"
                       size="sm"
-                      onClick={() => setStyleDescription(style)}
+                      onClick={() => handleStyleDescriptionChange(style)}
                       className="text-sm"
                     >
                       {style}
