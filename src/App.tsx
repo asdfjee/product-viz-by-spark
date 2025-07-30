@@ -759,7 +759,13 @@ function App() {
                       <Textarea
                         id="item-description"
                         value={itemDescription}
-                        onChange={(e) => setItemDescription(e.target.value)}
+                        onChange={(e) => {
+                          e.preventDefault()
+                          setItemDescription(e.target.value)
+                        }}
+                        onInput={(e) => {
+                          setItemDescription((e.target as HTMLTextAreaElement).value)
+                        }}
                         placeholder="e.g., A modern gray sectional sofa with clean lines and metal legs"
                         rows={4}
                         autoComplete="off"
@@ -814,7 +820,13 @@ function App() {
                   <Textarea
                     id="style-description"
                     value={styleDescription}
-                    onChange={(e) => setStyleDescription(e.target.value)}
+                    onChange={(e) => {
+                      e.preventDefault()
+                      setStyleDescription(e.target.value)
+                    }}
+                    onInput={(e) => {
+                      setStyleDescription((e.target as HTMLTextAreaElement).value)
+                    }}
                     placeholder="e.g., Cozy Scandinavian living room with warm textures and natural wood accents"
                     rows={4}
                     autoComplete="off"
@@ -887,7 +899,13 @@ function App() {
                       <Input
                         id="refinement"
                         value={refinementInput}
-                        onChange={(e) => setRefinementInput(e.target.value)}
+                        onChange={(e) => {
+                          e.preventDefault()
+                          setRefinementInput(e.target.value)
+                        }}
+                        onInput={(e) => {
+                          setRefinementInput((e.target as HTMLInputElement).value)
+                        }}
                         placeholder="e.g., Make the sofa darker blue, add a coffee table"
                         autoComplete="off"
                       />
