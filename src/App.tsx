@@ -150,17 +150,9 @@ function App() {
   const [currentVisualization, setCurrentVisualization] = useState<Visualization | null>(null)
 
   // Form states
-  const [projectForm, setProjectForm] = useState({ name: '', description: '' })
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [itemDescription, setItemDescription] = useState('')
   const [styleDescription, setStyleDescription] = useState('')
-
-  // Reset form when dialog closes
-  React.useEffect(() => {
-    if (!isCreateProjectOpen) {
-      setProjectForm({ name: '', description: '' })
-    }
-  }, [isCreateProjectOpen])
 
   // Footer component for consistency across pages
   const Footer = () => (
@@ -468,6 +460,80 @@ function App() {
     </div>
   )
 
+  // Create Project Dialog Component
+  const CreateProjectDialog = () => {
+    const [projectForm, setProjectForm] = useState({ name: '', description: '' })
+
+    const handleCreate = () => {
+      if (projectForm.name.trim()) {
+        const newProject: Project = {
+          id: Date.now().toString(),
+          name: projectForm.name,
+          description: projectForm.description,
+          createdAt: new Date().toISOString(),
+          visualizations: []
+        }
+        
+        setProjects(currentProjects => [...currentProjects, newProject])
+        setSelectedProject(newProject)
+        setProjectForm({ name: '', description: '' })
+        setIsCreateProjectOpen(false)
+        setCurrentView('workspace')
+        toast.success('Project created successfully!')
+      }
+    }
+
+    const handleCancel = () => {
+      setProjectForm({ name: '', description: '' })
+      setIsCreateProjectOpen(false)
+    }
+
+    return (
+      <Dialog open={isCreateProjectOpen} onOpenChange={setIsCreateProjectOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Project</DialogTitle>
+            <DialogDescription>
+              Start a new interior design project. You can add multiple room visualizations to each project.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="project-name">Project Name</Label>
+              <Input
+                id="project-name"
+                value={projectForm.name}
+                onChange={(e) => setProjectForm(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="e.g., Living Room Makeover"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="project-description">Description</Label>
+              <Textarea
+                id="project-description"
+                value={projectForm.description}
+                onChange={(e) => setProjectForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Describe your vision for this space..."
+                rows={3}
+              />
+            </div>
+          </div>
+        
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreate} disabled={!projectForm.name.trim()}>
+              Create Project
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
   // Project Dashboard Component
   const ProjectDashboard = () => (
     <div className="min-h-screen bg-background">
@@ -555,78 +621,7 @@ function App() {
         )}
       </div>
 
-      {/* Create Project Dialog */}
-      <Dialog 
-        open={isCreateProjectOpen} 
-        onOpenChange={setIsCreateProjectOpen}
-      >
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create New Project</DialogTitle>
-            <DialogDescription>
-              Start a new interior design project. You can add multiple room visualizations to each project.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="project-name">Project Name</Label>
-              <Input
-                id="project-name"
-                value={projectForm.name}
-                onChange={(e) => setProjectForm(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="e.g., Living Room Makeover"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="project-description">Description</Label>
-              <Textarea
-                id="project-description"
-                value={projectForm.description}
-                onChange={(e) => setProjectForm(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Describe your vision for this space..."
-                rows={3}
-              />
-            </div>
-          </div>
-        
-          <div className="flex justify-end gap-3">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setProjectForm({ name: '', description: '' })
-                setIsCreateProjectOpen(false)
-              }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={() => {
-                if (projectForm.name.trim()) {
-                  const newProject: Project = {
-                    id: Date.now().toString(),
-                    name: projectForm.name,
-                    description: projectForm.description,
-                    createdAt: new Date().toISOString(),
-                    visualizations: []
-                  }
-                  
-                  setProjects(currentProjects => [...currentProjects, newProject])
-                  setSelectedProject(newProject)
-                  setProjectForm({ name: '', description: '' })
-                  setIsCreateProjectOpen(false)
-                  setCurrentView('workspace')
-                  toast.success('Project created successfully!')
-                }
-              }}
-              disabled={!projectForm.name.trim()}
-            >
-              Create Project
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <CreateProjectDialog />
       
       <Footer />
     </div>
