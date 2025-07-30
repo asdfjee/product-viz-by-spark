@@ -820,13 +820,7 @@ function App() {
                   <Textarea
                     id="style-description"
                     value={styleDescription}
-                    onChange={(e) => {
-                    placeholder="e.g., Cozy Scandinavian living room with warm textures and natural wood accents"
-                    rows={4}
-                    autoComplete="off"
-                  />
-                </div>
-                
+                    onChange={(e) => setStyleDescription(e.target.value)}
                     placeholder="e.g., Cozy Scandinavian living room with warm textures and natural wood accents"
                     rows={4}
                     autoComplete="off"
