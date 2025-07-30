@@ -359,45 +359,101 @@ function App() {
         </div>
         
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          <Card className="text-center border-0 shadow-lg">
+          <Card 
+            className="text-center border-0 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 group"
+            onClick={() => {
+              setCurrentView('dashboard')
+              // Auto-create a project and go to upload tab
+              const newProject: Project = {
+                id: Date.now().toString(),
+                name: 'Quick Upload Project',
+                description: 'Created from homepage upload step',
+                createdAt: new Date().toISOString(),
+                visualizations: []
+              }
+              setProjects(currentProjects => [...currentProjects, newProject])
+              setSelectedProject(newProject)
+              setTimeout(() => {
+                setCurrentView('workspace')
+                setWorkspaceTab('upload')
+              }, 100)
+            }}
+          >
             <CardHeader>
-              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-accent/20 transition-colors">
                 <Camera className="w-8 h-8 text-accent" />
               </div>
               <CardTitle className="text-xl">Upload Your Room</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mb-4">
                 Take a photo of your space and let our AI analyze the lighting, perspective, and layout.
               </p>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button variant="outline" size="sm">
+                  Start Upload →
+                </Button>
+              </div>
             </CardContent>
           </Card>
           
-          <Card className="text-center border-0 shadow-lg">
+          <Card 
+            className="text-center border-0 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 group"
+            onClick={() => {
+              setCurrentView('dashboard')
+              // Auto-create a project and go to specific item tab
+              const newProject: Project = {
+                id: Date.now().toString(),
+                name: 'Vision Project',
+                description: 'Created from homepage vision step',
+                createdAt: new Date().toISOString(),
+                visualizations: []
+              }
+              setProjects(currentProjects => [...currentProjects, newProject])
+              setSelectedProject(newProject)
+              setTimeout(() => {
+                setCurrentView('workspace')
+                setWorkspaceTab('specific')
+              }, 100)
+            }}
+          >
             <CardHeader>
-              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-accent/20 transition-colors">
                 <Wand2 className="w-8 h-8 text-accent" />
               </div>
               <CardTitle className="text-xl">Describe Your Vision</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mb-4">
                 Tell us what you want or upload specific furniture. Our AI understands natural language.
               </p>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button variant="outline" size="sm">
+                  Describe Now →
+                </Button>
+              </div>
             </CardContent>
           </Card>
           
-          <Card className="text-center border-0 shadow-lg">
+          <Card 
+            className="text-center border-0 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 group"
+            onClick={() => setCurrentView('gallery')}
+          >
             <CardHeader>
-              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-accent/20 transition-colors">
                 <ShoppingBag className="w-8 h-8 text-accent" />
               </div>
               <CardTitle className="text-xl">Shop Your Look</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mb-4">
                 See realistic results and shop for every item directly. Make your vision reality.
               </p>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button variant="outline" size="sm">
+                  Browse Gallery →
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
