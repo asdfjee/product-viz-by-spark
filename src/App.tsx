@@ -149,11 +149,11 @@ function App() {
   const [projects, setProjects, deleteProjects] = useKV<Project[]>('user-projects', [])
   const [currentVisualization, setCurrentVisualization] = useState<Visualization | null>(null)
 
-  // Form states - using useKV for persistence to prevent re-render issues
+  // Form states - using useState for smooth typing experience
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
-  const [itemDescription, setItemDescription] = useKV('workspace-item-description', '')
-  const [styleDescription, setStyleDescription] = useKV('workspace-style-description', '')
-  const [refinementInput, setRefinementInput] = useKV('workspace-refinement-input', '')
+  const [itemDescription, setItemDescription] = useState('')
+  const [styleDescription, setStyleDescription] = useState('')
+  const [refinementInput, setRefinementInput] = useState('')
 
   // Footer component for consistency across pages
   const Footer = () => (
