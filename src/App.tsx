@@ -549,8 +549,33 @@ function App() {
       </div>
 
       {/* Create Project Dialog */}
-      <Dialog open={isCreateProjectOpen} onOpenChange={setIsCreateProjectOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+      <Dialog 
+        open={isCreateProjectOpen} 
+        onOpenChange={(open) => {
+          // Only close the dialog if open is false AND user isn't interacting with inputs
+          if (!open) {
+            setIsCreateProjectOpen(false)
+            setProjectForm({ name: '', description: '' })
+          }
+        }}
+      >
+        <DialogContent 
+          className="sm:max-w-[425px]"
+          onPointerDownOutside={(e) => {
+            // Prevent closing when clicking on inputs or form elements
+            const target = e.target as Element
+            if (target.closest('input, textarea, button')) {
+              e.preventDefault()
+            }
+          }}
+          onInteractOutside={(e) => {
+            // Prevent closing when interacting with form elements
+            const target = e.target as Element
+            if (target.closest('input, textarea, button')) {
+              e.preventDefault()
+            }
+          }}
+        >
           <DialogHeader>
             <DialogTitle>Create New Project</DialogTitle>
             <DialogDescription>
@@ -564,9 +589,14 @@ function App() {
               <Input
                 id="project-name"
                 value={projectForm.name}
-                onChange={(e) => setProjectForm(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => {
+                  e.stopPropagation()
+                  setProjectForm(prev => ({ ...prev, name: e.target.value }))
+                }}
                 placeholder="e.g., Living Room Makeover"
                 autoFocus
+                onFocus={(e) => e.stopPropagation()}
+                onBlur={(e) => e.stopPropagation()}
               />
             </div>
             
@@ -575,9 +605,14 @@ function App() {
               <Textarea
                 id="project-description"
                 value={projectForm.description}
-                onChange={(e) => setProjectForm(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) => {
+                  e.stopPropagation()
+                  setProjectForm(prev => ({ ...prev, description: e.target.value }))
+                }}
                 placeholder="Describe your vision for this space..."
                 rows={3}
+                onFocus={(e) => e.stopPropagation()}
+                onBlur={(e) => e.stopPropagation()}
               />
             </div>
           </div>
@@ -585,7 +620,8 @@ function App() {
           <div className="flex justify-end gap-3">
             <Button 
               variant="outline" 
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation()
                 setProjectForm({ name: '', description: '' })
                 setIsCreateProjectOpen(false)
               }}
@@ -593,7 +629,8 @@ function App() {
               Cancel
             </Button>
             <Button 
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation()
                 if (projectForm.name.trim()) {
                   const newProject: Project = {
                     id: Date.now().toString(),
