@@ -550,7 +550,7 @@ function App() {
 
       {/* Create Project Dialog */}
       <Dialog open={isCreateProjectOpen} onOpenChange={setIsCreateProjectOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px]" onPointerDownOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>Create New Project</DialogTitle>
             <DialogDescription>
@@ -566,6 +566,7 @@ function App() {
                 value={projectForm.name}
                 onChange={(e) => setProjectForm(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="e.g., Living Room Makeover"
+                autoFocus
               />
             </div>
             
@@ -584,7 +585,10 @@ function App() {
           <div className="flex justify-end gap-3">
             <Button 
               variant="outline" 
-              onClick={() => setIsCreateProjectOpen(false)}
+              onClick={() => {
+                setProjectForm({ name: '', description: '' })
+                setIsCreateProjectOpen(false)
+              }}
             >
               Cancel
             </Button>
