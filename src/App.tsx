@@ -564,7 +564,7 @@ function App() {
               <Input
                 id="project-name"
                 value={projectForm.name}
-                onChange={(e) => setProjectForm(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => setProjectForm({ ...projectForm, name: e.target.value })}
                 placeholder="e.g., Living Room Makeover"
                 autoFocus
               />
@@ -575,7 +575,7 @@ function App() {
               <Textarea
                 id="project-description"
                 value={projectForm.description}
-                onChange={(e) => setProjectForm(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
                 placeholder="Describe your vision for this space..."
                 rows={3}
               />
@@ -603,7 +603,7 @@ function App() {
                     visualizations: []
                   }
                   
-                  setProjects(prev => [...prev, newProject])
+                  setProjects([...projects, newProject])
                   setSelectedProject(newProject)
                   setProjectForm({ name: '', description: '' })
                   setIsCreateProjectOpen(false)
