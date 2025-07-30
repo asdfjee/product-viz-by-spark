@@ -821,12 +821,12 @@ function App() {
                     id="style-description"
                     value={styleDescription}
                     onChange={(e) => {
-                      e.preventDefault()
-                      setStyleDescription(e.target.value)
-                    }}
-                    onInput={(e) => {
-                      setStyleDescription((e.target as HTMLTextAreaElement).value)
-                    }}
+                    placeholder="e.g., Cozy Scandinavian living room with warm textures and natural wood accents"
+                    rows={4}
+                    autoComplete="off"
+                  />
+                </div>
+                
                     placeholder="e.g., Cozy Scandinavian living room with warm textures and natural wood accents"
                     rows={4}
                     autoComplete="off"
