@@ -618,7 +618,7 @@ function App() {
                   setIsCreateProjectOpen(false)
                   setCurrentView('workspace')
                   toast.success('Project created successfully!')
-                }
+        </DialogContent>
               }}
               disabled={!projectForm.name.trim()}
             >
