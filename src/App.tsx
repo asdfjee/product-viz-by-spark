@@ -1372,35 +1372,35 @@ function App() {
 
         {/* Transformation Detail Modal */}
         <Dialog open={!!selectedTransformation} onOpenChange={() => setSelectedTransformation(null)}>
-          <DialogContent className="max-w-6xl w-full h-[90vh] p-0">
+          <DialogContent className="max-w-7xl w-[95vw] h-[90vh] p-0 overflow-hidden">
             {selectedTransformation && (
-              <div className="flex flex-col h-full">
+              <div className="flex flex-col h-full bg-background">
                 {/* Modal Header */}
-                <div className="flex items-center justify-between p-6 border-b">
-                  <div>
-                    <DialogTitle className="text-2xl font-bold">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between p-6 border-b bg-card">
+                  <div className="mb-4 lg:mb-0">
+                    <DialogTitle className="text-2xl font-bold text-card-foreground">
                       {selectedTransformation.title}
                     </DialogTitle>
-                    <DialogDescription className="text-lg mt-1">
+                    <DialogDescription className="text-base mt-2 text-muted-foreground">
                       {selectedTransformation.description}
                     </DialogDescription>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-shrink-0">
                     <Badge variant="secondary">{selectedTransformation.room}</Badge>
                     <Badge variant="outline">{selectedTransformation.style}</Badge>
                   </div>
                 </div>
 
                 {/* Comparison Controls */}
-                <div className="flex items-center justify-between px-6 py-4 border-b bg-muted/30">
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 px-6 py-4 border-b bg-muted/30">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-muted-foreground">Comparison Mode:</span>
-                    <div className="flex rounded-lg border p-1">
+                    <div className="flex rounded-lg border bg-background p-1">
                       <Button
                         size="sm"
                         variant={comparisonMode === 'split' ? 'default' : 'ghost'}
                         onClick={() => setComparisonMode('split')}
-                        className="rounded-md px-3 h-7"
+                        className="rounded-md px-3 h-7 text-xs"
                       >
                         Split View
                       </Button>
@@ -1408,7 +1408,7 @@ function App() {
                         size="sm"
                         variant={comparisonMode === 'slide' ? 'default' : 'ghost'}
                         onClick={() => setComparisonMode('slide')}
-                        className="rounded-md px-3 h-7"
+                        className="rounded-md px-3 h-7 text-xs"
                       >
                         Slider
                       </Button>
@@ -1416,7 +1416,7 @@ function App() {
                         size="sm"
                         variant={comparisonMode === 'toggle' ? 'default' : 'ghost'}
                         onClick={() => setComparisonMode('toggle')}
-                        className="rounded-md px-3 h-7"
+                        className="rounded-md px-3 h-7 text-xs"
                       >
                         Toggle
                       </Button>
@@ -1431,18 +1431,18 @@ function App() {
                       <ShoppingBag className="w-4 h-4 mr-2" />
                       Shop Look
                     </Button>
-                    <div className="text-xs text-muted-foreground ml-2">
+                    <div className="text-xs text-muted-foreground ml-2 hidden lg:block">
                       Press 1-3 to change view • ESC to close
                     </div>
                   </div>
                 </div>
 
                 {/* Main Comparison Area */}
-                <div className="flex-1 p-6">
-                  <div className="grid lg:grid-cols-3 gap-6 h-full">
+                <div className="flex-1 overflow-hidden">
+                  <div className="grid lg:grid-cols-3 gap-0 h-full">
                     {/* Before/After Comparison */}
-                    <div className="lg:col-span-2">
-                      <div className="h-full bg-muted rounded-lg relative overflow-hidden">
+                    <div className="lg:col-span-2 border-r border-border">
+                      <div className="h-full bg-card relative overflow-hidden">
                         {comparisonMode === 'split' && (
                           <div className="grid grid-cols-2 h-full">
                             <div className="relative border-r border-border">
@@ -1524,90 +1524,92 @@ function App() {
                     </div>
 
                     {/* Details Sidebar */}
-                    <div className="space-y-6">
-                      {/* Transformation Details */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg">Transformation Details</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div>
-                            <Label className="text-sm font-medium text-muted-foreground">Room Type</Label>
-                            <p className="font-medium">{selectedTransformation.room}</p>
-                          </div>
-                          <div>
-                            <Label className="text-sm font-medium text-muted-foreground">Design Style</Label>
-                            <p className="font-medium">{selectedTransformation.style}</p>
-                          </div>
-                          <div>
-                            <Label className="text-sm font-medium text-muted-foreground">Key Features</Label>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {(selectedTransformation.keyFeatures || ['Modern Furniture', 'Natural Light', 'Neutral Palette', 'Clean Lines']).map((feature) => (
-                                <Badge key={feature} variant="outline" className="text-xs">
-                                  {feature}
-                                </Badge>
-                              ))}
+                    <div className="overflow-y-auto bg-background">
+                      <div className="p-6 space-y-6">
+                        {/* Transformation Details */}
+                        <Card className="border-0 shadow-sm">
+                          <CardHeader className="pb-3">
+                            <CardTitle className="text-base">Transformation Details</CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <div>
+                              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Room Type</Label>
+                              <p className="font-medium text-sm mt-1">{selectedTransformation.room}</p>
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                            <div>
+                              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Design Style</Label>
+                              <p className="font-medium text-sm mt-1">{selectedTransformation.style}</p>
+                            </div>
+                            <div>
+                              <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Key Features</Label>
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {(selectedTransformation.keyFeatures || ['Modern Furniture', 'Natural Light', 'Neutral Palette', 'Clean Lines']).map((feature) => (
+                                  <Badge key={feature} variant="outline" className="text-xs px-2 py-1">
+                                    {feature}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
 
-                      {/* Featured Items */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg">Featured Items</CardTitle>
-                          <CardDescription>
-                            Key pieces from this transformation
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-3">
-                            {(selectedTransformation.items || [
-                              { name: 'Modern Sectional Sofa', price: '$1,299', brand: 'West Elm' },
-                              { name: 'Glass Coffee Table', price: '$449', brand: 'CB2' },
-                              { name: 'Floor Lamp', price: '$189', brand: 'IKEA' }
-                            ]).map((item, index) => (
-                              <div key={index} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 bg-muted rounded"></div>
-                                  <div>
-                                    <p className="font-medium text-sm">{item.name}</p>
-                                    <p className="text-xs text-muted-foreground">{item.brand}</p>
+                        {/* Featured Items */}
+                        <Card className="border-0 shadow-sm">
+                          <CardHeader className="pb-3">
+                            <CardTitle className="text-base">Featured Items</CardTitle>
+                            <CardDescription className="text-xs">
+                              Key pieces from this transformation
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-3">
+                              {(selectedTransformation.items || [
+                                { name: 'Modern Sectional Sofa', price: '$1,299', brand: 'West Elm' },
+                                { name: 'Glass Coffee Table', price: '$449', brand: 'CB2' },
+                                { name: 'Floor Lamp', price: '$189', brand: 'IKEA' }
+                              ]).map((item, index) => (
+                                <div key={index} className="flex items-center justify-between p-3 border rounded-md hover:bg-muted/30 transition-colors">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-muted rounded"></div>
+                                    <div>
+                                      <p className="font-medium text-xs">{item.name}</p>
+                                      <p className="text-xs text-muted-foreground">{item.brand}</p>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="font-bold text-xs">{item.price}</p>
+                                    <Button size="sm" variant="outline" className="mt-1 h-6 px-2 text-xs">
+                                      <ShoppingBag className="w-3 h-3 mr-1" />
+                                      Buy
+                                    </Button>
                                   </div>
                                 </div>
-                                <div className="text-right">
-                                  <p className="font-bold text-sm">{item.price}</p>
-                                  <Button size="sm" variant="outline" className="mt-1 h-6 px-2 text-xs">
-                                    <ShoppingBag className="w-3 h-3 mr-1" />
-                                    Buy
-                                  </Button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
 
-                      {/* Actions */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg">Get This Look</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                          <Button className="w-full">
-                            <ShoppingBag className="w-4 h-4 mr-2" />
-                            Shop Complete Look
-                          </Button>
-                          <Button variant="outline" className="w-full">
-                            <Sparkles className="w-4 h-4 mr-2" />
-                            Create Similar Design
-                          </Button>
-                          <Button variant="outline" className="w-full">
-                            <Download className="w-4 h-4 mr-2" />
-                            Save Inspiration
-                          </Button>
-                        </CardContent>
-                      </Card>
+                        {/* Actions */}
+                        <Card className="border-0 shadow-sm">
+                          <CardHeader className="pb-3">
+                            <CardTitle className="text-base">Get This Look</CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-2">
+                            <Button className="w-full h-9 text-sm">
+                              <ShoppingBag className="w-4 h-4 mr-2" />
+                              Shop Complete Look
+                            </Button>
+                            <Button variant="outline" className="w-full h-9 text-sm">
+                              <Sparkles className="w-4 h-4 mr-2" />
+                              Create Similar Design
+                            </Button>
+                            <Button variant="outline" className="w-full h-9 text-sm">
+                              <Download className="w-4 h-4 mr-2" />
+                              Save Inspiration
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      </div>
                     </div>
                   </div>
                 </div>
