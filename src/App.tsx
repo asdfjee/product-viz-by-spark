@@ -517,79 +517,79 @@ function App() {
     </div>
   )
 
-  // Create Project Dialog Component
-  const CreateProjectDialog = React.memo(() => {
-    const [projectForm, setProjectForm] = useState({ name: '', description: '' })
+  // Create Project Dialog Component - moved state outside to prevent re-rendering issues
+  const [projectForm, setProjectForm] = useState({ name: '', description: '' })
 
-    const handleCreate = () => {
-      if (projectForm.name.trim()) {
-        const newProject: Project = {
-          id: Date.now().toString(),
-          name: projectForm.name,
-          description: projectForm.description,
-          createdAt: new Date().toISOString(),
-          visualizations: []
-        }
-        
-        setProjects(currentProjects => [...(currentProjects || []), newProject])
-        setSelectedProject(newProject)
-        setProjectForm({ name: '', description: '' })
-        setIsCreateProjectOpen(false)
-        setCurrentView('workspace')
-        toast.success('Project created successfully!')
+  const handleCreateProject = () => {
+    if (projectForm.name.trim()) {
+      const newProject: Project = {
+        id: Date.now().toString(),
+        name: projectForm.name,
+        description: projectForm.description,
+        createdAt: new Date().toISOString(),
+        visualizations: []
       }
-    }
-
-    const handleCancel = () => {
+      
+      setProjects(currentProjects => [...(currentProjects || []), newProject])
+      setSelectedProject(newProject)
       setProjectForm({ name: '', description: '' })
       setIsCreateProjectOpen(false)
+      setCurrentView('workspace')
+      toast.success('Project created successfully!')
     }
+  }
 
-    return (
-      <Dialog open={isCreateProjectOpen} onOpenChange={setIsCreateProjectOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create New Project</DialogTitle>
-            <DialogDescription>
-              Start a new interior design project. You can add multiple room visualizations to each project.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="project-name">Project Name</Label>
-              <Input
-                id="project-name"
-                value={projectForm.name}
-                onChange={(e) => setProjectForm(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="e.g., Living Room Makeover"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="project-description">Description</Label>
-              <Textarea
-                id="project-description"
-                value={projectForm.description}
-                onChange={(e) => setProjectForm(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Describe your vision for this space..."
-                rows={3}
-              />
-            </div>
-          </div>
+  const handleCancelProject = () => {
+    setProjectForm({ name: '', description: '' })
+    setIsCreateProjectOpen(false)
+  }
+
+  const CreateProjectDialog = () => (
+    <Dialog open={isCreateProjectOpen} onOpenChange={setIsCreateProjectOpen}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create New Project</DialogTitle>
+          <DialogDescription>
+            Start a new interior design project. You can add multiple room visualizations to each project.
+          </DialogDescription>
+        </DialogHeader>
         
-          <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={handleCancel}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreate} disabled={!projectForm.name.trim()}>
-              Create Project
-            </Button>
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="project-name">Project Name</Label>
+            <Input
+              id="project-name"
+              value={projectForm.name}
+              onChange={(e) => setProjectForm(prev => ({ ...prev, name: e.target.value }))}
+              placeholder="e.g., Living Room Makeover"
+              autoComplete="off"
+            />
           </div>
-        </DialogContent>
-      </Dialog>
-    )
-  })
+          
+          <div className="space-y-2">
+            <Label htmlFor="project-description">Description</Label>
+            <Textarea
+              id="project-description"
+              value={projectForm.description}
+              onChange={(e) => setProjectForm(prev => ({ ...prev, description: e.target.value }))}
+              placeholder="Describe your vision for this space..."
+              rows={3}
+              autoComplete="off"
+            />
+          </div>
+        </div>
+      
+        <div className="flex justify-end gap-3">
+          <Button variant="outline" onClick={handleCancelProject}>
+            Cancel
+          </Button>
+          <Button onClick={handleCreateProject} disabled={!projectForm.name.trim()}>
+            Create Project
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
 
   // Project Dashboard Component
   const ProjectDashboard = () => (
@@ -814,6 +814,7 @@ function App() {
                         onChange={(e) => setItemDescription(e.target.value)}
                         placeholder="e.g., A modern gray sectional sofa with clean lines and metal legs"
                         rows={4}
+                        autoComplete="off"
                       />
                     </div>
                     
@@ -868,6 +869,7 @@ function App() {
                     onChange={(e) => setStyleDescription(e.target.value)}
                     placeholder="e.g., Cozy Scandinavian living room with warm textures and natural wood accents"
                     rows={4}
+                    autoComplete="off"
                   />
                 </div>
                 
@@ -939,6 +941,7 @@ function App() {
                         value={refinementInput}
                         onChange={(e) => setRefinementInput(e.target.value)}
                         placeholder="e.g., Make the sofa darker blue, add a coffee table"
+                        autoComplete="off"
                       />
                     </div>
                   </div>
