@@ -550,7 +550,7 @@ function App() {
 
       {/* Create Project Dialog */}
       <Dialog open={isCreateProjectOpen} onOpenChange={setIsCreateProjectOpen}>
-        <DialogContent className="sm:max-w-[425px]" onPointerDownOutside={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Create New Project</DialogTitle>
             <DialogDescription>
