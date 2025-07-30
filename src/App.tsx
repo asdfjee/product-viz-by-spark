@@ -596,86 +596,25 @@ function App() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Projects Grid */}
-      <div className="container mx-auto px-6 py-8">
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-3xl font-bold mb-2">Your Projects</h2>
-              <p className="text-muted-foreground">
-                Create and manage your interior design projects
-              </p>
-            </div>
+      {/* Simple Create Project View */}
+      <div className="container mx-auto px-6 py-20">
+        <Card className="text-center py-16 max-w-2xl mx-auto">
+          <CardContent>
+            <Folder className="w-20 h-20 text-muted-foreground mx-auto mb-6" />
+            <CardTitle className="text-3xl mb-4">Ready to Design?</CardTitle>
+            <CardDescription className="text-lg mb-8">
+              Create your first project to start visualizing your dream space with AI-powered interior design
+            </CardDescription>
             <Button 
               onClick={() => setIsCreateProjectOpen(true)}
-              className="gap-2"
+              size="lg"
+              className="text-lg px-8 py-6 h-auto"
             >
-              <Plus className="w-4 h-4" />
-              New Project
+              <Plus className="w-5 h-5 mr-2" />
+              Create New Project
             </Button>
-          </div>
-        </div>
-
-        {projects.length === 0 ? (
-          <Card className="text-center py-12">
-            <CardContent>
-              <Folder className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <CardTitle className="mb-2">No projects yet</CardTitle>
-              <CardDescription className="mb-6">
-                Create your first project to start visualizing your dream space
-              </CardDescription>
-              <Button onClick={() => setIsCreateProjectOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Project
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
-              <Card 
-                key={project.id} 
-                className="cursor-pointer hover:shadow-lg transition-shadow group"
-                onClick={() => {
-                  setSelectedProject(project)
-                  setCurrentView('workspace')
-                }}
-              >
-                <div className="aspect-video bg-muted relative overflow-hidden rounded-t-lg">
-                  {project.thumbnail ? (
-                    <img 
-                      src={project.thumbnail} 
-                      alt={project.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <ImageIcon className="w-12 h-12 text-muted-foreground" />
-                    </div>
-                  )}
-                  
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <Button size="sm" variant="secondary">
-                      Open Project
-                    </Button>
-                  </div>
-                </div>
-                
-                <CardHeader>
-                  <CardTitle className="text-lg">{project.name}</CardTitle>
-                  <CardDescription>{project.description}</CardDescription>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>{project.visualizations.length} visualizations</span>
-                    <span>{new Date(project.createdAt).toLocaleDateString()}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+          </CardContent>
+        </Card>
       </div>
 
       <CreateProjectDialog />
