@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -153,15 +153,6 @@ function App() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [itemDescription, setItemDescription] = useState('')
   const [styleDescription, setStyleDescription] = useState('')
-
-  // Memoized callbacks to prevent re-renders
-  const handleStyleDescriptionChange = useCallback((value: string) => {
-    setStyleDescription(value)
-  }, [])
-
-  const handleItemDescriptionChange = useCallback((value: string) => {
-    setItemDescription(value)
-  }, [])
 
   // Footer component for consistency across pages
   const Footer = () => (
@@ -820,7 +811,7 @@ function App() {
                       <Textarea
                         id="item-description"
                         value={itemDescription}
-                        onChange={(e) => handleItemDescriptionChange(e.target.value)}
+                        onChange={(e) => setItemDescription(e.target.value)}
                         placeholder="e.g., A modern gray sectional sofa with clean lines and metal legs"
                         rows={4}
                       />
@@ -874,7 +865,7 @@ function App() {
                   <Textarea
                     id="style-description"
                     value={styleDescription}
-                    onChange={(e) => handleStyleDescriptionChange(e.target.value)}
+                    onChange={(e) => setStyleDescription(e.target.value)}
                     placeholder="e.g., Cozy Scandinavian living room with warm textures and natural wood accents"
                     rows={4}
                   />
@@ -886,7 +877,7 @@ function App() {
                       key={style}
                       variant="outline"
                       size="sm"
-                      onClick={() => handleStyleDescriptionChange(style)}
+                      onClick={() => setStyleDescription(style)}
                       className="text-sm"
                     >
                       {style}
