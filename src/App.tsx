@@ -552,30 +552,13 @@ function App() {
       <Dialog 
         open={isCreateProjectOpen} 
         onOpenChange={(open) => {
-          // Only close the dialog if open is false AND user isn't interacting with inputs
           if (!open) {
             setIsCreateProjectOpen(false)
             setProjectForm({ name: '', description: '' })
           }
         }}
       >
-        <DialogContent 
-          className="sm:max-w-[425px]"
-          onPointerDownOutside={(e) => {
-            // Prevent closing when clicking on inputs or form elements
-            const target = e.target as Element
-            if (target.closest('input, textarea, button')) {
-              e.preventDefault()
-            }
-          }}
-          onInteractOutside={(e) => {
-            // Prevent closing when interacting with form elements
-            const target = e.target as Element
-            if (target.closest('input, textarea, button')) {
-              e.preventDefault()
-            }
-          }}
-        >
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Create New Project</DialogTitle>
             <DialogDescription>
@@ -583,76 +566,64 @@ function App() {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="project-name">Project Name</Label>
-              <Input
-                id="project-name"
-                value={projectForm.name}
-                onChange={(e) => {
-                  e.stopPropagation()
-                  setProjectForm(prev => ({ ...prev, name: e.target.value }))
-                }}
-                placeholder="e.g., Living Room Makeover"
-                autoFocus
-                onFocus={(e) => e.stopPropagation()}
-                onBlur={(e) => e.stopPropagation()}
-              />
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="project-name">Project Name</Label>
+                <Input
+                  id="project-name"
+                  value={projectForm.name}
+                  onChange={(e) => setProjectForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g., Living Room Makeover"
+                  autoFocus
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="project-description">Description</Label>
+                <Textarea
+                  id="project-description"
+                  value={projectForm.description}
+                  onChange={(e) => setProjectForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Describe your vision for this space..."
+                  rows={3}
+                />
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="project-description">Description</Label>
-              <Textarea
-                id="project-description"
-                value={projectForm.description}
-                onChange={(e) => {
-                  e.stopPropagation()
-                  setProjectForm(prev => ({ ...prev, description: e.target.value }))
-                }}
-                placeholder="Describe your vision for this space..."
-                rows={3}
-                onFocus={(e) => e.stopPropagation()}
-                onBlur={(e) => e.stopPropagation()}
-              />
-            </div>
-          </div>
           
-          <div className="flex justify-end gap-3">
-            <Button 
-              variant="outline" 
-              onClick={(e) => {
-                e.stopPropagation()
-                setProjectForm({ name: '', description: '' })
-                setIsCreateProjectOpen(false)
-              }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={(e) => {
-                e.stopPropagation()
-                if (projectForm.name.trim()) {
-                  const newProject: Project = {
-                    id: Date.now().toString(),
-                    name: projectForm.name,
-                    description: projectForm.description,
-                    createdAt: new Date().toISOString(),
-                    visualizations: []
-                  }
-                  
-                  setProjects(currentProjects => [...currentProjects, newProject])
-                  setSelectedProject(newProject)
+            <div className="flex justify-end gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => {
                   setProjectForm({ name: '', description: '' })
                   setIsCreateProjectOpen(false)
-                  setCurrentView('workspace')
-                  toast.success('Project created successfully!')
-                }
-              }}
-              disabled={!projectForm.name.trim()}
-            >
-              Create Project
-            </Button>
-          </div>
+                }}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => {
+                  if (projectForm.name.trim()) {
+                    const newProject: Project = {
+                      id: Date.now().toString(),
+                      name: projectForm.name,
+                      description: projectForm.description,
+                      createdAt: new Date().toISOString(),
+                      visualizations: []
+                    }
+                    
+                    setProjects(currentProjects => [...currentProjects, newProject])
+                    setSelectedProject(newProject)
+                    setProjectForm({ name: '', description: '' })
+                    setIsCreateProjectOpen(false)
+                    setCurrentView('workspace')
+                    toast.success('Project created successfully!')
+                  }
+                }}
+                disabled={!projectForm.name.trim()}
+              >
+                Create Project
+              </Button>
+            </div>
         </DialogContent>
       </Dialog>
       
