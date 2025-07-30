@@ -153,6 +153,7 @@ function App() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [itemDescription, setItemDescription] = useState('')
   const [styleDescription, setStyleDescription] = useState('')
+  const [refinementInput, setRefinementInput] = useState('')
 
   // Footer component for consistency across pages
   const Footer = () => (
@@ -720,7 +721,6 @@ function App() {
 
       <div className="container mx-auto px-6 py-8">
         <Tabs 
-          key={selectedProject?.id} 
           value={workspaceTab} 
           onValueChange={setWorkspaceTab} 
           className="w-full"
@@ -786,7 +786,7 @@ function App() {
           </TabsContent>
           
           {/* Specific Item Tab */}
-          <TabsContent key="specific-tab" value="specific" className="space-y-6">
+          <TabsContent value="specific" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -847,7 +847,7 @@ function App() {
           </TabsContent>
           
           {/* Style Brainstorm Tab */}
-          <TabsContent key="style-tab" value="style" className="space-y-6">
+          <TabsContent value="style" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -936,6 +936,8 @@ function App() {
                       <Label htmlFor="refinement">Refine with text commands</Label>
                       <Input
                         id="refinement"
+                        value={refinementInput}
+                        onChange={(e) => setRefinementInput(e.target.value)}
                         placeholder="e.g., Make the sofa darker blue, add a coffee table"
                       />
                     </div>
