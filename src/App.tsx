@@ -671,7 +671,6 @@ function App() {
 
       <div className="container mx-auto px-6 py-8">
         <Tabs 
-          key="workspace-tabs"
           value={workspaceTab} 
           onValueChange={setWorkspaceTab} 
           className="w-full"
@@ -684,7 +683,7 @@ function App() {
           </TabsList>
           
           {/* Upload Scene Tab */}
-          <TabsContent key="upload-tab" value="upload" className="space-y-6">
+          <TabsContent value="upload" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -737,7 +736,7 @@ function App() {
           </TabsContent>
           
           {/* Specific Item Tab */}
-          <TabsContent key="specific-tab" value="specific" className="space-y-6">
+          <TabsContent value="specific" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -750,7 +749,7 @@ function App() {
               </CardHeader>
               
               <CardContent className="space-y-6">
-                <Tabs defaultValue="describe" key="specific-item-tabs">
+                <Tabs defaultValue="describe">
                   <TabsList>
                     <TabsTrigger value="describe">Describe Item</TabsTrigger>
                     <TabsTrigger value="upload">Upload Product Photo</TabsTrigger>
@@ -760,7 +759,6 @@ function App() {
                     <div className="space-y-2">
                       <Label htmlFor="item-description">Describe the item you want to add</Label>
                       <Textarea
-                        key="item-description-textarea"
                         id="item-description"
                         value={itemDescription}
                         onChange={(e) => setItemDescription(e.target.value)}
@@ -800,7 +798,7 @@ function App() {
           </TabsContent>
           
           {/* Style Brainstorm Tab */}
-          <TabsContent key="style-tab" value="style" className="space-y-6">
+          <TabsContent value="style" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -816,7 +814,6 @@ function App() {
                 <div className="space-y-2">
                   <Label htmlFor="style-description">Describe your desired style or vibe</Label>
                   <Textarea
-                    key="style-description-textarea"
                     id="style-description"
                     value={styleDescription}
                     onChange={(e) => setStyleDescription(e.target.value)}
@@ -853,7 +850,7 @@ function App() {
           </TabsContent>
           
           {/* Refine & Shop Tab */}
-          <TabsContent key="refine-tab" value="refine" className="space-y-6">
+          <TabsContent value="refine" className="space-y-6">
             <div className="grid lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
@@ -890,7 +887,6 @@ function App() {
                     <div className="space-y-2">
                       <Label htmlFor="refinement">Refine with text commands</Label>
                       <Input
-                        key="refinement-input"
                         id="refinement"
                         value={refinementInput}
                         onChange={(e) => setRefinementInput(e.target.value)}
