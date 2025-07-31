@@ -363,8 +363,7 @@ function App() {
           <Card 
             className="text-center border-0 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 group"
             onClick={() => {
-              setCurrentView('dashboard')
-              // Auto-create a project and go to upload tab
+              // Auto-create a project and go directly to workspace
               const newProject: Project = {
                 id: Date.now().toString(),
                 name: 'Quick Upload Project',
@@ -374,10 +373,8 @@ function App() {
               }
               setProjects(currentProjects => [...(currentProjects || []), newProject])
               setSelectedProject(newProject)
-              setTimeout(() => {
-                setCurrentView('workspace')
-                setWorkspaceTab('upload')
-              }, 100)
+              setWorkspaceTab('upload')
+              setCurrentView('workspace')
             }}
           >
             <CardHeader>
@@ -401,8 +398,7 @@ function App() {
           <Card 
             className="text-center border-0 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 group"
             onClick={() => {
-              setCurrentView('dashboard')
-              // Auto-create a project and go to specific item tab
+              // Auto-create a project and go directly to workspace
               const newProject: Project = {
                 id: Date.now().toString(),
                 name: 'Vision Project',
@@ -412,10 +408,8 @@ function App() {
               }
               setProjects(currentProjects => [...(currentProjects || []), newProject])
               setSelectedProject(newProject)
-              setTimeout(() => {
-                setCurrentView('workspace')
-                setWorkspaceTab('style')
-              }, 100)
+              setWorkspaceTab('style')
+              setCurrentView('workspace')
             }}
           >
             <CardHeader>
@@ -671,6 +665,7 @@ function App() {
 
       <div className="container mx-auto px-6 py-8">
         <Tabs 
+          value={workspaceTab}
           onValueChange={setWorkspaceTab} 
           className="w-full"
         >
@@ -758,6 +753,7 @@ function App() {
                     <div className="space-y-2">
                       <Label htmlFor="item-description">Describe the item you want to add</Label>
                       <Textarea
+                        key="item-description-textarea"
                         id="item-description"
                         value={itemDescription}
                         onChange={(e) => setItemDescription(e.target.value)}
@@ -813,6 +809,7 @@ function App() {
                 <div className="space-y-2">
                   <Label htmlFor="style-description">Describe your desired style or vibe</Label>
                   <Textarea
+                    key="style-description-textarea"
                     id="style-description"
                     value={styleDescription}
                     onChange={(e) => setStyleDescription(e.target.value)}
@@ -886,9 +883,10 @@ function App() {
                     <div className="space-y-2">
                       <Label htmlFor="refinement">Refine with text commands</Label>
                       <Input
+                        key="refinement-input"
                         id="refinement"
                         value={refinementInput}
-                        placeholder="e.g., Make the sofa darker blue, add a coffee table"
+                        onChange={(e) => setRefinementInput(e.target.value)}
                         placeholder="e.g., Make the sofa darker blue, add a coffee table"
                         autoComplete="off"
                       />
