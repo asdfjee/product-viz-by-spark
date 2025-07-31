@@ -560,7 +560,6 @@ function App() {
             <div className="space-y-2">
               <Label htmlFor="project-name">Project Name</Label>
               <Input
-                key="project-name-input"
                 id="project-name"
                 value={localProjectForm.name}
                 onChange={(e) => setLocalProjectForm(prev => ({ ...prev, name: e.target.value }))}
@@ -572,7 +571,6 @@ function App() {
             <div className="space-y-2">
               <Label htmlFor="project-description">Description</Label>
               <Textarea
-                key="project-description-textarea"
                 id="project-description"
                 value={localProjectForm.description}
                 onChange={(e) => setLocalProjectForm(prev => ({ ...prev, description: e.target.value }))}
@@ -753,7 +751,6 @@ function App() {
                     <div className="space-y-2">
                       <Label htmlFor="item-description">Describe the item you want to add</Label>
                       <Textarea
-                        key="item-description-textarea"
                         id="item-description"
                         value={itemDescription}
                         onChange={(e) => setItemDescription(e.target.value)}
@@ -809,7 +806,6 @@ function App() {
                 <div className="space-y-2">
                   <Label htmlFor="style-description">Describe your desired style or vibe</Label>
                   <Textarea
-                    key="style-description-textarea"
                     id="style-description"
                     value={styleDescription}
                     onChange={(e) => setStyleDescription(e.target.value)}
@@ -883,7 +879,6 @@ function App() {
                     <div className="space-y-2">
                       <Label htmlFor="refinement">Refine with text commands</Label>
                       <Input
-                        key="refinement-input"
                         id="refinement"
                         value={refinementInput}
                         onChange={(e) => setRefinementInput(e.target.value)}
