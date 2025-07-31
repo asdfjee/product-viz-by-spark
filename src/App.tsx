@@ -154,8 +154,64 @@ function App() {
   const [itemDescription, setItemDescription] = useState('')
   const [styleDescription, setStyleDescription] = useState('')
   const [refinementInput, setRefinementInput] = useState('')
+  const [isGenerating, setIsGenerating] = useState(false)
+  
+  // File input reference for upload functionality
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
 
-  // Footer component for consistency across pages
+  // File upload handlers
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setUploadedImage(e.target?.result as string)
+        toast.success('Image uploaded successfully!')
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  // Trigger file input click
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click()
+  }
+
+  // Drag and drop handlers
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    const files = e.dataTransfer.files
+    if (files && files[0]) {
+      const file = files[0]
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          setUploadedImage(e.target?.result as string)
+          toast.success('Image uploaded successfully!')
+        }
+        reader.readAsDataURL(file)
+      } else {
+        toast.error('Please upload an image file.')
+      }
+    }
+  }
   const Footer = () => (
     <footer className="py-8 text-center">
       <div className="container mx-auto px-6">
@@ -729,13 +785,22 @@ function App() {
               </CardHeader>
               
               <CardContent>
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                
                 <div 
                   className="border-2 border-dashed border-border rounded-lg p-12 text-center hover:border-accent/50 transition-colors cursor-pointer group"
-                  onClick={() => {
-                    // Simulate file upload for demo purposes
-                    setUploadedImage('demo-image-placeholder')
-                    toast.success('Room photo uploaded successfully!')
-                  }}
+                  onClick={triggerFileUpload}
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
                 >
                   <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4 group-hover:text-accent transition-colors" />
                   <div className="space-y-2">
@@ -748,9 +813,11 @@ function App() {
                 {uploadedImage && (
                   <div className="mt-6">
                     <div className="aspect-video bg-muted rounded-lg relative overflow-hidden">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <ImageIcon className="w-16 h-16 text-muted-foreground" />
-                      </div>
+                      <img 
+                        src={uploadedImage} 
+                        alt="Uploaded room" 
+                        className="w-full h-full object-cover"
+                      />
                       <div className="absolute bottom-4 left-4">
                         <Badge className="bg-green-500/90 text-white">
                           <Check className="w-3 h-3 mr-1" />
@@ -797,12 +864,23 @@ function App() {
                   
                   <TabsContent value="describe" className="space-y-4">
                     <ItemDescriptionInput />
+                    
+                    {/* Hidden file input for product photo */}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      id="product-photo-upload"
+                    />
+                    
                     <div 
                       className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-accent/50 transition-colors"
-                      onClick={() => {
-                        // Simulate file upload for demo purposes
-                        toast.success('Product photo uploaded successfully!')
-                      }}
+                      onClick={() => document.getElementById('product-photo-upload')?.click()}
+                      onDragOver={handleDragOver}
+                      onDragEnter={handleDragEnter}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
                     >
                       <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
                       <p className="font-medium mb-1">Upload product photo</p>
@@ -814,17 +892,39 @@ function App() {
                 <Button 
                   className="w-full" 
                   size="lg"
-                  disabled={!uploadedImage || !itemDescription.trim()}
-                  onClick={() => {
+                  disabled={!uploadedImage || !itemDescription.trim() || isGenerating}
+                  onClick={async () => {
                     if (uploadedImage && itemDescription.trim()) {
-                      toast.success('Generating visualization... This may take a few moments.')
-                      // In a real app, this would trigger AI generation
-                      setWorkspaceTab('refine')
+                      try {
+                        setIsGenerating(true)
+                        // Show loading state
+                        toast.success('Generating visualization... This may take a few moments.')
+                        
+                        // In a real app, this would trigger AI generation
+                        // For now, we'll simulate the process
+                        await new Promise(resolve => setTimeout(resolve, 3000))
+                        
+                        // Navigate to refine tab to show results
+                        setWorkspaceTab('refine')
+                        
+                        toast.success('Visualization generated successfully!')
+                      } catch (error) {
+                        toast.error('Failed to generate visualization. Please try again.')
+                      } finally {
+                        setIsGenerating(false)
+                      }
+                    } else {
+                      if (!uploadedImage) {
+                        toast.error('Please upload a room photo first.')
+                        setWorkspaceTab('upload')
+                      } else {
+                        toast.error('Please describe the item you want to add.')
+                      }
                     }
                   }}
                 >
                   <Wand2 className="w-4 h-4 mr-2" />
-                  Generate Visualization
+                  {isGenerating ? 'Generating...' : 'Generate Visualization'}
                 </Button>
               </CardContent>
             </Card>
@@ -863,17 +963,39 @@ function App() {
                 <Button 
                   className="w-full" 
                   size="lg"
-                  disabled={!uploadedImage || !styleDescription.trim()}
-                  onClick={() => {
+                  disabled={!uploadedImage || !styleDescription.trim() || isGenerating}
+                  onClick={async () => {
                     if (uploadedImage && styleDescription.trim()) {
-                      toast.success('Generating style concepts... This may take a few moments.')
-                      // In a real app, this would trigger AI generation
-                      setWorkspaceTab('refine')
+                      try {
+                        setIsGenerating(true)
+                        // Show loading state
+                        toast.success('Generating style concepts... This may take a few moments.')
+                        
+                        // In a real app, this would trigger AI generation
+                        // For now, we'll simulate the process
+                        await new Promise(resolve => setTimeout(resolve, 3000))
+                        
+                        // Navigate to refine tab to show results
+                        setWorkspaceTab('refine')
+                        
+                        toast.success('Style concepts generated successfully!')
+                      } catch (error) {
+                        toast.error('Failed to generate style concepts. Please try again.')
+                      } finally {
+                        setIsGenerating(false)
+                      }
+                    } else {
+                      if (!uploadedImage) {
+                        toast.error('Please upload a room photo first.')
+                        setWorkspaceTab('upload')
+                      } else {
+                        toast.error('Please describe your desired style.')
+                      }
                     }
                   }}
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Generate Style Concepts
+                  {isGenerating ? 'Generating...' : 'Generate Style Concepts'}
                 </Button>
               </CardContent>
             </Card>
@@ -892,12 +1014,20 @@ function App() {
                 
                 <CardContent>
                   <div className="aspect-video bg-muted rounded-lg relative">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <ImageIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">Generated visualization will appear here</p>
+                    {uploadedImage ? (
+                      <img 
+                        src={uploadedImage} 
+                        alt="Generated visualization" 
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                          <ImageIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                          <p className="text-muted-foreground">Generated visualization will appear here</p>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                   
                   <div className="mt-4 space-y-3">
