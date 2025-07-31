@@ -790,16 +790,6 @@ function App() {
                   
                   <TabsContent value="describe" className="space-y-4">
                     <ItemDescriptionInput />
-                    
-                    <div className="bg-muted/50 p-4 rounded-lg">
-                      <p className="text-sm text-muted-foreground">
-                        <strong>Tip:</strong> Be specific about colors, materials, and style. 
-                        The more details you provide, the better the AI can match your vision.
-                      </p>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="upload" className="space-y-4">
                     <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
                       <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
                       <p className="font-medium mb-1">Upload product photo</p>
@@ -844,17 +834,7 @@ function App() {
                       size="sm"
                       onClick={() => setStyleDescription(style)}
                       className="text-sm"
-                    >
-                      {style}
-                    </Button>
-                  ))}
-                </div>
-                
-                <Button 
-                  className="w-full" 
-                  size="lg"
-                  disabled={!uploadedImage || !styleDescription.trim()}
-                >
+                <StyleDescriptionInput />
                   <Sparkles className="w-4 h-4 mr-2" />
                   Generate Style Concepts
                 </Button>
@@ -917,16 +897,7 @@ function App() {
                       { name: 'Wooden Coffee Table', price: '$449', store: 'CB2' },
                       { name: 'Floor Lamp', price: '$189', store: 'IKEA' }
                     ].map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-muted rounded"></div>
-                          <div>
-                            <p className="font-medium">{item.name}</p>
-                            <p className="text-sm text-muted-foreground">{item.store}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold">{item.price}</p>
+                    <RefinementInput />3 border rounded-lg">
                           <Button size="sm" className="mt-1">
                             <ShoppingBag className="w-3 h-3 mr-1" />
                             Buy
@@ -985,7 +956,7 @@ function App() {
       document.addEventListener('keydown', handleKeyDown)
       return () => document.removeEventListener('keydown', handleKeyDown)
     }, [selectedTransformation])
-
+  ))
     const galleryItems = [
       {
         id: '1',
