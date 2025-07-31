@@ -888,7 +888,7 @@ function App() {
                       <Input
                         id="refinement"
                         value={refinementInput}
-                        onChange={(e) => setRefinementInput(e.target.value)}
+                        placeholder="e.g., Make the sofa darker blue, add a coffee table"
                         placeholder="e.g., Make the sofa darker blue, add a coffee table"
                         autoComplete="off"
                       />
