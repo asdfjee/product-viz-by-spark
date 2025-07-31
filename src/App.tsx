@@ -560,7 +560,6 @@ function App() {
             <div className="space-y-2">
               <Label htmlFor="project-name">Project Name</Label>
               <Input
-                id="project-name"
                 value={localProjectForm.name}
                 onChange={(e) => setLocalProjectForm(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="e.g., Living Room Makeover"
