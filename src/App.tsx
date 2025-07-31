@@ -834,7 +834,17 @@ function App() {
                       size="sm"
                       onClick={() => setStyleDescription(style)}
                       className="text-sm"
-                <StyleDescriptionInput />
+                    >
+                      {style}
+                    </Button>
+                  ))}
+                </div>
+                
+                <Button 
+                  className="w-full" 
+                  size="lg"
+                  disabled={!uploadedImage || !styleDescription.trim()}
+                >
                   <Sparkles className="w-4 h-4 mr-2" />
                   Generate Style Concepts
                 </Button>
@@ -897,7 +907,16 @@ function App() {
                       { name: 'Wooden Coffee Table', price: '$449', store: 'CB2' },
                       { name: 'Floor Lamp', price: '$189', store: 'IKEA' }
                     ].map((item, index) => (
-                    <RefinementInput />3 border rounded-lg">
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-muted rounded"></div>
+                          <div>
+                            <p className="font-medium text-sm">{item.name}</p>
+                            <p className="text-xs text-muted-foreground">{item.store}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-sm">{item.price}</p>
                           <Button size="sm" className="mt-1">
                             <ShoppingBag className="w-3 h-3 mr-1" />
                             Buy
@@ -956,7 +975,6 @@ function App() {
       document.addEventListener('keydown', handleKeyDown)
       return () => document.removeEventListener('keydown', handleKeyDown)
     }, [selectedTransformation])
-  ))
     const galleryItems = [
       {
         id: '1',
