@@ -625,8 +625,50 @@ function App() {
     </div>
   )
 
+  // Memoized input components to prevent re-renders
+  const ItemDescriptionInput = React.memo(() => (
+    <div className="space-y-2">
+      <Label htmlFor="item-description">Describe the item you want to add</Label>
+      <Textarea
+        id="item-description"
+        value={itemDescription}
+        onChange={(e) => setItemDescription(e.target.value)}
+        placeholder="e.g., A modern gray sectional sofa with clean lines and metal legs"
+        rows={4}
+        autoComplete="off"
+      />
+    </div>
+  ))
+
+  const StyleDescriptionInput = React.memo(() => (
+    <div className="space-y-2">
+      <Label htmlFor="style-description">Describe your desired style or vibe</Label>
+      <Textarea
+        id="style-description"
+        value={styleDescription}
+        onChange={(e) => setStyleDescription(e.target.value)}
+        placeholder="e.g., Cozy Scandinavian living room with warm textures and natural wood accents"
+        rows={4}
+        autoComplete="off"
+      />
+    </div>
+  ))
+
+  const RefinementInput = React.memo(() => (
+    <div className="space-y-2">
+      <Label htmlFor="refinement">Refine with text commands</Label>
+      <Input
+        id="refinement"
+        value={refinementInput}
+        onChange={(e) => setRefinementInput(e.target.value)}
+        placeholder="e.g., Make the sofa darker blue, add a coffee table"
+        autoComplete="off"
+      />
+    </div>
+  ))
+
   // Workspace Component (Visualization Interface)
-  const VisualizationWorkspace = () => (
+  const VisualizationWorkspace = React.memo(() => (
     <div className="min-h-screen bg-background">
       <Header />
       
@@ -747,17 +789,7 @@ function App() {
                   </TabsList>
                   
                   <TabsContent value="describe" className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="item-description">Describe the item you want to add</Label>
-                      <Textarea
-                        id="item-description"
-                        value={itemDescription}
-                        onChange={(e) => setItemDescription(e.target.value)}
-                        placeholder="e.g., A modern gray sectional sofa with clean lines and metal legs"
-                        rows={4}
-                        autoComplete="off"
-                      />
-                    </div>
+                    <ItemDescriptionInput />
                     
                     <div className="bg-muted/50 p-4 rounded-lg">
                       <p className="text-sm text-muted-foreground">
@@ -802,17 +834,7 @@ function App() {
               </CardHeader>
               
               <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="style-description">Describe your desired style or vibe</Label>
-                  <Textarea
-                    id="style-description"
-                    value={styleDescription}
-                    onChange={(e) => setStyleDescription(e.target.value)}
-                    placeholder="e.g., Cozy Scandinavian living room with warm textures and natural wood accents"
-                    rows={4}
-                    autoComplete="off"
-                  />
-                </div>
+                <StyleDescriptionInput />
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {['Modern Minimalist', 'Cozy Farmhouse', 'Mid-Century Modern', 'Bohemian Chic'].map((style) => (
@@ -875,16 +897,7 @@ function App() {
                     
                     <Separator />
                     
-                    <div className="space-y-2">
-                      <Label htmlFor="refinement">Refine with text commands</Label>
-                      <Input
-                        id="refinement"
-                        value={refinementInput}
-                        onChange={(e) => setRefinementInput(e.target.value)}
-                        placeholder="e.g., Make the sofa darker blue, add a coffee table"
-                        autoComplete="off"
-                      />
-                    </div>
+                    <RefinementInput />
                   </div>
                 </CardContent>
               </Card>
@@ -943,7 +956,7 @@ function App() {
       
       <Footer />
     </div>
-  )
+  ))
 
   // Gallery Page Component
   const GalleryPage = () => {
