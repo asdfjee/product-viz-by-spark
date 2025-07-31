@@ -729,7 +729,14 @@ function App() {
               </CardHeader>
               
               <CardContent>
-                <div className="border-2 border-dashed border-border rounded-lg p-12 text-center hover:border-accent/50 transition-colors cursor-pointer group">
+                <div 
+                  className="border-2 border-dashed border-border rounded-lg p-12 text-center hover:border-accent/50 transition-colors cursor-pointer group"
+                  onClick={() => {
+                    // Simulate file upload for demo purposes
+                    setUploadedImage('demo-image-placeholder')
+                    toast.success('Room photo uploaded successfully!')
+                  }}
+                >
                   <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4 group-hover:text-accent transition-colors" />
                   <div className="space-y-2">
                     <p className="text-lg font-medium">Drop your room photo here</p>
@@ -790,7 +797,13 @@ function App() {
                   
                   <TabsContent value="describe" className="space-y-4">
                     <ItemDescriptionInput />
-                    <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+                    <div 
+                      className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-accent/50 transition-colors"
+                      onClick={() => {
+                        // Simulate file upload for demo purposes
+                        toast.success('Product photo uploaded successfully!')
+                      }}
+                    >
                       <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
                       <p className="font-medium mb-1">Upload product photo</p>
                       <p className="text-sm text-muted-foreground">Drop image or click to browse</p>
@@ -802,6 +815,13 @@ function App() {
                   className="w-full" 
                   size="lg"
                   disabled={!uploadedImage || !itemDescription.trim()}
+                  onClick={() => {
+                    if (uploadedImage && itemDescription.trim()) {
+                      toast.success('Generating visualization... This may take a few moments.')
+                      // In a real app, this would trigger AI generation
+                      setWorkspaceTab('refine')
+                    }
+                  }}
                 >
                   <Wand2 className="w-4 h-4 mr-2" />
                   Generate Visualization
@@ -844,6 +864,13 @@ function App() {
                   className="w-full" 
                   size="lg"
                   disabled={!uploadedImage || !styleDescription.trim()}
+                  onClick={() => {
+                    if (uploadedImage && styleDescription.trim()) {
+                      toast.success('Generating style concepts... This may take a few moments.')
+                      // In a real app, this would trigger AI generation
+                      setWorkspaceTab('refine')
+                    }
+                  }}
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
                   Generate Style Concepts
