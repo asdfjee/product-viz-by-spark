@@ -671,7 +671,6 @@ function App() {
 
       <div className="container mx-auto px-6 py-8">
         <Tabs 
-          value={workspaceTab} 
           onValueChange={setWorkspaceTab} 
           className="w-full"
         >
@@ -684,7 +683,7 @@ function App() {
           
           {/* Upload Scene Tab */}
           <TabsContent value="upload" className="space-y-6">
-            <Card>
+          <TabsContent value="upload" className="space-y-6">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Camera className="w-5 h-5" />
@@ -815,7 +814,6 @@ function App() {
                   <Label htmlFor="style-description">Describe your desired style or vibe</Label>
                   <Textarea
                     id="style-description"
-                    value={styleDescription}
                     onChange={(e) => setStyleDescription(e.target.value)}
                     placeholder="e.g., Cozy Scandinavian living room with warm textures and natural wood accents"
                     rows={4}
@@ -889,7 +887,6 @@ function App() {
                       <Input
                         id="refinement"
                         value={refinementInput}
-                        onChange={(e) => setRefinementInput(e.target.value)}
                         placeholder="e.g., Make the sofa darker blue, add a coffee table"
                         autoComplete="off"
                       />
