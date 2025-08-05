@@ -1688,19 +1688,28 @@ function App() {
                             <CardDescription className="text-xs">
                               Key design features in this transformation
                             </CardDescription>
-                            <CardTitle className="text-base">Design Elements</CardTitle>
+                          </CardHeader>
                           <CardContent>
-                              Key design features in this transformation
-                              {(selectedTransformation.keyFeatures || ['Modern Furniture', 'Natural Light', 'Neutral Palette', 'Clean Lines']).map((feature, index) => (
-                                <div key={index} className="flex items-center p-2 border rounded-md bg-muted/30">
-                                  <div className="w-6 h-6 bg-accent/20 rounded-sm mr-3 flex items-center justify-center">
                             <div className="space-y-2">
                               {(selectedTransformation.keyFeatures || ['Modern Furniture', 'Natural Light', 'Neutral Palette', 'Clean Lines']).map((feature, index) => (
                                 <div key={index} className="flex items-center p-2 border rounded-md bg-muted/30">
                                   <div className="w-6 h-6 bg-accent/20 rounded-sm mr-3 flex items-center justify-center">
                                     <Check className="w-3 h-3 text-accent" />
-                          </CardHeader>
+                                  </div>
                                   <p className="text-sm font-medium">{feature}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        {/* Get Inspired */}
+                        <Card className="border-0 shadow-sm">
+                          <CardHeader className="pb-3">
+                            <CardTitle className="text-base">Get Inspired</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <Button className="w-full" variant="outline">
                               Save Inspiration
                             </Button>
                           </CardContent>
@@ -1710,10 +1719,14 @@ function App() {
                   </div>
                 </div>
               </div>
-                            <CardTitle className="text-base">Get Inspired</CardTitle>
+            )}
           </DialogContent>
         </Dialog>
 
+        {/* CTA Section */}
+        <div className="bg-accent text-accent-foreground rounded-lg p-8 text-center mt-20">
+          <div className="container mx-auto px-6">
+            <h3 className="text-2xl font-bold mb-4">Ready to Transform Your Space?</h3>
             <p className="text-xl mb-8 opacity-90">
               Join thousands of users who have redesigned their homes with AI
             </p>
@@ -1811,12 +1824,12 @@ function App() {
                       1
                     </div>
                     <h3 className="text-xl font-bold">Upload Your Space</h3>
-                <Download className="w-8 h-8 text-accent" />
+                  </div>
                   <p className="text-muted-foreground">
-              <h3 className="text-xl font-bold mb-4">Export & Share</h3>
+                    Simply take a photo of your room and upload it. Our AI analyzes 
                     the lighting, dimensions, and existing elements to understand your space.
-                Download high-resolution images and share your designs with friends, 
-                family, or save them for future reference.
+                  </p>
+                </div>
                 <div className="w-full md:w-80 h-48 bg-muted rounded-lg flex items-center justify-center">
                   <Camera className="w-12 h-12 text-muted-foreground" />
                 </div>
