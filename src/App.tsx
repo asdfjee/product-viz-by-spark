@@ -1563,10 +1563,6 @@ function App() {
                       <Download className="w-4 h-4 mr-2" />
                       Download
                     </Button>
-                    <div className="text-xs text-muted-foreground ml-2 hidden lg:block">
-                      Press 1-3 to change view • ESC to close
-                    </div>
-                  </div>
                 </div>
 
                 {/* Main Comparison Area */}
@@ -1692,33 +1688,19 @@ function App() {
                             <CardDescription className="text-xs">
                               Key design features in this transformation
                             </CardDescription>
-                          </CardHeader>
+                            <CardTitle className="text-base">Design Elements</CardTitle>
                           <CardContent>
+                              Key design features in this transformation
+                              {(selectedTransformation.keyFeatures || ['Modern Furniture', 'Natural Light', 'Neutral Palette', 'Clean Lines']).map((feature, index) => (
+                                <div key={index} className="flex items-center p-2 border rounded-md bg-muted/30">
+                                  <div className="w-6 h-6 bg-accent/20 rounded-sm mr-3 flex items-center justify-center">
                             <div className="space-y-2">
                               {(selectedTransformation.keyFeatures || ['Modern Furniture', 'Natural Light', 'Neutral Palette', 'Clean Lines']).map((feature, index) => (
                                 <div key={index} className="flex items-center p-2 border rounded-md bg-muted/30">
                                   <div className="w-6 h-6 bg-accent/20 rounded-sm mr-3 flex items-center justify-center">
                                     <Check className="w-3 h-3 text-accent" />
-                                  </div>
-                                  <p className="text-sm font-medium">{feature}</p>
-                                </div>
-                              ))}
-                            </div>
-                          </CardContent>
-                        </Card>
-
-                        {/* Actions */}
-                        <Card className="border-0 shadow-sm">
-                          <CardHeader className="pb-3">
-                            <CardTitle className="text-base">Get Inspired</CardTitle>
                           </CardHeader>
-                          <CardContent className="space-y-2">
-                            <Button className="w-full h-9 text-sm">
-                              <Sparkles className="w-4 h-4 mr-2" />
-                              Create Similar Design
-                            </Button>
-                            <Button variant="outline" className="w-full h-9 text-sm">
-                              <Download className="w-4 h-4 mr-2" />
+                                  <p className="text-sm font-medium">{feature}</p>
                               Save Inspiration
                             </Button>
                           </CardContent>
@@ -1728,14 +1710,10 @@ function App() {
                   </div>
                 </div>
               </div>
-            )}
+                            <CardTitle className="text-base">Get Inspired</CardTitle>
           </DialogContent>
         </Dialog>
 
-        {/* CTA Section */}
-        <div className="bg-accent text-accent-foreground py-16">
-          <div className="container mx-auto px-6 text-center">
-            <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Space?</h2>
             <p className="text-xl mb-8 opacity-90">
               Join thousands of users who have redesigned their homes with AI
             </p>
@@ -1833,12 +1811,12 @@ function App() {
                       1
                     </div>
                     <h3 className="text-xl font-bold">Upload Your Space</h3>
-                  </div>
+                <Download className="w-8 h-8 text-accent" />
                   <p className="text-muted-foreground">
-                    Simply take a photo of your room using your phone or camera. Our AI analyzes 
+              <h3 className="text-xl font-bold mb-4">Export & Share</h3>
                     the lighting, dimensions, and existing elements to understand your space.
-                  </p>
-                </div>
+                Download high-resolution images and share your designs with friends, 
+                family, or save them for future reference.
                 <div className="w-full md:w-80 h-48 bg-muted rounded-lg flex items-center justify-center">
                   <Camera className="w-12 h-12 text-muted-foreground" />
                 </div>
