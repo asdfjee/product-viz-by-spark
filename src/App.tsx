@@ -1563,6 +1563,7 @@ function App() {
                       <Download className="w-4 h-4 mr-2" />
                       Download
                     </Button>
+                  </div>
                 </div>
 
                 {/* Main Comparison Area */}
