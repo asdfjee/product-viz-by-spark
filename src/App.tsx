@@ -16,7 +16,6 @@ import {
   Upload, 
   ArrowRight, 
   Palette, 
-  ShoppingBag, 
   Lightbulb,
   Star,
   Play,
@@ -492,13 +491,13 @@ function App() {
           >
             <CardHeader>
               <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-accent/20 transition-colors">
-                <ShoppingBag className="w-8 h-8 text-accent" />
+                <Download className="w-8 h-8 text-accent" />
               </div>
-              <CardTitle className="text-xl">Shop Your Look</CardTitle>
+              <CardTitle className="text-xl">Export Your Design</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                See realistic results and shop for every item directly. Make your vision reality.
+                Download high-resolution images and videos of your transformed space to share or save.
               </p>
               <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button variant="outline" size="sm">
@@ -764,11 +763,10 @@ function App() {
           onValueChange={setWorkspaceTab} 
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="upload">Upload Scene</TabsTrigger>
             <TabsTrigger value="specific">Specific Item</TabsTrigger>
             <TabsTrigger value="style">Style Brainstorm</TabsTrigger>
-            <TabsTrigger value="refine">Refine & Shop</TabsTrigger>
           </TabsList>
           
           {/* Upload Scene Tab */}
@@ -904,9 +902,7 @@ function App() {
                         // For now, we'll simulate the process
                         await new Promise(resolve => setTimeout(resolve, 3000))
                         
-                        // Navigate to refine tab to show results
-                        setWorkspaceTab('refine')
-                        
+                        // Show success and stay on current tab
                         toast.success('Visualization generated successfully!')
                       } catch (error) {
                         toast.error('Failed to generate visualization. Please try again.')
@@ -975,9 +971,7 @@ function App() {
                         // For now, we'll simulate the process
                         await new Promise(resolve => setTimeout(resolve, 3000))
                         
-                        // Navigate to refine tab to show results
-                        setWorkspaceTab('refine')
-                        
+                        // Show success and stay on current tab
                         toast.success('Style concepts generated successfully!')
                       } catch (error) {
                         toast.error('Failed to generate style concepts. Please try again.')
@@ -1001,102 +995,146 @@ function App() {
             </Card>
           </TabsContent>
           
-          {/* Refine & Shop Tab */}
-          <TabsContent value="refine" className="space-y-6">
-            <div className="grid lg:grid-cols-2 gap-6">
+          {/* Generated Results Display */}
+          <TabsContent value="upload" className="space-y-6">
+            {uploadedImage && (
               <Card>
                 <CardHeader>
                   <CardTitle>Generated Visualization</CardTitle>
                   <CardDescription>
-                    Your AI-generated room design. Use the controls below to refine and adjust.
+                    Your AI-generated room design based on the uploaded photo.
                   </CardDescription>
                 </CardHeader>
                 
                 <CardContent>
-                  <div className="aspect-video bg-muted rounded-lg relative">
-                    {uploadedImage ? (
+                  <div className="grid lg:grid-cols-2 gap-6">
+                    <div className="aspect-video bg-muted rounded-lg relative">
                       <img 
                         src={uploadedImage} 
                         alt="Generated visualization" 
                         className="w-full h-full object-cover rounded-lg"
                       />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-center">
-                          <ImageIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                          <p className="text-muted-foreground">Generated visualization will appear here</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="mt-4 space-y-3">
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <RefreshCw className="w-3 h-3 mr-2" />
-                        Regenerate
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Download className="w-3 h-3 mr-2" />
-                        Download
-                      </Button>
                     </div>
                     
-                    <Separator />
-                    
-                    <RefinementInput />
+                    <div className="space-y-4">
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">
+                          <RefreshCw className="w-3 h-3 mr-2" />
+                          Regenerate
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Download className="w-3 h-3 mr-2" />
+                          Download
+                        </Button>
+                      </div>
+                      
+                      <Separator />
+                      
+                      <RefinementInput />
+                      
+                      <Button className="w-full">
+                        <Wand2 className="w-4 h-4 mr-2" />
+                        Apply Changes
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-              
+            )}
+          </TabsContent>
+          
+          <TabsContent value="specific" className="space-y-6">
+            {uploadedImage && itemDescription && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Shop This Look</CardTitle>
+                  <CardTitle>Generated Visualization</CardTitle>
                   <CardDescription>
-                    Browse and purchase the items from your visualization.
+                    Your AI-generated room with the specific item added.
                   </CardDescription>
                 </CardHeader>
                 
                 <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { name: 'Modern Gray Sectional', price: '$1,299', store: 'West Elm' },
-                      { name: 'Wooden Coffee Table', price: '$449', store: 'CB2' },
-                      { name: 'Floor Lamp', price: '$189', store: 'IKEA' }
-                    ].map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-muted rounded"></div>
-                          <div>
-                            <p className="font-medium text-sm">{item.name}</p>
-                            <p className="text-xs text-muted-foreground">{item.store}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-sm">{item.price}</p>
-                          <Button size="sm" className="mt-1">
-                            <ShoppingBag className="w-3 h-3 mr-1" />
-                            Buy
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    <Separator />
-                    
-                    <div className="flex justify-between items-center font-bold text-lg">
-                      <span>Total:</span>
-                      <span>$1,937</span>
+                  <div className="grid lg:grid-cols-2 gap-6">
+                    <div className="aspect-video bg-muted rounded-lg relative">
+                      <img 
+                        src={uploadedImage} 
+                        alt="Generated visualization" 
+                        className="w-full h-full object-cover rounded-lg"
+                      />
                     </div>
                     
-                    <Button className="w-full" size="lg">
-                      <ShoppingBag className="w-4 h-4 mr-2" />
-                      Shop Complete Look
-                    </Button>
+                    <div className="space-y-4">
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">
+                          <RefreshCw className="w-3 h-3 mr-2" />
+                          Regenerate
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Download className="w-3 h-3 mr-2" />
+                          Download
+                        </Button>
+                      </div>
+                      
+                      <Separator />
+                      
+                      <RefinementInput />
+                      
+                      <Button className="w-full">
+                        <Wand2 className="w-4 h-4 mr-2" />
+                        Apply Changes
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="style" className="space-y-6">
+            {uploadedImage && styleDescription && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Generated Style Concepts</CardTitle>
+                  <CardDescription>
+                    Your AI-generated room design with the requested style.
+                  </CardDescription>
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="grid lg:grid-cols-2 gap-6">
+                    <div className="aspect-video bg-muted rounded-lg relative">
+                      <img 
+                        src={uploadedImage} 
+                        alt="Generated visualization" 
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">
+                          <RefreshCw className="w-3 h-3 mr-2" />
+                          Regenerate
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Download className="w-3 h-3 mr-2" />
+                          Download
+                        </Button>
+                      </div>
+                      
+                      <Separator />
+                      
+                      <RefinementInput />
+                      
+                      <Button className="w-full">
+                        <Wand2 className="w-4 h-4 mr-2" />
+                        Apply Changes
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>
@@ -1142,12 +1180,7 @@ function App() {
         description: 'A complete makeover featuring contemporary furniture and warm lighting',
         style: 'Modern Minimalist',
         room: 'Living Room',
-        keyFeatures: ['Modern Furniture', 'Natural Light', 'Neutral Palette', 'Clean Lines'],
-        items: [
-          { name: 'Modern Sectional Sofa', price: '$1,299', brand: 'West Elm' },
-          { name: 'Glass Coffee Table', price: '$449', brand: 'CB2' },
-          { name: 'Floor Lamp', price: '$189', brand: 'IKEA' }
-        ]
+        keyFeatures: ['Modern Furniture', 'Natural Light', 'Neutral Palette', 'Clean Lines']
       },
       {
         id: '2',
@@ -1158,12 +1191,7 @@ function App() {
         description: 'Cozy bedroom design with natural textures and clean lines',
         style: 'Scandinavian',
         room: 'Bedroom',
-        keyFeatures: ['Natural Textures', 'Hygge Vibes', 'Light Woods', 'Minimal Clutter'],
-        items: [
-          { name: 'Platform Bed Frame', price: '$899', brand: 'MUJI' },
-          { name: 'Wool Throw Blanket', price: '$129', brand: 'Parachute' },
-          { name: 'Bedside Table', price: '$299', brand: 'HAY' }
-        ]
+        keyFeatures: ['Natural Textures', 'Hygge Vibes', 'Light Woods', 'Minimal Clutter']
       },
       {
         id: '3',
@@ -1174,12 +1202,7 @@ function App() {
         description: 'Bold kitchen featuring exposed elements and modern appliances',
         style: 'Industrial',
         room: 'Kitchen',
-        keyFeatures: ['Exposed Brick', 'Metal Accents', 'Open Shelving', 'Dark Palette'],
-        items: [
-          { name: 'Industrial Bar Stools', price: '$349', brand: 'Restoration Hardware' },
-          { name: 'Pendant Light Fixtures', price: '$229', brand: 'CB2' },
-          { name: 'Open Shelving Unit', price: '$399', brand: 'West Elm' }
-        ]
+        keyFeatures: ['Exposed Brick', 'Metal Accents', 'Open Shelving', 'Dark Palette']
       },
       {
         id: '4',
@@ -1190,12 +1213,7 @@ function App() {
         description: 'Eclectic dining space with vibrant colors and mixed textures',
         style: 'Bohemian',
         room: 'Dining Room',
-        keyFeatures: ['Mixed Patterns', 'Vibrant Colors', 'Vintage Pieces', 'Global Textiles'],
-        items: [
-          { name: 'Moroccan Dining Table', price: '$799', brand: 'World Market' },
-          { name: 'Mixed Dining Chairs', price: '$199', brand: 'Anthropologie' },
-          { name: 'Persian Area Rug', price: '$549', brand: 'Rugs USA' }
-        ]
+        keyFeatures: ['Mixed Patterns', 'Vibrant Colors', 'Vintage Pieces', 'Global Textiles']
       },
       {
         id: '5',
@@ -1206,12 +1224,7 @@ function App() {
         description: 'Productive workspace with vintage-inspired furniture',
         style: 'Mid-Century Modern',
         room: 'Office',
-        keyFeatures: ['Vintage Style', 'Rich Woods', 'Geometric Patterns', 'Bold Colors'],
-        items: [
-          { name: 'Walnut Desk', price: '$1,199', brand: 'Article' },
-          { name: 'Ergonomic Office Chair', price: '$459', brand: 'Herman Miller' },
-          { name: 'Geometric Bookshelf', price: '$399', brand: 'Design Within Reach' }
-        ]
+        keyFeatures: ['Vintage Style', 'Rich Woods', 'Geometric Patterns', 'Bold Colors']
       },
       {
         id: '6',
@@ -1222,12 +1235,7 @@ function App() {
         description: 'Rustic charm meets modern comfort in this inviting space',
         style: 'Farmhouse',
         room: 'Living Room',
-        keyFeatures: ['Rustic Woods', 'Neutral Tones', 'Vintage Accents', 'Cozy Textiles'],
-        items: [
-          { name: 'Reclaimed Wood Coffee Table', price: '$649', brand: 'Pottery Barn' },
-          { name: 'Linen Sectional Sofa', price: '$1,499', brand: 'Restoration Hardware' },
-          { name: 'Vintage Table Lamps', price: '$229', brand: 'Wayfair' }
-        ]
+        keyFeatures: ['Rustic Woods', 'Neutral Tones', 'Vintage Accents', 'Cozy Textiles']
       },
       {
         id: '7',
@@ -1238,12 +1246,7 @@ function App() {
         description: 'Clean lines and neutral tones create a peaceful retreat',
         style: 'Modern Minimalist',
         room: 'Bedroom',
-        keyFeatures: ['Clean Lines', 'Neutral Palette', 'Quality Materials', 'Functional Design'],
-        items: [
-          { name: 'Platform Bed', price: '$999', brand: 'Floyd' },
-          { name: 'Organic Cotton Bedding', price: '$199', brand: 'Brooklinen' },
-          { name: 'Minimalist Nightstand', price: '$349', brand: 'Blu Dot' }
-        ]
+        keyFeatures: ['Clean Lines', 'Neutral Palette', 'Quality Materials', 'Functional Design']
       },
       {
         id: '8',
@@ -1254,12 +1257,7 @@ function App() {
         description: 'Farmhouse elements meet modern functionality',
         style: 'Farmhouse',
         room: 'Kitchen',
-        keyFeatures: ['Shaker Cabinets', 'Butcher Block', 'Vintage Hardware', 'Subway Tile'],
-        items: [
-          { name: 'Farmhouse Sink', price: '$799', brand: 'Kohler' },
-          { name: 'Butcher Block Island', price: '$1,299', brand: 'IKEA' },
-          { name: 'Vintage Pendant Lights', price: '$179', brand: 'Rejuvenation' }
-        ]
+        keyFeatures: ['Shaker Cabinets', 'Butcher Block', 'Vintage Hardware', 'Subway Tile']
       },
       {
         id: '9',
@@ -1270,12 +1268,7 @@ function App() {
         description: 'Sleek design perfect for entertaining guests',
         style: 'Modern Minimalist',
         room: 'Dining Room',
-        keyFeatures: ['Sleek Design', 'Statement Lighting', 'Quality Materials', 'Entertainment Ready'],
-        items: [
-          { name: 'Live Edge Dining Table', price: '$1,899', brand: 'Room & Board' },
-          { name: 'Modern Dining Chairs', price: '$299', brand: 'Design Within Reach' },
-          { name: 'Statement Chandelier', price: '$699', brand: 'West Elm' }
-        ]
+        keyFeatures: ['Sleek Design', 'Statement Lighting', 'Quality Materials', 'Entertainment Ready']
       }
     ]
 
@@ -1463,9 +1456,6 @@ function App() {
                       </Button>
                       <div className="flex items-center gap-2">
                         <Button variant="ghost" size="sm">
-                          <ShoppingBag className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
                           <Download className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1572,10 +1562,6 @@ function App() {
                     <Button variant="outline" size="sm">
                       <Download className="w-4 h-4 mr-2" />
                       Download
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <ShoppingBag className="w-4 h-4 mr-2" />
-                      Shop Look
                     </Button>
                     <div className="text-xs text-muted-foreground ml-2 hidden lg:block">
                       Press 1-3 to change view • ESC to close
@@ -1702,33 +1688,19 @@ function App() {
                         {/* Featured Items */}
                         <Card className="border-0 shadow-sm">
                           <CardHeader className="pb-3">
-                            <CardTitle className="text-base">Featured Items</CardTitle>
+                            <CardTitle className="text-base">Design Elements</CardTitle>
                             <CardDescription className="text-xs">
-                              Key pieces from this transformation
+                              Key design features in this transformation
                             </CardDescription>
                           </CardHeader>
                           <CardContent>
-                            <div className="space-y-3">
-                              {(selectedTransformation.items || [
-                                { name: 'Modern Sectional Sofa', price: '$1,299', brand: 'West Elm' },
-                                { name: 'Glass Coffee Table', price: '$449', brand: 'CB2' },
-                                { name: 'Floor Lamp', price: '$189', brand: 'IKEA' }
-                              ]).map((item, index) => (
-                                <div key={index} className="flex items-center justify-between p-3 border rounded-md hover:bg-muted/30 transition-colors">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-muted rounded"></div>
-                                    <div>
-                                      <p className="font-medium text-xs">{item.name}</p>
-                                      <p className="text-xs text-muted-foreground">{item.brand}</p>
-                                    </div>
+                            <div className="space-y-2">
+                              {(selectedTransformation.keyFeatures || ['Modern Furniture', 'Natural Light', 'Neutral Palette', 'Clean Lines']).map((feature, index) => (
+                                <div key={index} className="flex items-center p-2 border rounded-md bg-muted/30">
+                                  <div className="w-6 h-6 bg-accent/20 rounded-sm mr-3 flex items-center justify-center">
+                                    <Check className="w-3 h-3 text-accent" />
                                   </div>
-                                  <div className="text-right">
-                                    <p className="font-bold text-xs">{item.price}</p>
-                                    <Button size="sm" variant="outline" className="mt-1 h-6 px-2 text-xs">
-                                      <ShoppingBag className="w-3 h-3 mr-1" />
-                                      Buy
-                                    </Button>
-                                  </div>
+                                  <p className="text-sm font-medium">{feature}</p>
                                 </div>
                               ))}
                             </div>
@@ -1738,14 +1710,10 @@ function App() {
                         {/* Actions */}
                         <Card className="border-0 shadow-sm">
                           <CardHeader className="pb-3">
-                            <CardTitle className="text-base">Get This Look</CardTitle>
+                            <CardTitle className="text-base">Get Inspired</CardTitle>
                           </CardHeader>
                           <CardContent className="space-y-2">
                             <Button className="w-full h-9 text-sm">
-                              <ShoppingBag className="w-4 h-4 mr-2" />
-                              Shop Complete Look
-                            </Button>
-                            <Button variant="outline" className="w-full h-9 text-sm">
                               <Sparkles className="w-4 h-4 mr-2" />
                               Create Similar Design
                             </Button>
@@ -1843,12 +1811,12 @@ function App() {
 
             <Card className="text-center p-8 border-0 shadow-lg">
               <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <ShoppingBag className="w-8 h-8 text-accent" />
+                <Download className="w-8 h-8 text-accent" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Instant Shopping</h3>
+              <h3 className="text-xl font-bold mb-4">Export & Share</h3>
               <p className="text-muted-foreground">
-                Seamlessly purchase any item from your design with direct links 
-                to trusted retailers and real-time pricing.
+                Download high-resolution images and share your designs with friends, 
+                family, or save them for future reference.
               </p>
             </Card>
           </div>
@@ -1900,15 +1868,15 @@ function App() {
                     <div className="w-10 h-10 bg-accent text-accent-foreground rounded-full flex items-center justify-center font-bold">
                       3
                     </div>
-                    <h3 className="text-xl font-bold">See & Shop Results</h3>
+                    <h3 className="text-xl font-bold">Export & Share Results</h3>
                   </div>
                   <p className="text-muted-foreground">
-                    Receive realistic visualizations of your redesigned space and instantly shop 
-                    for every item with real products from trusted retailers.
+                    Download high-resolution visualizations of your redesigned space and 
+                    share your creations with others for inspiration.
                   </p>
                 </div>
                 <div className="w-full md:w-80 h-48 bg-muted rounded-lg flex items-center justify-center">
-                  <ShoppingBag className="w-12 h-12 text-muted-foreground" />
+                  <Download className="w-12 h-12 text-muted-foreground" />
                 </div>
               </div>
             </div>
