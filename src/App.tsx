@@ -696,9 +696,10 @@ function App() {
         placeholder="e.g., A modern gray sectional sofa with clean lines and metal legs"
         rows={4}
         autoComplete="off"
+        key="item-description-input"
       />
     </div>
-  ))
+  ), [itemDescription])
 
   const StyleDescriptionInput = React.memo(() => (
     <div className="space-y-2">
@@ -710,9 +711,10 @@ function App() {
         placeholder="e.g., Cozy Scandinavian living room with warm textures and natural wood accents"
         rows={4}
         autoComplete="off"
+        key="style-description-input"
       />
     </div>
-  ))
+  ), [styleDescription])
 
   // Submit request helper function
   const submitVisualizationRequest = async (type: 'specific-item' | 'style-brainstorm') => {
@@ -788,12 +790,13 @@ function App() {
         placeholder="your@email.com"
         autoComplete="email"
         required
+        key="customer-email-input"
       />
       <p className="text-xs text-muted-foreground">
         We'll send your visualization results to this email within 3-5 business days.
       </p>
     </div>
-  ))
+  ), [customerEmail])
 
   // Workspace Component (Visualization Interface)
   const VisualizationWorkspace = React.memo(() => (
@@ -835,6 +838,7 @@ function App() {
           value={workspaceTab}
           onValueChange={setWorkspaceTab} 
           className="w-full"
+          key="workspace-tabs"
         >
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="specific">Specific Item</TabsTrigger>
