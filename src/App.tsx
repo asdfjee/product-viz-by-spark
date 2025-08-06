@@ -1423,7 +1423,7 @@ function App() {
                       <span>•</span>
                       <div className="flex items-center">
                         <Star className="w-3 h-3 mr-1 fill-current text-accent" />
-                        <span>Featured</span>
+                        <span>{item.id === '3' ? 'Featured Design' : 'Featured'}</span>
                       </div>
                     </div>
                     
