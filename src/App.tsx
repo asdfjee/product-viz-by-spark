@@ -794,7 +794,7 @@ function App() {
       </p>
     </div>
   )
-  )
+  
   // Workspace Component (Visualization Interface)
   const VisualizationWorkspace = () => (
     <div className="min-h-screen bg-background">
