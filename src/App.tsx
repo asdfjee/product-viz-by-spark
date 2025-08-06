@@ -43,18 +43,18 @@ interface Project {
   description: string
   createdAt: string
   thumbnail?: string
-  visualizations: Visualization[]
+  visualizationRequests: VisualizationRequest[]
 }
 
-interface Visualization {
+interface VisualizationRequest {
   id: string
   type: 'specific-item' | 'style-brainstorm'
   originalImage: string
-  generatedImage?: string
   description: string
   createdAt: string
-  status: 'uploading' | 'processing' | 'completed' | 'error'
-  progress: number
+  status: 'submitted' | 'processing' | 'completed' | 'delivered'
+  customerEmail: string
+  estimatedDelivery: string
 }
 
 // Mock data for demonstration
@@ -146,14 +146,14 @@ function App() {
   // User data persistence
   const [user, setUser] = useKV('user-profile', null)
   const [projects, setProjects, deleteProjects] = useKV<Project[]>('user-projects', [])
-  const [currentVisualization, setCurrentVisualization] = useState<Visualization | null>(null)
+  const [currentRequest, setCurrentRequest] = useState<VisualizationRequest | null>(null)
 
   // Form states - using useState for smooth typing experience
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [itemDescription, setItemDescription] = useState('')
   const [styleDescription, setStyleDescription] = useState('')
-  const [refinementInput, setRefinementInput] = useState('')
-  const [isGenerating, setIsGenerating] = useState(false)
+  const [customerEmail, setCustomerEmail] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   
   // File input reference for upload functionality
   const fileInputRef = React.useRef<HTMLInputElement>(null)
@@ -383,7 +383,7 @@ function App() {
             </h1>
             
             <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-              Transform your room with AI. Upload a photo, describe your vision, and see your space come to life with furniture that fits perfectly.
+              Submit your room photo and design preferences to our professional team. Get custom visualizations delivered to your email within 3-5 business days.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -424,7 +424,7 @@ function App() {
                 name: 'Quick Upload Project',
                 description: 'Created from homepage upload step',
                 createdAt: new Date().toISOString(),
-                visualizations: []
+                visualizationRequests: []
               }
               setProjects(currentProjects => [...(currentProjects || []), newProject])
               setSelectedProject(newProject)
@@ -440,7 +440,7 @@ function App() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Take a photo of your space and let our AI analyze the lighting, perspective, and layout.
+                Upload your room photo and let our professional design team analyze the space and create custom visualizations.
               </p>
               <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button variant="outline" size="sm">
@@ -459,7 +459,7 @@ function App() {
                 name: 'Vision Project',
                 description: 'Created from homepage vision step',
                 createdAt: new Date().toISOString(),
-                visualizations: []
+                visualizationRequests: []
               }
               setProjects(currentProjects => [...(currentProjects || []), newProject])
               setSelectedProject(newProject)
@@ -475,7 +475,7 @@ function App() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Tell us what you want or upload specific furniture. Our AI understands natural language.
+                Describe your vision or upload specific furniture. Our design team will create professional visualizations and email them to you.
               </p>
               <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button variant="outline" size="sm">
@@ -493,15 +493,15 @@ function App() {
               <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-accent/20 transition-colors">
                 <Download className="w-8 h-8 text-accent" />
               </div>
-              <CardTitle className="text-xl">Export Your Design</CardTitle>
+              <CardTitle className="text-xl">Receive Your Design</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Download high-resolution images and videos of your transformed space to share or save.
+                Receive professional-quality visualizations and purchase recommendations delivered to your email within 3-5 business days.
               </p>
               <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button variant="outline" size="sm">
-                  Browse Gallery →
+                  Receive Results →
                 </Button>
               </div>
             </CardContent>
@@ -513,9 +513,9 @@ function App() {
       <div className="bg-muted/30 py-20">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Amazing Transformations</h2>
+            <h2 className="text-4xl font-bold mb-4">Professional Design Transformations</h2>
             <p className="text-xl text-muted-foreground">
-              See what others have created with Product Viz 2.0
+              Real projects completed by our professional design team - delivered via email
             </p>
           </div>
           
@@ -577,7 +577,7 @@ function App() {
           name: localProjectForm.name,
           description: localProjectForm.description,
           createdAt: new Date().toISOString(),
-          visualizations: []
+          visualizationRequests: []
         }
         
         setProjects(currentProjects => [...(currentProjects || []), newProject])
@@ -709,16 +709,84 @@ function App() {
     </div>
   ))
 
-  const RefinementInput = React.memo(() => (
+  // Submit request helper function
+  const submitVisualizationRequest = async (type: 'specific-item' | 'style-brainstorm') => {
+    if (!uploadedImage || !customerEmail.trim()) {
+      toast.error('Please upload an image and provide your email address.')
+      return
+    }
+
+    const description = type === 'specific-item' ? itemDescription : styleDescription
+    if (!description.trim()) {
+      toast.error(`Please describe your ${type === 'specific-item' ? 'item' : 'style'}.`)
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+      
+      // Calculate estimated delivery (3-5 business days)
+      const now = new Date()
+      const deliveryDate = new Date(now.getTime() + (4 * 24 * 60 * 60 * 1000)) // 4 days from now
+      
+      const newRequest: VisualizationRequest = {
+        id: Date.now().toString(),
+        type,
+        originalImage: uploadedImage,
+        description,
+        createdAt: new Date().toISOString(),
+        status: 'submitted',
+        customerEmail: customerEmail,
+        estimatedDelivery: deliveryDate.toLocaleDateString()
+      }
+
+      // Add to current project
+      if (selectedProject) {
+        setProjects(currentProjects => 
+          (currentProjects || []).map(project => 
+            project.id === selectedProject.id
+              ? { ...project, visualizationRequests: [...project.visualizationRequests, newRequest] }
+              : project
+          )
+        )
+        
+        // Update selected project
+        setSelectedProject(prev => prev ? {
+          ...prev,
+          visualizationRequests: [...prev.visualizationRequests, newRequest]
+        } : null)
+      }
+
+      // Clear form
+      setItemDescription('')
+      setStyleDescription('')
+      setUploadedImage(null)
+      
+      toast.success(`Request submitted successfully! You'll receive your visualization at ${customerEmail} within 3-5 business days.`)
+      
+    } catch (error) {
+      toast.error('Failed to submit request. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Email input component
+  const EmailInput = React.memo(() => (
     <div className="space-y-2">
-      <Label htmlFor="refinement">Refine with text commands</Label>
+      <Label htmlFor="customer-email">Your Email Address</Label>
       <Input
-        id="refinement"
-        value={refinementInput}
-        onChange={(e) => setRefinementInput(e.target.value)}
-        placeholder="e.g., Make the sofa darker blue, add a coffee table"
-        autoComplete="off"
+        id="customer-email"
+        type="email"
+        value={customerEmail}
+        onChange={(e) => setCustomerEmail(e.target.value)}
+        placeholder="your@email.com"
+        autoComplete="email"
+        required
       />
+      <p className="text-xs text-muted-foreground">
+        We'll send your visualization results to this email within 3-5 business days.
+      </p>
     </div>
   ))
 
@@ -763,82 +831,11 @@ function App() {
           onValueChange={setWorkspaceTab} 
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="upload">Upload Scene</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="specific">Specific Item</TabsTrigger>
             <TabsTrigger value="style">Style Brainstorm</TabsTrigger>
           </TabsList>
           
-          {/* Upload Scene Tab */}
-          <TabsContent value="upload" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Camera className="w-5 h-5" />
-                  Upload Your Room Photo
-                </CardTitle>
-                <CardDescription>
-                  Take a well-lit photo of your space. The AI works best with good lighting and a clear view of the area you want to redesign.
-                </CardDescription>
-              </CardHeader>
-              
-              <CardContent>
-                {/* Hidden file input */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-                
-                <div 
-                  className="border-2 border-dashed border-border rounded-lg p-12 text-center hover:border-accent/50 transition-colors cursor-pointer group"
-                  onClick={triggerFileUpload}
-                  onDragOver={handleDragOver}
-                  onDragEnter={handleDragEnter}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                >
-                  <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4 group-hover:text-accent transition-colors" />
-                  <div className="space-y-2">
-                    <p className="text-lg font-medium">Drop your room photo here</p>
-                    <p className="text-muted-foreground">or click to browse files</p>
-                    <p className="text-sm text-muted-foreground">Supports JPG, PNG up to 10MB</p>
-                  </div>
-                </div>
-                
-                {uploadedImage && (
-                  <div className="mt-6">
-                    <div className="aspect-video bg-muted rounded-lg relative overflow-hidden">
-                      <img 
-                        src={uploadedImage} 
-                        alt="Uploaded room" 
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute bottom-4 left-4">
-                        <Badge className="bg-green-500/90 text-white">
-                          <Check className="w-3 h-3 mr-1" />
-                          Photo uploaded
-                        </Badge>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-4 p-4 bg-accent/5 rounded-lg border border-accent/20">
-                      <div className="flex items-center gap-2 text-accent mb-2">
-                        <Lightbulb className="w-4 h-4" />
-                        <span className="font-medium">AI Analysis</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Great lighting and perspective! This photo will work well for visualization. 
-                        The AI detected good natural light from the left side and clear floor space for furniture placement.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
           
           {/* Specific Item Tab */}
           <TabsContent value="specific" className="space-y-6">
@@ -846,82 +843,82 @@ function App() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <ImageIcon className="w-5 h-5" />
-                  Visualize a Specific Item
+                  Submit Specific Item Request
                 </CardTitle>
                 <CardDescription>
-                  Upload a product photo or describe exactly what you want to place in your room.
+                  Upload your room photo and describe the specific item you want to add. We'll create a professional visualization and email it to you within 3-5 business days.
                 </CardDescription>
               </CardHeader>
               
               <CardContent className="space-y-6">
-                <Tabs defaultValue="describe">
-                  <TabsList>
-                    <TabsTrigger value="describe">Describe Item</TabsTrigger>
-                    <TabsTrigger value="upload">Upload Product Photo</TabsTrigger>
-                  </TabsList>
+                {/* Room Photo Upload */}
+                <div className="space-y-2">
+                  <Label>Room Photo</Label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
                   
-                  <TabsContent value="describe" className="space-y-4">
-                    <ItemDescriptionInput />
-                    
-                    {/* Hidden file input for product photo */}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      id="product-photo-upload"
-                    />
-                    
-                    <div 
-                      className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-accent/50 transition-colors"
-                      onClick={() => document.getElementById('product-photo-upload')?.click()}
-                      onDragOver={handleDragOver}
-                      onDragEnter={handleDragEnter}
-                      onDragLeave={handleDragLeave}
-                      onDrop={handleDrop}
-                    >
-                      <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-                      <p className="font-medium mb-1">Upload product photo</p>
-                      <p className="text-sm text-muted-foreground">Drop image or click to browse</p>
+                  <div 
+                    className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-accent/50 transition-colors cursor-pointer group"
+                    onClick={triggerFileUpload}
+                    onDragOver={handleDragOver}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
+                    <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-3 group-hover:text-accent transition-colors" />
+                    <p className="font-medium mb-1">Upload room photo</p>
+                    <p className="text-sm text-muted-foreground">Drop image or click to browse</p>
+                  </div>
+                  
+                  {uploadedImage && (
+                    <div className="mt-4">
+                      <div className="aspect-video bg-muted rounded-lg relative overflow-hidden max-w-md">
+                        <img 
+                          src={uploadedImage} 
+                          alt="Uploaded room" 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-4 left-4">
+                          <Badge className="bg-green-500/90 text-white">
+                            <Check className="w-3 h-3 mr-1" />
+                            Photo uploaded
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
-                  </TabsContent>
-                </Tabs>
+                  )}
+                </div>
+                
+                <ItemDescriptionInput />
+                <EmailInput />
                 
                 <Button 
                   className="w-full" 
                   size="lg"
-                  disabled={!uploadedImage || !itemDescription.trim() || isGenerating}
-                  onClick={async () => {
-                    if (uploadedImage && itemDescription.trim()) {
-                      try {
-                        setIsGenerating(true)
-                        // Show loading state
-                        toast.success('Generating visualization... This may take a few moments.')
-                        
-                        // In a real app, this would trigger AI generation
-                        // For now, we'll simulate the process
-                        await new Promise(resolve => setTimeout(resolve, 3000))
-                        
-                        // Show success and stay on current tab
-                        toast.success('Visualization generated successfully!')
-                      } catch (error) {
-                        toast.error('Failed to generate visualization. Please try again.')
-                      } finally {
-                        setIsGenerating(false)
-                      }
-                    } else {
-                      if (!uploadedImage) {
-                        toast.error('Please upload a room photo first.')
-                        setWorkspaceTab('upload')
-                      } else {
-                        toast.error('Please describe the item you want to add.')
-                      }
-                    }
-                  }}
+                  disabled={!uploadedImage || !itemDescription.trim() || !customerEmail.trim() || isSubmitting}
+                  onClick={() => submitVisualizationRequest('specific-item')}
                 >
                   <Wand2 className="w-4 h-4 mr-2" />
-                  {isGenerating ? 'Generating...' : 'Generate Visualization'}
+                  {isSubmitting ? 'Submitting Request...' : 'Submit Visualization Request'}
                 </Button>
+                
+                <div className="p-4 bg-accent/5 rounded-lg border border-accent/20">
+                  <div className="flex items-center gap-2 text-accent mb-2">
+                    <Lightbulb className="w-4 h-4" />
+                    <span className="font-medium">What happens next?</span>
+                  </div>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• Our design team will review your request</li>
+                    <li>• Professional visualization created within 3-5 business days</li>
+                    <li>• High-resolution images emailed directly to you</li>
+                    <li>• You'll receive 2-3 different design variations</li>
+                  </ul>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -932,14 +929,57 @@ function App() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Palette className="w-5 h-5" />
-                  Brainstorm a Style
+                  Submit Style Brainstorm Request
                 </CardTitle>
                 <CardDescription>
-                  Describe the overall vibe or style you want, and let AI design the entire space for you.
+                  Upload your room photo and describe your desired style. Our designers will create a complete room transformation and email it to you within 3-5 business days.
                 </CardDescription>
               </CardHeader>
               
               <CardContent className="space-y-6">
+                {/* Room Photo Upload */}
+                <div className="space-y-2">
+                  <Label>Room Photo</Label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  
+                  <div 
+                    className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-accent/50 transition-colors cursor-pointer group"
+                    onClick={triggerFileUpload}
+                    onDragOver={handleDragOver}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
+                    <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-3 group-hover:text-accent transition-colors" />
+                    <p className="font-medium mb-1">Upload room photo</p>
+                    <p className="text-sm text-muted-foreground">Drop image or click to browse</p>
+                  </div>
+                  
+                  {uploadedImage && (
+                    <div className="mt-4">
+                      <div className="aspect-video bg-muted rounded-lg relative overflow-hidden max-w-md">
+                        <img 
+                          src={uploadedImage} 
+                          alt="Uploaded room" 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-4 left-4">
+                          <Badge className="bg-green-500/90 text-white">
+                            <Check className="w-3 h-3 mr-1" />
+                            Photo uploaded
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
                 <StyleDescriptionInput />
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -956,186 +996,81 @@ function App() {
                   ))}
                 </div>
                 
+                <EmailInput />
+                
                 <Button 
                   className="w-full" 
                   size="lg"
-                  disabled={!uploadedImage || !styleDescription.trim() || isGenerating}
-                  onClick={async () => {
-                    if (uploadedImage && styleDescription.trim()) {
-                      try {
-                        setIsGenerating(true)
-                        // Show loading state
-                        toast.success('Generating style concepts... This may take a few moments.')
-                        
-                        // In a real app, this would trigger AI generation
-                        // For now, we'll simulate the process
-                        await new Promise(resolve => setTimeout(resolve, 3000))
-                        
-                        // Show success and stay on current tab
-                        toast.success('Style concepts generated successfully!')
-                      } catch (error) {
-                        toast.error('Failed to generate style concepts. Please try again.')
-                      } finally {
-                        setIsGenerating(false)
-                      }
-                    } else {
-                      if (!uploadedImage) {
-                        toast.error('Please upload a room photo first.')
-                        setWorkspaceTab('upload')
-                      } else {
-                        toast.error('Please describe your desired style.')
-                      }
-                    }
-                  }}
+                  disabled={!uploadedImage || !styleDescription.trim() || !customerEmail.trim() || isSubmitting}
+                  onClick={() => submitVisualizationRequest('style-brainstorm')}
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
-                  {isGenerating ? 'Generating...' : 'Generate Style Concepts'}
+                  {isSubmitting ? 'Submitting Request...' : 'Submit Style Request'}
                 </Button>
+                
+                <div className="p-4 bg-accent/5 rounded-lg border border-accent/20">
+                  <div className="flex items-center gap-2 text-accent mb-2">
+                    <Lightbulb className="w-4 h-4" />
+                    <span className="font-medium">What happens next?</span>
+                  </div>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• Our design experts will analyze your space and style preferences</li>
+                    <li>• Complete room transformation created within 3-5 business days</li>
+                    <li>• Multiple design concepts emailed directly to you</li>
+                    <li>• Detailed style breakdown and product recommendations included</li>
+                  </ul>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
           
-          {/* Generated Results Display */}
-          <TabsContent value="upload" className="space-y-6">
-            {uploadedImage && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Generated Visualization</CardTitle>
-                  <CardDescription>
-                    Your AI-generated room design based on the uploaded photo.
-                  </CardDescription>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="grid lg:grid-cols-2 gap-6">
-                    <div className="aspect-video bg-muted rounded-lg relative">
-                      <img 
-                        src={uploadedImage} 
-                        alt="Generated visualization" 
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          <RefreshCw className="w-3 h-3 mr-2" />
-                          Regenerate
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Download className="w-3 h-3 mr-2" />
-                          Download
-                        </Button>
+          {/* Request History */}
+          {selectedProject && selectedProject.visualizationRequests.length > 0 && (
+            <Card className="mt-8">
+              <CardHeader>
+                <CardTitle>Your Requests</CardTitle>
+                <CardDescription>
+                  Track the status of your visualization requests
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {selectedProject.visualizationRequests.map((request) => (
+                    <div key={request.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className="text-xs">
+                            {request.type === 'specific-item' ? 'Specific Item' : 'Style Brainstorm'}
+                          </Badge>
+                          <Badge 
+                            variant={request.status === 'completed' ? 'default' : 'secondary'}
+                            className="text-xs"
+                          >
+                            {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-1">
+                          {request.description.substring(0, 100)}...
+                        </p>
+                        <div className="text-xs text-muted-foreground">
+                          Submitted: {new Date(request.createdAt).toLocaleDateString()} • 
+                          Estimated delivery: {request.estimatedDelivery}
+                        </div>
                       </div>
-                      
-                      <Separator />
-                      
-                      <RefinementInput />
-                      
-                      <Button className="w-full">
-                        <Wand2 className="w-4 h-4 mr-2" />
-                        Apply Changes
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="specific" className="space-y-6">
-            {uploadedImage && itemDescription && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Generated Visualization</CardTitle>
-                  <CardDescription>
-                    Your AI-generated room with the specific item added.
-                  </CardDescription>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="grid lg:grid-cols-2 gap-6">
-                    <div className="aspect-video bg-muted rounded-lg relative">
-                      <img 
-                        src={uploadedImage} 
-                        alt="Generated visualization" 
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          <RefreshCw className="w-3 h-3 mr-2" />
-                          Regenerate
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Download className="w-3 h-3 mr-2" />
-                          Download
-                        </Button>
+                      <div className="flex items-center gap-2">
+                        {request.status === 'completed' && (
+                          <Badge className="bg-green-500 text-white">
+                            <Check className="w-3 h-3 mr-1" />
+                            Delivered
+                          </Badge>
+                        )}
                       </div>
-                      
-                      <Separator />
-                      
-                      <RefinementInput />
-                      
-                      <Button className="w-full">
-                        <Wand2 className="w-4 h-4 mr-2" />
-                        Apply Changes
-                      </Button>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="style" className="space-y-6">
-            {uploadedImage && styleDescription && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Generated Style Concepts</CardTitle>
-                  <CardDescription>
-                    Your AI-generated room design with the requested style.
-                  </CardDescription>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="grid lg:grid-cols-2 gap-6">
-                    <div className="aspect-video bg-muted rounded-lg relative">
-                      <img 
-                        src={uploadedImage} 
-                        alt="Generated visualization" 
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          <RefreshCw className="w-3 h-3 mr-2" />
-                          Regenerate
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Download className="w-3 h-3 mr-2" />
-                          Download
-                        </Button>
-                      </div>
-                      
-                      <Separator />
-                      
-                      <RefinementInput />
-                      
-                      <Button className="w-full">
-                        <Wand2 className="w-4 h-4 mr-2" />
-                        Apply Changes
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </Tabs>
       </div>
       
@@ -1727,16 +1662,16 @@ function App() {
         {/* CTA Section */}
         <div className="bg-accent text-accent-foreground rounded-lg p-8 text-center mt-20">
           <div className="container mx-auto px-6">
-            <h3 className="text-2xl font-bold mb-4">Ready to Transform Your Space?</h3>
+            <h3 className="text-2xl font-bold mb-4">Ready for Professional Design Service?</h3>
             <p className="text-xl mb-8 opacity-90">
-              Join thousands of users who have redesigned their homes with AI
+              Submit your room photos and get custom visualizations delivered within 3-5 business days
             </p>
             <Button 
               size="lg" 
               variant="secondary"
               onClick={() => setCurrentView('dashboard')}
             >
-              Start Your Project
+              Submit Your Project
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </div>
@@ -1772,8 +1707,9 @@ function App() {
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              To democratize interior design by providing cutting-edge AI tools that help everyone 
-              create beautiful, personalized spaces they love to live in.
+              We provide professional interior design visualization services powered by AI technology. 
+              Submit your room photos and design preferences, and receive custom visualizations 
+              delivered directly to your email within 3-5 business days.
             </p>
           </div>
 
@@ -1783,10 +1719,10 @@ function App() {
               <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Sparkles className="w-8 h-8 text-accent" />
               </div>
-              <h3 className="text-xl font-bold mb-4">AI-Powered Design</h3>
+              <h3 className="text-xl font-bold mb-4">Professional Design Team</h3>
               <p className="text-muted-foreground">
-                Advanced machine learning algorithms understand your space and preferences 
-                to generate realistic, contextual design solutions.
+                Our experienced interior designers use advanced AI tools to create 
+                realistic, contextual design solutions tailored to your space and preferences.
               </p>
             </Card>
 
@@ -1805,10 +1741,10 @@ function App() {
               <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Download className="w-8 h-8 text-accent" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Export & Share</h3>
+              <h3 className="text-xl font-bold mb-4">Email Delivery Service</h3>
               <p className="text-muted-foreground">
-                Download high-resolution images and share your designs with friends, 
-                family, or save them for future reference.
+                Receive high-quality visualizations delivered directly to your email 
+                within 3-5 business days, including multiple design variations and recommendations.
               </p>
             </Card>
           </div>
@@ -1827,8 +1763,8 @@ function App() {
                     <h3 className="text-xl font-bold">Upload Your Space</h3>
                   </div>
                   <p className="text-muted-foreground">
-                    Simply take a photo of your room and upload it. Our AI analyzes 
-                    the lighting, dimensions, and existing elements to understand your space.
+                    Upload your room photo and submit your request. Our design team will 
+                    analyze the space and lighting to understand your room's potential.
                   </p>
                 </div>
                 <div className="w-full md:w-80 h-48 bg-muted rounded-lg flex items-center justify-center">
@@ -1845,8 +1781,8 @@ function App() {
                     <h3 className="text-xl font-bold">Describe Your Vision</h3>
                   </div>
                   <p className="text-muted-foreground">
-                    Tell us what you want in natural language or upload specific furniture photos. 
-                    Our AI understands style preferences, colors, and design concepts.
+                    Describe your vision in natural language or upload specific furniture photos. 
+                    Our professional designers will interpret your preferences and style goals.
                   </p>
                 </div>
                 <div className="w-full md:w-80 h-48 bg-muted rounded-lg flex items-center justify-center">
@@ -1860,11 +1796,11 @@ function App() {
                     <div className="w-10 h-10 bg-accent text-accent-foreground rounded-full flex items-center justify-center font-bold">
                       3
                     </div>
-                    <h3 className="text-xl font-bold">Export & Share Results</h3>
+                    <h3 className="text-xl font-bold">Receive Professional Results</h3>
                   </div>
                   <p className="text-muted-foreground">
-                    Download high-resolution visualizations of your redesigned space and 
-                    share your creations with others for inspiration.
+                    Within 3-5 business days, receive professional-quality visualizations 
+                    delivered directly to your email with detailed design recommendations.
                   </p>
                 </div>
                 <div className="w-full md:w-80 h-48 bg-muted rounded-lg flex items-center justify-center">
