@@ -1498,7 +1498,7 @@ function App() {
 
         {/* Transformation Detail Modal */}
         <Dialog open={!!selectedTransformation} onOpenChange={() => setSelectedTransformation(null)}>
-          <DialogContent className="max-w-7xl w-[95vw] h-[90vh] p-0 overflow-hidden">
+          <DialogContent className="max-w-[98vw] w-[98vw] h-[95vh] p-0 overflow-hidden">
             {selectedTransformation && (
               <div className="flex flex-col h-full bg-background">
                 {/* Modal Header */}
@@ -1558,9 +1558,9 @@ function App() {
 
                 {/* Main Comparison Area */}
                 <div className="flex-1 overflow-hidden">
-                  <div className="grid lg:grid-cols-3 gap-0 h-full">
-                    {/* Before/After Comparison */}
-                    <div className="lg:col-span-2 border-r border-border">
+                  <div className="grid lg:grid-cols-5 gap-0 h-full">
+                    {/* Before/After Comparison - Now takes up more space */}
+                    <div className="lg:col-span-3 border-r border-border">
                       <div className="h-full bg-card relative overflow-hidden">
                         {comparisonMode === 'split' && (
                           <div className="grid grid-cols-2 h-full">
@@ -1642,8 +1642,8 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Details Sidebar */}
-                    <div className="overflow-y-auto bg-background">
+                    {/* Details Sidebar - Now more compact */}
+                    <div className="lg:col-span-2 overflow-y-auto bg-background">
                       <div className="p-6 space-y-6">
                         {/* Transformation Details */}
                         <Card className="border-0 shadow-sm">
