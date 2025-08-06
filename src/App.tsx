@@ -788,6 +788,7 @@ function App() {
         placeholder="your@email.com"
         autoComplete="email"
         required
+      />
       <p className="text-xs text-muted-foreground">
         We'll send your visualization results to this email within 3-5 business days.
       </p>
