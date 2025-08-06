@@ -35,6 +35,7 @@ import {
 } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
+import modernLivingRoomVideo from '@/assets/video/modern-living-room-transformation.mp4'
 
 // Types for our application
 interface Project {
@@ -63,7 +64,7 @@ const featuredVisualizationsData = [
     id: '1',
     before: '/api/placeholder/300/200',
     after: '/api/placeholder/300/200',
-    video: '/api/placeholder/600/400/video', // Optional video showing transformation
+    video: modernLivingRoomVideo, // Use imported video file
     description: 'Modern living room transformation'
   },
   {
@@ -1115,7 +1116,7 @@ function App() {
         id: '1',
         before: '/api/placeholder/400/300',
         after: '/api/placeholder/400/300',
-        video: '/api/placeholder/800/600/video',
+        video: modernLivingRoomVideo, // Use imported video file
         title: 'Modern Living Room Transformation',
         description: 'A complete makeover featuring contemporary furniture and warm lighting',
         style: 'Modern Minimalist',
