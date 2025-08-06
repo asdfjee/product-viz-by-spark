@@ -685,8 +685,8 @@ function App() {
     </div>
   )
 
-  // Memoized input components to prevent re-renders
-  const ItemDescriptionInput = React.memo(() => (
+  // Input components for descriptions
+  const ItemDescriptionInput = () => (
     <div className="space-y-2">
       <Label htmlFor="item-description">Describe the item you want to add</Label>
       <Textarea
@@ -696,12 +696,11 @@ function App() {
         placeholder="e.g., A modern gray sectional sofa with clean lines and metal legs"
         rows={4}
         autoComplete="off"
-        key="item-description-input"
       />
     </div>
-  ), [itemDescription])
+  )
 
-  const StyleDescriptionInput = React.memo(() => (
+  const StyleDescriptionInput = () => (
     <div className="space-y-2">
       <Label htmlFor="style-description">Describe your desired style or vibe</Label>
       <Textarea
@@ -711,10 +710,9 @@ function App() {
         placeholder="e.g., Cozy Scandinavian living room with warm textures and natural wood accents"
         rows={4}
         autoComplete="off"
-        key="style-description-input"
       />
     </div>
-  ), [styleDescription])
+  )
 
   const submitVisualizationRequest = (type: 'specific-item' | 'style-brainstorm') => {
     if (!uploadedImage || !customerEmail.trim()) {
@@ -779,7 +777,7 @@ function App() {
   }
 
   // Email input component
-  const EmailInput = React.memo(() => (
+  const EmailInput = () => (
     <div className="space-y-2">
       <Label htmlFor="customer-email">Your Email Address</Label>
       <Input
@@ -790,16 +788,15 @@ function App() {
         placeholder="your@email.com"
         autoComplete="email"
         required
-        key="customer-email-input"
       />
       <p className="text-xs text-muted-foreground">
         We'll send your visualization results to this email within 3-5 business days.
       </p>
     </div>
-  ), [customerEmail])
+  )
 
   // Workspace Component (Visualization Interface)
-  const VisualizationWorkspace = React.memo(() => (
+  const VisualizationWorkspace = () => (
     <div className="min-h-screen bg-background">
       <Header />
       
@@ -838,16 +835,15 @@ function App() {
           value={workspaceTab}
           onValueChange={setWorkspaceTab} 
           className="w-full"
-          key="workspace-tabs"
         >
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="specific">Specific Item</TabsTrigger>
+            <TabsTrigger value="upload">Specific Item</TabsTrigger>
             <TabsTrigger value="style">Style Brainstorm</TabsTrigger>
           </TabsList>
           
           
           {/* Specific Item Tab */}
-          <TabsContent value="specific" className="space-y-6">
+          <TabsContent value="upload" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -1085,7 +1081,7 @@ function App() {
       
       <Footer />
     </div>
-  ))
+  )
 
   // Gallery Page Component
   const GalleryPage = () => {
