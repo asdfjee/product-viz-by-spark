@@ -38,7 +38,7 @@ import {
 import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
 import modernLivingRoomVideo from '@/assets/video/modern-living-room-transformation.mp4'
-import cozyBedroomVideo from '@/assets/video/Cozy_Room_Makeover_Video_Ready.mp4'
+import cozyBedroomVideo from '@/assets/video/cozy-bedroom-makeover.mp4'
 
 // Types for our application
 interface Project {
