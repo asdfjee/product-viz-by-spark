@@ -396,7 +396,12 @@ function App() {
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
               
-              <Button variant="outline" size="lg" className="text-lg px-8 py-6 h-auto">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="text-lg px-8 py-6 h-auto"
+                onClick={() => setCurrentView('gallery')}
+              >
                 <Play className="mr-2 w-5 h-5" />
                 Watch Demo
               </Button>
