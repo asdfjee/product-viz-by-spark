@@ -66,7 +66,7 @@ const featuredVisualizationsData = [
     id: '1',
     before: '/api/placeholder/300/200',
     after: '/api/placeholder/300/200',
-    video: modernLivingRoomVideo, // Use imported video file
+    video: modernLivingRoomVideo,
     description: 'Modern living room transformation'
   },
   {
@@ -1141,7 +1141,7 @@ function App() {
           id: '1',
           before: '/api/placeholder/400/300',
           after: '/api/placeholder/400/300',
-          video: modernLivingRoomVideo, // Use imported video file
+          video: modernLivingRoomVideo,
           title: 'Modern Living Room Transformation',
           description: 'A complete makeover featuring contemporary furniture and warm lighting',
           style: 'Modern Minimalist',
@@ -2244,17 +2244,7 @@ function App() {
             </div>
           </DialogContent>
         </Dialog>
-  // Render current view
-  if (currentView === 'landing') return <LandingPage />
-  if (currentView === 'dashboard') return <ProjectDashboard />
-  if (currentView === 'workspace') return <VisualizationWorkspace />
-  if (currentView === 'gallery') return <GalleryPage />
-  if (currentView === 'about') return <AboutPage />
-  
-  return <LandingPage />
-}
 
-export default App
         <Footer />
       </div>
     )
