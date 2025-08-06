@@ -38,6 +38,7 @@ import {
 import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
 import modernLivingRoomVideo from '@/assets/video/modern-living-room-transformation.mp4'
+import cozyBedroomVideo from '@/assets/video/Cozy_Room_Makeover_Video_Ready.mp4'
 
 // Types for our application
 interface Project {
@@ -73,7 +74,7 @@ const featuredVisualizationsData = [
     id: '2', 
     before: '/api/placeholder/300/200',
     after: '/api/placeholder/300/200',
-    video: '/api/placeholder/600/400/video',
+    video: cozyBedroomVideo,
     description: 'Cozy bedroom makeover'
   },
   {
@@ -1152,7 +1153,7 @@ function App() {
           id: '2',
           before: '/api/placeholder/400/300',
           after: '/api/placeholder/400/300',
-          video: '/api/placeholder/800/600/video',
+          video: cozyBedroomVideo,
           title: 'Scandinavian Bedroom Retreat',
           description: 'Cozy bedroom design with natural textures and clean lines',
           style: 'Scandinavian',
