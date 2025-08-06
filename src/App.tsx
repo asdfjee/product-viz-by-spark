@@ -731,24 +731,25 @@ function App() {
     try {
       setIsSubmitting(true)
       
-  // Submit request helper function
-      const now = new Date()
-    if (!uploadedImage || !customerEmail.trim()) {
-      toast.error('Please upload an image and provide your email address.')
-      return
-    }
-
-    const description = type === 'specific-item' ? itemDescription : styleDescription
-    if (!description.trim()) {
-      toast.error(`Please describe your ${type === 'specific-item' ? 'item' : 'style'}.`)
-      return
-    }
-
-    try {
-      setIsSubmitting(true)
-      
       // Calculate estimated delivery (3-5 business days)
       const now = new Date()
+      const deliveryDate = new Date(now)
+      deliveryDate.setDate(now.getDate() + 5) // 5 business days
+      
+      const newRequest: VisualizationRequest = {
+        id: Date.now().toString(),
+        type,
+        originalImage: uploadedImage,
+        description,
+        createdAt: now.toISOString(),
+        status: 'submitted',
+        customerEmail,
+        estimatedDelivery: deliveryDate.toLocaleDateString()
+      }
+
+      // Update projects with new request
+      if (selectedProject) {
+        setProjects(currentProjects => 
           (currentProjects || []).map(project => 
             project.id === selectedProject.id
               ? { ...project, visualizationRequests: [...project.visualizationRequests, newRequest] }
@@ -1041,7 +1042,7 @@ function App() {
                   Track the status of your visualization requests
                 </CardDescription>
               </CardHeader>
-                    <li>• Detailed style breakdown and product recommendations included</li>
+              <CardContent>
                 <div className="space-y-4">
                   {selectedProject.visualizationRequests.map((request) => (
                     <div key={request.id} className="flex items-center justify-between p-4 border rounded-lg">
@@ -1057,7 +1058,7 @@ function App() {
                             {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                           </Badge>
                         </div>
-              <CardContent>
+                        <p className="text-sm mb-2">
                           {request.description.substring(0, 100)}...
                         </p>
                         <div className="text-xs text-muted-foreground">
