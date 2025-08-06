@@ -699,9 +699,8 @@ function App() {
         key="item-description-input"
       />
     </div>
-  ), [itemDescription])
 
-  const StyleDescriptionInput = React.memo(() => (
+
     <div className="space-y-2">
       <Label htmlFor="style-description">Describe your desired style or vibe</Label>
       <Textarea
@@ -712,12 +711,12 @@ function App() {
         rows={4}
         autoComplete="off"
         key="style-description-input"
-      />
+        key="style-description-input"
+    </div>
     </div>
   ), [styleDescription])
-
   // Submit request helper function
-  const submitVisualizationRequest = async (type: 'specific-item' | 'style-brainstorm') => {
+  // Submit request helper function| 'style-brainstorm') => {
     if (!uploadedImage || !customerEmail.trim()) {
       toast.error('Please upload an image and provide your email address.')
       return
