@@ -31,7 +31,9 @@ import {
   X,
   Envelope,
   MapPin,
-  Phone
+  Phone,
+  Settings,
+  Trash2
 } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
@@ -138,7 +140,7 @@ const ToggleComparison = ({ transformation }: { transformation: any }) => {
 
 function App() {
   // App state management
-  const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'workspace' | 'gallery' | 'about'>('landing')
+  const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'workspace' | 'gallery' | 'about' | 'admin'>('landing')
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false)
   const [workspaceTab, setWorkspaceTab] = useState('upload')
@@ -148,6 +150,7 @@ function App() {
   const [user, setUser] = useKV('user-profile', null)
   const [projects, setProjects, deleteProjects] = useKV<Project[]>('user-projects', [])
   const [currentRequest, setCurrentRequest] = useState<VisualizationRequest | null>(null)
+  const [galleryVideos, setGalleryVideos] = useKV<any[]>('gallery-videos', [])
 
   // Form states - using useState for smooth typing experience
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
@@ -269,6 +272,16 @@ function App() {
             >
               About
             </a>
+            <a 
+              href="#"
+              className="text-foreground hover:text-primary transition-colors font-medium text-sm"
+              onClick={(e) => {
+                e.preventDefault()
+                setCurrentView('admin')
+              }}
+            >
+              Admin
+            </a>
             <Button 
               className="ml-4"
               onClick={() => setCurrentView('dashboard')}
@@ -347,6 +360,17 @@ function App() {
                 }}
               >
                 About
+              </a>
+              <a 
+                href="#"
+                className="text-foreground hover:text-primary transition-colors font-medium text-center py-2 text-sm"
+                onClick={(e) => {
+                  e.preventDefault()
+                  setCurrentView('admin')
+                  setIsMobileMenuOpen(false)
+                }}
+              >
+                Admin
               </a>
               <Button 
                 className="mt-2"
@@ -1111,107 +1135,113 @@ function App() {
       document.addEventListener('keydown', handleKeyDown)
       return () => document.removeEventListener('keydown', handleKeyDown)
     }, [selectedTransformation])
-    const galleryItems = [
-      {
-        id: '1',
-        before: '/api/placeholder/400/300',
-        after: '/api/placeholder/400/300',
-        video: modernLivingRoomVideo, // Use imported video file
-        title: 'Modern Living Room Transformation',
-        description: 'A complete makeover featuring contemporary furniture and warm lighting',
-        style: 'Modern Minimalist',
-        room: 'Living Room',
-        keyFeatures: ['Modern Furniture', 'Natural Light', 'Neutral Palette', 'Clean Lines']
-      },
-      {
-        id: '2',
-        before: '/api/placeholder/400/300',
-        after: '/api/placeholder/400/300',
-        video: '/api/placeholder/800/600/video',
-        title: 'Scandinavian Bedroom Retreat',
-        description: 'Cozy bedroom design with natural textures and clean lines',
-        style: 'Scandinavian',
-        room: 'Bedroom',
-        keyFeatures: ['Natural Textures', 'Hygge Vibes', 'Light Woods', 'Minimal Clutter']
-      },
-      {
-        id: '3',
-        before: '/api/placeholder/400/300',
-        after: '/api/placeholder/400/300',
-        video: '/api/placeholder/800/600/video',
-        title: 'Industrial Kitchen Design',
-        description: 'Bold kitchen featuring exposed elements and modern appliances',
-        style: 'Industrial',
-        room: 'Kitchen',
-        keyFeatures: ['Exposed Brick', 'Metal Accents', 'Open Shelving', 'Dark Palette']
-      },
-      {
-        id: '4',
-        before: '/api/placeholder/400/300',
-        after: '/api/placeholder/400/300',
-        video: '/api/placeholder/800/600/video',
-        title: 'Bohemian Chic Dining Room',
-        description: 'Eclectic dining space with vibrant colors and mixed textures',
-        style: 'Bohemian',
-        room: 'Dining Room',
-        keyFeatures: ['Mixed Patterns', 'Vibrant Colors', 'Vintage Pieces', 'Global Textiles']
-      },
-      {
-        id: '5',
-        before: '/api/placeholder/400/300',
-        after: '/api/placeholder/400/300',
-        video: '/api/placeholder/800/600/video',
-        title: 'Mid-Century Modern Office',
-        description: 'Productive workspace with vintage-inspired furniture',
-        style: 'Mid-Century Modern',
-        room: 'Office',
-        keyFeatures: ['Vintage Style', 'Rich Woods', 'Geometric Patterns', 'Bold Colors']
-      },
-      {
-        id: '6',
-        before: '/api/placeholder/400/300',
-        after: '/api/placeholder/400/300',
-        video: '/api/placeholder/800/600/video',
-        title: 'Cozy Farmhouse Living Room',
-        description: 'Rustic charm meets modern comfort in this inviting space',
-        style: 'Farmhouse',
-        room: 'Living Room',
-        keyFeatures: ['Rustic Woods', 'Neutral Tones', 'Vintage Accents', 'Cozy Textiles']
-      },
-      {
-        id: '7',
-        before: '/api/placeholder/400/300',
-        after: '/api/placeholder/400/300',
-        video: '/api/placeholder/800/600/video',
-        title: 'Minimalist Bedroom Sanctuary',
-        description: 'Clean lines and neutral tones create a peaceful retreat',
-        style: 'Modern Minimalist',
-        room: 'Bedroom',
-        keyFeatures: ['Clean Lines', 'Neutral Palette', 'Quality Materials', 'Functional Design']
-      },
-      {
-        id: '8',
-        before: '/api/placeholder/400/300',
-        after: '/api/placeholder/400/300',
-        video: '/api/placeholder/800/600/video',
-        title: 'Rustic Kitchen Renovation',
-        description: 'Farmhouse elements meet modern functionality',
-        style: 'Farmhouse',
-        room: 'Kitchen',
-        keyFeatures: ['Shaker Cabinets', 'Butcher Block', 'Vintage Hardware', 'Subway Tile']
-      },
-      {
-        id: '9',
-        before: '/api/placeholder/400/300',
-        after: '/api/placeholder/400/300',
-        video: '/api/placeholder/800/600/video',
-        title: 'Contemporary Dining Space',
-        description: 'Sleek design perfect for entertaining guests',
-        style: 'Modern Minimalist',
-        room: 'Dining Room',
-        keyFeatures: ['Sleek Design', 'Statement Lighting', 'Quality Materials', 'Entertainment Ready']
-      }
-    ]
+    const galleryItems = useMemo(() => {
+      const builtInItems = [
+        {
+          id: '1',
+          before: '/api/placeholder/400/300',
+          after: '/api/placeholder/400/300',
+          video: modernLivingRoomVideo, // Use imported video file
+          title: 'Modern Living Room Transformation',
+          description: 'A complete makeover featuring contemporary furniture and warm lighting',
+          style: 'Modern Minimalist',
+          room: 'Living Room',
+          keyFeatures: ['Modern Furniture', 'Natural Light', 'Neutral Palette', 'Clean Lines']
+        },
+        {
+          id: '2',
+          before: '/api/placeholder/400/300',
+          after: '/api/placeholder/400/300',
+          video: '/api/placeholder/800/600/video',
+          title: 'Scandinavian Bedroom Retreat',
+          description: 'Cozy bedroom design with natural textures and clean lines',
+          style: 'Scandinavian',
+          room: 'Bedroom',
+          keyFeatures: ['Natural Textures', 'Hygge Vibes', 'Light Woods', 'Minimal Clutter']
+        },
+        {
+          id: '3',
+          before: '/api/placeholder/400/300',
+          after: '/api/placeholder/400/300',
+          video: '/api/placeholder/800/600/video',
+          title: 'Industrial Kitchen Design',
+          description: 'Bold kitchen featuring exposed elements and modern appliances',
+          style: 'Industrial',
+          room: 'Kitchen',
+          keyFeatures: ['Exposed Brick', 'Metal Accents', 'Open Shelving', 'Dark Palette']
+        },
+        {
+          id: '4',
+          before: '/api/placeholder/400/300',
+          after: '/api/placeholder/400/300',
+          video: '/api/placeholder/800/600/video',
+          title: 'Bohemian Chic Dining Room',
+          description: 'Eclectic dining space with vibrant colors and mixed textures',
+          style: 'Bohemian',
+          room: 'Dining Room',
+          keyFeatures: ['Mixed Patterns', 'Vibrant Colors', 'Vintage Pieces', 'Global Textiles']
+        },
+        {
+          id: '5',
+          before: '/api/placeholder/400/300',
+          after: '/api/placeholder/400/300',
+          video: '/api/placeholder/800/600/video',
+          title: 'Mid-Century Modern Office',
+          description: 'Productive workspace with vintage-inspired furniture',
+          style: 'Mid-Century Modern',
+          room: 'Office',
+          keyFeatures: ['Vintage Style', 'Rich Woods', 'Geometric Patterns', 'Bold Colors']
+        },
+        {
+          id: '6',
+          before: '/api/placeholder/400/300',
+          after: '/api/placeholder/400/300',
+          video: '/api/placeholder/800/600/video',
+          title: 'Cozy Farmhouse Living Room',
+          description: 'Rustic charm meets modern comfort in this inviting space',
+          style: 'Farmhouse',
+          room: 'Living Room',
+          keyFeatures: ['Rustic Woods', 'Neutral Tones', 'Vintage Accents', 'Cozy Textiles']
+        },
+        {
+          id: '7',
+          before: '/api/placeholder/400/300',
+          after: '/api/placeholder/400/300',
+          video: '/api/placeholder/800/600/video',
+          title: 'Minimalist Bedroom Sanctuary',
+          description: 'Clean lines and neutral tones create a peaceful retreat',
+          style: 'Modern Minimalist',
+          room: 'Bedroom',
+          keyFeatures: ['Clean Lines', 'Neutral Palette', 'Quality Materials', 'Functional Design']
+        },
+        {
+          id: '8',
+          before: '/api/placeholder/400/300',
+          after: '/api/placeholder/400/300',
+          video: '/api/placeholder/800/600/video',
+          title: 'Rustic Kitchen Renovation',
+          description: 'Farmhouse elements meet modern functionality',
+          style: 'Farmhouse',
+          room: 'Kitchen',
+          keyFeatures: ['Shaker Cabinets', 'Butcher Block', 'Vintage Hardware', 'Subway Tile']
+        },
+        {
+          id: '9',
+          before: '/api/placeholder/400/300',
+          after: '/api/placeholder/400/300',
+          video: '/api/placeholder/800/600/video',
+          title: 'Contemporary Dining Space',
+          description: 'Sleek design perfect for entertaining guests',
+          style: 'Modern Minimalist',
+          room: 'Dining Room',
+          keyFeatures: ['Sleek Design', 'Statement Lighting', 'Quality Materials', 'Entertainment Ready']
+        }
+      ]
+
+      // Combine built-in items with user-uploaded videos
+      const userVideos = galleryVideos || []
+      return [...builtInItems, ...userVideos]
+    }, [galleryVideos])
 
     // Filter rooms and styles arrays
     const roomTypes = ['All Rooms', 'Living Room', 'Bedroom', 'Kitchen', 'Dining Room', 'Office']
@@ -1947,12 +1977,286 @@ function App() {
     </div>
   )
 
+  // Admin Page Component for managing gallery videos
+  const AdminPage = () => {
+    const [isUploadOpen, setIsUploadOpen] = useState(false)
+    const [uploadForm, setUploadForm] = useState({
+      title: '',
+      description: '',
+      style: '',
+      room: '',
+      keyFeatures: ''
+    })
+    const [videoFile, setVideoFile] = useState<File | null>(null)
+    const [isUploading, setIsUploading] = useState(false)
+    
+    const videoInputRef = React.useRef<HTMLInputElement>(null)
+
+    const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0]
+      if (file && file.type.startsWith('video/')) {
+        setVideoFile(file)
+        toast.success('Video selected successfully!')
+      } else {
+        toast.error('Please select a video file.')
+      }
+    }
+
+    const triggerVideoUpload = () => {
+      videoInputRef.current?.click()
+    }
+
+    const handleSubmitVideo = async () => {
+      if (!videoFile || !uploadForm.title.trim()) {
+        toast.error('Please select a video and provide a title.')
+        return
+      }
+
+      setIsUploading(true)
+      
+      try {
+        // Create a data URL for the video (in a real app, you'd upload to a server)
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          const videoURL = e.target?.result as string
+          
+          const newVideo = {
+            id: Date.now().toString(),
+            before: '/api/placeholder/400/300',
+            after: '/api/placeholder/400/300',
+            video: videoURL,
+            title: uploadForm.title,
+            description: uploadForm.description,
+            style: uploadForm.style || 'Modern Minimalist',
+            room: uploadForm.room || 'Living Room',
+            keyFeatures: uploadForm.keyFeatures.split(',').map(f => f.trim()).filter(f => f.length > 0)
+          }
+
+          setGalleryVideos(current => [...(current || []), newVideo])
+          
+          // Reset form
+          setUploadForm({
+            title: '',
+            description: '',
+            style: '',
+            room: '',
+            keyFeatures: ''
+          })
+          setVideoFile(null)
+          setIsUploadOpen(false)
+          
+          toast.success('Video added to gallery successfully!')
+        }
+        reader.readAsDataURL(videoFile)
+        
+      } catch (error) {
+        toast.error('Failed to upload video. Please try again.')
+      } finally {
+        setIsUploading(false)
+      }
+    }
+
+    const handleDeleteVideo = (videoId: string) => {
+      setGalleryVideos(current => (current || []).filter(v => v.id !== videoId))
+      toast.success('Video removed from gallery.')
+    }
+
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        
+        <div className="container mx-auto px-6 py-8">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-3xl font-bold mb-2">Gallery Management</h1>
+                <p className="text-muted-foreground">Upload and manage transformation videos for your gallery</p>
+              </div>
+              <Button onClick={() => setIsUploadOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Video
+              </Button>
+            </div>
+
+            {/* Current Videos */}
+            <div className="space-y-6">
+              <h2 className="text-xl font-bold">Current Gallery Videos</h2>
+              
+              {galleryVideos && galleryVideos.length > 0 ? (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {galleryVideos.map((video) => (
+                    <Card key={video.id} className="overflow-hidden">
+                      <div className="aspect-video bg-muted relative">
+                        <video 
+                          className="w-full h-full object-cover"
+                          controls
+                          src={video.video}
+                        >
+                          Your browser does not support video playback.
+                        </video>
+                      </div>
+                      <CardContent className="p-4">
+                        <h3 className="font-bold mb-2">{video.title}</h3>
+                        <p className="text-sm text-muted-foreground mb-3">{video.description}</p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex gap-2">
+                            <Badge variant="outline" className="text-xs">{video.room}</Badge>
+                            <Badge variant="outline" className="text-xs">{video.style}</Badge>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDeleteVideo(video.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <ImageIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-bold mb-2">No videos uploaded yet</h3>
+                    <p className="text-muted-foreground mb-4">Upload your first transformation video to get started.</p>
+                    <Button onClick={() => setIsUploadOpen(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add First Video
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Upload Dialog */}
+        <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Add New Gallery Video</DialogTitle>
+              <DialogDescription>
+                Upload a transformation video and provide details for the gallery.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6 py-4">
+              {/* Video Upload */}
+              <div className="space-y-2">
+                <Label>Transformation Video</Label>
+                <input
+                  ref={videoInputRef}
+                  type="file"
+                  accept="video/*"
+                  onChange={handleVideoUpload}
+                  className="hidden"
+                />
+                
+                <div 
+                  className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-accent/50 transition-colors cursor-pointer group"
+                  onClick={triggerVideoUpload}
+                >
+                  <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-3 group-hover:text-accent transition-colors" />
+                  <p className="font-medium mb-1">
+                    {videoFile ? videoFile.name : 'Upload transformation video'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {videoFile ? 'Click to change video' : 'Click to browse or drag and drop'}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Video Details */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="video-title">Title</Label>
+                  <Input
+                    id="video-title"
+                    value={uploadForm.title}
+                    onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
+                    placeholder="e.g., Modern Living Room Transformation"
+                    autoComplete="off"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="video-room">Room Type</Label>
+                  <Input
+                    id="video-room"
+                    value={uploadForm.room}
+                    onChange={(e) => setUploadForm(prev => ({ ...prev, room: e.target.value }))}
+                    placeholder="e.g., Living Room"
+                    autoComplete="off"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="video-description">Description</Label>
+                <Textarea
+                  id="video-description"
+                  value={uploadForm.description}
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Describe the transformation shown in this video..."
+                  rows={3}
+                  autoComplete="off"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="video-style">Design Style</Label>
+                  <Input
+                    id="video-style"
+                    value={uploadForm.style}
+                    onChange={(e) => setUploadForm(prev => ({ ...prev, style: e.target.value }))}
+                    placeholder="e.g., Modern Minimalist"
+                    autoComplete="off"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="video-features">Key Features</Label>
+                  <Input
+                    id="video-features"
+                    value={uploadForm.keyFeatures}
+                    onChange={(e) => setUploadForm(prev => ({ ...prev, keyFeatures: e.target.value }))}
+                    placeholder="e.g., Natural Light, Modern Furniture"
+                    autoComplete="off"
+                  />
+                  <p className="text-xs text-muted-foreground">Separate features with commas</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setIsUploadOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSubmitVideo} 
+                disabled={!videoFile || !uploadForm.title.trim() || isUploading}
+              >
+                {isUploading ? 'Uploading...' : 'Add to Gallery'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Footer />
+      </div>
+    )
+  }
+
   // Render current view
   if (currentView === 'landing') return <LandingPage />
   if (currentView === 'dashboard') return <ProjectDashboard />
   if (currentView === 'workspace') return <VisualizationWorkspace />
   if (currentView === 'gallery') return <GalleryPage />
   if (currentView === 'about') return <AboutPage />
+  if (currentView === 'admin') return <AdminPage />
   
   return <LandingPage />
 }
