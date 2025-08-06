@@ -1995,16 +1995,71 @@ function App() {
 
     const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0]
-      if (file && file.type.startsWith('video/')) {
+      if (file && isVideoFile(file)) {
         setVideoFile(file)
         toast.success('Video selected successfully!')
       } else {
-        toast.error('Please select a video file.')
+        toast.error('Please select a video file (.mp4, .mov, .avi, .mkv, .webm).')
       }
+    }
+
+    // Helper function to check if file is a video
+    const isVideoFile = (file: File) => {
+      const videoTypes = [
+        'video/mp4',
+        'video/quicktime', // .mov files
+        'video/x-msvideo', // .avi files
+        'video/x-matroska', // .mkv files
+        'video/webm',
+        'video/ogg'
+      ]
+      
+      const videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.ogg']
+      
+      // Check MIME type first
+      if (file.type && videoTypes.includes(file.type)) {
+        return true
+      }
+      
+      // Fallback to file extension check (for .mov files that sometimes have incorrect MIME types)
+      const fileName = file.name.toLowerCase()
+      return videoExtensions.some(ext => fileName.endsWith(ext))
     }
 
     const triggerVideoUpload = () => {
       videoInputRef.current?.click()
+    }
+
+    // Drag and drop handlers for video upload
+    const handleVideoDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+
+    const handleVideoDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+
+    const handleVideoDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+
+    const handleVideoDrop = (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault()
+      e.stopPropagation()
+      
+      const files = e.dataTransfer.files
+      if (files && files[0]) {
+        const file = files[0]
+        if (isVideoFile(file)) {
+          setVideoFile(file)
+          toast.success('Video uploaded successfully!')
+        } else {
+          toast.error('Please upload a video file (.mp4, .mov, .avi, .mkv, .webm).')
+        }
+      }
     }
 
     const handleSubmitVideo = async () => {
@@ -2150,7 +2205,7 @@ function App() {
                 <input
                   ref={videoInputRef}
                   type="file"
-                  accept="video/*"
+                  accept=".mp4,.mov,.avi,.mkv,.webm,.ogg,video/*"
                   onChange={handleVideoUpload}
                   className="hidden"
                 />
@@ -2158,6 +2213,10 @@ function App() {
                 <div 
                   className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-accent/50 transition-colors cursor-pointer group"
                   onClick={triggerVideoUpload}
+                  onDragOver={handleVideoDragOver}
+                  onDragEnter={handleVideoDragEnter}
+                  onDragLeave={handleVideoDragLeave}
+                  onDrop={handleVideoDrop}
                 >
                   <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-3 group-hover:text-accent transition-colors" />
                   <p className="font-medium mb-1">
@@ -2165,6 +2224,9 @@ function App() {
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {videoFile ? 'Click to change video' : 'Click to browse or drag and drop'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Supported formats: MP4, MOV, AVI, MKV, WebM
                   </p>
                 </div>
               </div>
