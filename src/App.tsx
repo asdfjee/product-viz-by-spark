@@ -39,6 +39,7 @@ import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
 import modernLivingRoomVideo from '@/assets/video/modern-living-room-transformation.mp4'
 import cozyBedroomVideo from '@/assets/video/Cozy_Room_Transformation_Video_(1).mp4'
+import kitchenPanVideo from '@/assets/video/Kitchen_Pan_Video_Generation.mp4'
 
 // Types for our application
 interface Project {
@@ -81,7 +82,7 @@ const featuredVisualizationsData = [
     id: '3',
     before: '/api/placeholder/300/200', 
     after: '/api/placeholder/300/200',
-    video: '/api/placeholder/600/400/video',
+    video: kitchenPanVideo,
     description: 'Minimalist kitchen design'
   }
 ]
@@ -1164,12 +1165,12 @@ function App() {
           id: '3',
           before: '/api/placeholder/400/300',
           after: '/api/placeholder/400/300',
-          video: '/api/placeholder/800/600/video',
-          title: 'Industrial Kitchen Design',
-          description: 'Bold kitchen featuring exposed elements and modern appliances',
-          style: 'Industrial',
+          video: kitchenPanVideo,
+          title: 'Minimalist Kitchen Design',
+          description: 'Clean, functional kitchen featuring sleek lines and modern appliances',
+          style: 'Modern Minimalist',
           room: 'Kitchen',
-          keyFeatures: ['Exposed Brick', 'Metal Accents', 'Open Shelving', 'Dark Palette']
+          keyFeatures: ['Clean Lines', 'Modern Appliances', 'Minimal Clutter', 'Functional Design']
         },
         {
           id: '4',
@@ -1220,14 +1221,25 @@ function App() {
           before: '/api/placeholder/400/300',
           after: '/api/placeholder/400/300',
           video: '/api/placeholder/800/600/video',
-          title: 'Rustic Kitchen Renovation',
+          title: 'Industrial Kitchen Renovation',
+          description: 'Bold kitchen featuring exposed elements and modern appliances',
+          style: 'Industrial',
+          room: 'Kitchen',
+          keyFeatures: ['Exposed Brick', 'Metal Accents', 'Open Shelving', 'Dark Palette']
+        },
+        {
+          id: '9',
+          before: '/api/placeholder/400/300',
+          after: '/api/placeholder/400/300',
+          video: '/api/placeholder/800/600/video',
+          title: 'Rustic Farmhouse Kitchen',
           description: 'Farmhouse elements meet modern functionality',
           style: 'Farmhouse',
           room: 'Kitchen',
           keyFeatures: ['Shaker Cabinets', 'Butcher Block', 'Vintage Hardware', 'Subway Tile']
         },
         {
-          id: '9',
+          id: '10',
           before: '/api/placeholder/400/300',
           after: '/api/placeholder/400/300',
           video: '/api/placeholder/800/600/video',
