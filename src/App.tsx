@@ -2244,7 +2244,17 @@ function App() {
             </div>
           </DialogContent>
         </Dialog>
+  // Render current view
+  if (currentView === 'landing') return <LandingPage />
+  if (currentView === 'dashboard') return <ProjectDashboard />
+  if (currentView === 'workspace') return <VisualizationWorkspace />
+  if (currentView === 'gallery') return <GalleryPage />
+  if (currentView === 'about') return <AboutPage />
+  
+  return <LandingPage />
+}
 
+export default App
         <Footer />
       </div>
     )
