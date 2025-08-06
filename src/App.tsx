@@ -553,7 +553,11 @@ function App() {
           
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {featuredVisualizationsData.map((viz) => (
-              <Card key={viz.id} className="overflow-hidden border-0 shadow-lg group cursor-pointer hover:shadow-xl transition-shadow">
+              <Card 
+                key={viz.id} 
+                className="overflow-hidden border-0 shadow-lg group cursor-pointer hover:shadow-xl transition-shadow"
+                onClick={() => setCurrentView('gallery')}
+              >
                 <div className="relative">
                   <div className="aspect-video bg-muted relative overflow-hidden">
                     <video 
