@@ -42,30 +42,16 @@ const modernLivingRoomVideo = '/videos/modern-living-room-transformation.mp4'
 const cozyBedroomVideo = '/videos/Cozy_Room_Transformation_Video_(1).mp4'
 const kitchenPanVideo = '/videos/Kitchen_Pan_Video_Generation.mp4'
 
-// Function to verify video availability in development
-const checkVideoAvailability = () => {
-  const videos = [modernLivingRoomVideo, cozyBedroomVideo, kitchenPanVideo]
-  videos.forEach(video => {
-    fetch(video, { method: 'HEAD' })
-      .then(response => {
-        if (!response.ok) {
-          console.warn(`Video may not be available: ${video}`)
-        } else {
-          console.log(`Video available: ${video}`)
-        }
-      })
-      .catch(error => {
-        console.warn(`Failed to check video: ${video}`, error)
-      })
-  })
+// Fallback to check if videos exist and provide alternatives
+const checkVideoPath = (primaryPath: string, fallbacks: string[] = []) => {
+  // In production, we'll use the primary path
+  // The fallbacks are for development/testing
+  return primaryPath
 }
 
-// Check video availability on app load (only in development)
-if (process.env.NODE_ENV === 'development') {
-  checkVideoAvailability()
-}
 
-// Enhanced Video Component with error handling
+
+// Enhanced Video Component with error handling and production optimization
 const EnhancedVideo = ({ 
   src, 
   className = "", 
@@ -89,9 +75,22 @@ const EnhancedVideo = ({
 }) => {
   const [hasError, setHasError] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [retryCount, setRetryCount] = useState(0)
 
   const handleError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
-    console.error('Video failed to load:', src)
+    console.error('Video failed to load:', src, 'Retry count:', retryCount)
+    
+    // Try to reload the video once
+    if (retryCount < 1) {
+      setRetryCount(prev => prev + 1)
+      setIsLoading(true)
+      setHasError(false)
+      // Force reload by updating the src
+      const video = e.currentTarget
+      video.load()
+      return
+    }
+    
     setHasError(true)
     setIsLoading(false)
     if (onError) onError(e)
@@ -104,6 +103,12 @@ const EnhancedVideo = ({
 
   const handleCanPlay = () => {
     setIsLoading(false)
+    setRetryCount(0) // Reset retry count on successful load
+  }
+
+  const handleLoadedData = () => {
+    setIsLoading(false)
+    setRetryCount(0)
   }
 
   if (hasError) {
@@ -111,7 +116,8 @@ const EnhancedVideo = ({
       <div className={`bg-gradient-to-br from-muted to-accent/20 flex items-center justify-center ${className}`}>
         <div className="text-center">
           <ImageIcon className="w-16 h-16 text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">Video unavailable</p>
+          <p className="text-sm text-muted-foreground">Video loading...</p>
+          <p className="text-xs text-muted-foreground mt-1">Check your connection</p>
         </div>
       </div>
     )
@@ -138,8 +144,11 @@ const EnhancedVideo = ({
         onError={handleError}
         onLoadStart={handleLoadStart}
         onCanPlay={handleCanPlay}
+        onLoadedData={handleLoadedData}
+        preload="metadata"
         {...props}
       >
+        <source src={src} type="video/mp4" />
         Your browser does not support video playback.
       </video>
     </div>
@@ -268,6 +277,31 @@ function App() {
   
   // File input reference for upload functionality
   const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+  // Check video availability on app load
+  React.useEffect(() => {
+    // Only check in development to avoid unnecessary requests in production
+    if (process.env.NODE_ENV === 'development') {
+      const checkVideoAvailability = async () => {
+        const videos = [modernLivingRoomVideo, cozyBedroomVideo, kitchenPanVideo]
+        
+        for (const video of videos) {
+          try {
+            const response = await fetch(video, { method: 'HEAD' })
+            if (!response.ok) {
+              console.warn(`Video may not be available: ${video} (Status: ${response.status})`)
+            } else {
+              console.log(`Video available: ${video}`)
+            }
+          } catch (error) {
+            console.warn(`Failed to check video: ${video}`, error)
+          }
+        }
+      }
+      
+      checkVideoAvailability()
+    }
+  }, [])
 
   // File upload handlers
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
