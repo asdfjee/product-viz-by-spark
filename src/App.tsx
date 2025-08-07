@@ -36,7 +36,7 @@ import {
   Settings,
   Trash2
 } from '@phosphor-icons/react'
-import { toast } from 'sonner'
+import { toast, Toaster } from 'sonner'
 // Video files served from public directory for better production performance
 const modernLivingRoomVideo = '/videos/modern-living-room-transformation.mp4'
 const cozyBedroomVideo = '/videos/Cozy_Room_Transformation_Video_(1).mp4'
@@ -2557,14 +2557,23 @@ const [galleryVideos, setGalleryVideos] = useLocalStorage<any[]>('gallery-videos
     )
   }
 
-  // Render current view
-  if (currentView === 'landing') return <LandingPage />
-  if (currentView === 'dashboard') return <ProjectDashboard />
-  if (currentView === 'workspace') return <VisualizationWorkspace />
-  if (currentView === 'gallery') return <GalleryPage />
-  if (currentView === 'about') return <AboutPage />
-  
-  return <LandingPage />
+   // Render current view
+  const CurrentPageComponent = () => {
+    if (currentView === 'landing') return <LandingPage />
+    if (currentView === 'dashboard') return <ProjectDashboard />
+    if (currentView === 'workspace') return <VisualizationWorkspace />
+    if (currentView === 'gallery') return <GalleryPage />
+    if (currentView === 'about') return <AboutPage />
+    if (currentView === 'admin') return <AdminPage />
+    return <LandingPage />
+  }
+
+  return (
+    <>
+      <CurrentPageComponent />
+      <Toaster />
+    </>
+  )
 }
 
 export default App
