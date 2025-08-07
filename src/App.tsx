@@ -34,7 +34,7 @@ import {
   MapPin,
   Phone,
   Gear,
-  Trash2
+  Trash
 } from '@phosphor-icons/react'
 import { toast, Toaster } from 'sonner'
 // Video files served from public directory for better production performance
@@ -2408,7 +2408,7 @@ const [galleryVideos, setGalleryVideos] = useLocalStorage<any[]>('gallery-videos
                             size="sm"
                             onClick={() => handleDeleteVideo(video.id)}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash className="w-4 h-4" />
                           </Button>
                         </div>
                       </CardContent>
