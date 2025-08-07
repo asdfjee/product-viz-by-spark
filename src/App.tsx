@@ -1334,8 +1334,8 @@ function App() {
 
             {/* Active Filters & Results Count */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-6 pt-4 border-t">
-            {/* Active Filters & Results Count */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-6 pt-4 border-t">
+              <div className="flex items-center gap-2">
+                {activeRoomFilter !== 'All Rooms' && (
                   <Badge variant="secondary" className="gap-1">
                     {activeRoomFilter}
                     <button 
