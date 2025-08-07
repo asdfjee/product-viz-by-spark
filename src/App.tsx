@@ -37,8 +37,144 @@ import {
 } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
-import modernLivingRoomVideo from '@/assets/video/modern-living-room-transformation.mp4'
-import cozyBedroomVideo from '@/assets/video/Cozy_Room_Transformation_Video_(1).mp4'
+// Video files served from public directory for better production performance
+const modernLivingRoomVideo = '/videos/modern-living-room-transformation.mp4'
+const cozyBedroomVideo = '/videos/Cozy_Room_Transformation_Video_(1).mp4'
+const kitchenPanVideo = '/videos/Kitchen_Pan_Video_Generation.mp4'
+
+// Production video verification
+const verifyVideoPath = async (path: string): Promise<boolean> => {
+  try {
+    const response = await fetch(path, { method: 'HEAD' })
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
+// Fallback to check if videos exist and provide alternatives
+const checkVideoPath = (primaryPath: string, fallbacks: string[] = []) => {
+  // In production, we'll use the primary path
+  // The fallbacks are for development/testing
+  return primaryPath
+}
+
+
+
+// Enhanced Video Component with better production error handling
+const EnhancedVideo = ({ 
+  src, 
+  className = "", 
+  autoPlay = true, 
+  muted = true, 
+  loop = true, 
+  playsInline = true,
+  controls = false,
+  onError,
+  ...props 
+}: {
+  src: string
+  className?: string
+  autoPlay?: boolean
+  muted?: boolean
+  loop?: boolean
+  playsInline?: boolean
+  controls?: boolean
+  onError?: (e: React.SyntheticEvent<HTMLVideoElement, Event>) => void
+  [key: string]: any
+}) => {
+  const [hasError, setHasError] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [retryCount, setRetryCount] = useState(0)
+
+  const handleError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+    console.error('Video failed to load:', src, 'Error:', e.currentTarget.error)
+    
+    // Log more details about the error
+    const video = e.currentTarget
+    if (video.error) {
+      console.error('Video error code:', video.error.code)
+      console.error('Video error message:', video.error.message)
+    }
+    
+    // Try to reload the video once with a slight delay
+    if (retryCount < 2) {
+      setRetryCount(prev => prev + 1)
+      setTimeout(() => {
+        setIsLoading(true)
+        setHasError(false)
+        video.load()
+      }, 1000)
+      return
+    }
+    
+    setHasError(true)
+    setIsLoading(false)
+    if (onError) onError(e)
+  }
+
+  const handleLoadStart = () => {
+    setIsLoading(true)
+    setHasError(false)
+  }
+
+  const handleCanPlay = () => {
+    setIsLoading(false)
+    setRetryCount(0)
+  }
+
+  const handleLoadedData = () => {
+    setIsLoading(false)
+    setRetryCount(0)
+  }
+
+  // Production fallback: show placeholder instead of broken video
+  if (hasError) {
+    return (
+      <div className={`bg-gradient-to-br from-accent/10 to-accent/5 flex items-center justify-center ${className}`}>
+        <div className="text-center">
+          <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-3">
+            <Play className="w-8 h-8 text-accent" />
+          </div>
+          <p className="text-sm font-medium text-foreground">Transformation Video</p>
+          <p className="text-xs text-muted-foreground mt-1">Professional design showcase</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className={`relative ${className}`}>
+      {isLoading && (
+        <div className="absolute inset-0 bg-muted flex items-center justify-center z-10">
+          <div className="text-center">
+            <RefreshCw className="w-8 h-8 text-muted-foreground animate-spin mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Loading video...</p>
+          </div>
+        </div>
+      )}
+      <video
+        className={`w-full h-full object-cover ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity`}
+        src={src}
+        autoPlay={autoPlay}
+        muted={muted}
+        loop={loop}
+        playsInline={playsInline}
+        controls={controls}
+        onError={handleError}
+        onLoadStart={handleLoadStart}
+        onCanPlay={handleCanPlay}
+        onLoadedData={handleLoadedData}
+        preload="metadata"
+        crossOrigin="anonymous"
+        {...props}
+      >
+        <source src={src} type="video/mp4" />
+        Your browser does not support video playback.
+      </video>
+    </div>
+  )
+}
 
 // Types for our application
 interface Project {
@@ -81,7 +217,7 @@ const featuredVisualizationsData = [
     id: '3',
     before: '/api/placeholder/300/200', 
     after: '/api/placeholder/300/200',
-    video: '/api/placeholder/600/400/video',
+    video: kitchenPanVideo,
     description: 'Minimalist kitchen design'
   }
 ]
@@ -141,7 +277,7 @@ const ToggleComparison = ({ transformation }: { transformation: any }) => {
 
 function App() {
   // App state management
-  const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'workspace' | 'gallery' | 'about' | 'admin'>('landing')
+  const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'workspace' | 'gallery' | 'about'>('landing')
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false)
   const [workspaceTab, setWorkspaceTab] = useState('upload')
@@ -162,6 +298,30 @@ function App() {
   
   // File input reference for upload functionality
   const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+  // Check video availability and log status
+  React.useEffect(() => {
+    // Simple availability check without blocking production
+    const videos = [modernLivingRoomVideo, cozyBedroomVideo, kitchenPanVideo]
+    
+    // Only do extensive checking in development
+    if (process.env.NODE_ENV === 'development') {
+      const checkVideoAvailability = async () => {
+        for (const video of videos) {
+          try {
+            const response = await fetch(video, { method: 'HEAD' })
+            console.log(`Video ${video}:`, response.ok ? 'Available' : `Status ${response.status}`)
+          } catch (error) {
+            console.warn(`Failed to check video: ${video}`, error)
+          }
+        }
+      }
+      checkVideoAvailability()
+    } else {
+      // In production, just log the video paths being used
+      console.log('Production video paths:', videos)
+    }
+  }, [])
 
   // File upload handlers
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -273,16 +433,6 @@ function App() {
             >
               About
             </a>
-            <a 
-              href="#"
-              className="text-foreground hover:text-primary transition-colors font-medium text-sm"
-              onClick={(e) => {
-                e.preventDefault()
-                setCurrentView('admin')
-              }}
-            >
-              Admin
-            </a>
             <Button 
               className="ml-4"
               onClick={() => setCurrentView('dashboard')}
@@ -361,17 +511,6 @@ function App() {
                 }}
               >
                 About
-              </a>
-              <a 
-                href="#"
-                className="text-foreground hover:text-primary transition-colors font-medium text-center py-2 text-sm"
-                onClick={(e) => {
-                  e.preventDefault()
-                  setCurrentView('admin')
-                  setIsMobileMenuOpen(false)
-                }}
-              >
-                Admin
               </a>
               <Button 
                 className="mt-2"
@@ -552,27 +691,27 @@ function App() {
           
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {featuredVisualizationsData.map((viz) => (
-              <Card key={viz.id} className="overflow-hidden border-0 shadow-lg group cursor-pointer hover:shadow-xl transition-shadow">
+                 <Card 
+                key={viz.id} 
+                className="overflow-hidden border-0 shadow-lg group cursor-pointer hover:shadow-xl transition-shadow"
+                onClick={() => setCurrentView('gallery')}
+              >
                 <div className="relative">
                   <div className="aspect-video bg-muted relative overflow-hidden">
-                    <video 
-                      className="w-full h-full object-cover"
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                    >
-                      <source src={viz.video} type="video/mp4" />
-                      {/* Fallback for browsers that don't support video */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-muted to-accent/20" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <ImageIcon className="w-12 h-12 text-muted-foreground" />
-                      </div>
-                    </video>
+                    <EnhancedVideo 
+                      src={viz.video}
+                      className="w-full h-full"
+                      onError={(e) => {
+                        console.error(`Failed to load video: ${viz.video}`)
+                        // Don't block the UI, just log the error
+                      }}
+                    />
                   </div>
-                  <div className="absolute top-4 right-4">
-                    <Badge className="bg-white/90 text-foreground">Before → After</Badge>
-                  </div>
+                  {viz.id !== '3' && (
+                    <div className="absolute top-4 right-4">
+                      <Badge className="bg-white/90 text-foreground">Before → After</Badge>
+                    </div>
+                  )}
                   {/* Play overlay for visual indication */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                     <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1164,12 +1303,12 @@ function App() {
           id: '3',
           before: '/api/placeholder/400/300',
           after: '/api/placeholder/400/300',
-          video: '/api/placeholder/800/600/video',
-          title: 'Industrial Kitchen Design',
-          description: 'Bold kitchen featuring exposed elements and modern appliances',
-          style: 'Industrial',
+          video: kitchenPanVideo,
+          title: 'Minimalist Kitchen Design',
+          description: 'Clean, functional kitchen featuring sleek lines and modern appliances',
+          style: 'Modern Minimalist',
           room: 'Kitchen',
-          keyFeatures: ['Exposed Brick', 'Metal Accents', 'Open Shelving', 'Dark Palette']
+          keyFeatures: ['Clean Lines', 'Modern Appliances', 'Minimal Clutter', 'Functional Design']
         },
         {
           id: '4',
@@ -1220,14 +1359,25 @@ function App() {
           before: '/api/placeholder/400/300',
           after: '/api/placeholder/400/300',
           video: '/api/placeholder/800/600/video',
-          title: 'Rustic Kitchen Renovation',
+          title: 'Industrial Kitchen Renovation',
+          description: 'Bold kitchen featuring exposed elements and modern appliances',
+          style: 'Industrial',
+          room: 'Kitchen',
+          keyFeatures: ['Exposed Brick', 'Metal Accents', 'Open Shelving', 'Dark Palette']
+        },
+        {
+          id: '9',
+          before: '/api/placeholder/400/300',
+          after: '/api/placeholder/400/300',
+          video: '/api/placeholder/800/600/video',
+          title: 'Rustic Farmhouse Kitchen',
           description: 'Farmhouse elements meet modern functionality',
           style: 'Farmhouse',
           room: 'Kitchen',
           keyFeatures: ['Shaker Cabinets', 'Butcher Block', 'Vintage Hardware', 'Subway Tile']
         },
         {
-          id: '9',
+          id: '10',
           before: '/api/placeholder/400/300',
           after: '/api/placeholder/400/300',
           video: '/api/placeholder/800/600/video',
@@ -1316,8 +1466,8 @@ function App() {
 
             {/* Active Filters & Results Count */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-6 pt-4 border-t">
-            {/* Active Filters & Results Count */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-6 pt-4 border-t">
+              <div className="flex items-center gap-2">
+                {activeRoomFilter !== 'All Rooms' && (
                   <Badge variant="secondary" className="gap-1">
                     {activeRoomFilter}
                     <button 
@@ -1367,20 +1517,14 @@ function App() {
                   <div className="relative">
                     {/* Video/Image Display */}
                     <div className="aspect-[4/3] bg-muted relative overflow-hidden">
-                      <video 
-                        className="w-full h-full object-cover"
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                      >
-                        <source src={item.video} type="video/mp4" />
-                        {/* Fallback */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-muted to-accent/20" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <ImageIcon className="w-16 h-16 text-muted-foreground" />
-                        </div>
-                      </video>
+                      <EnhancedVideo 
+                        src={item.video}
+                        className="w-full h-full"
+                        onError={(e) => {
+                          console.error(`Failed to load gallery video: ${item.video}`, e)
+                          // The EnhancedVideo component already handles the error display
+                        }}
+                      />
                     </div>
                     
                     {/* Overlay on hover */}
@@ -1409,7 +1553,7 @@ function App() {
                       <span>•</span>
                       <div className="flex items-center">
                         <Star className="w-3 h-3 mr-1 fill-current text-accent" />
-                        <span>Featured</span>
+                        <span>{item.id === '3' ? 'Featured Design' : 'Featured'}</span>
                       </div>
                     </div>
                     
@@ -1480,7 +1624,7 @@ function App() {
 
         {/* Transformation Detail Modal */}
         <Dialog open={!!selectedTransformation} onOpenChange={() => setSelectedTransformation(null)}>
-          <DialogContent className="max-w-7xl w-[95vw] h-[90vh] p-0 overflow-hidden">
+          <DialogContent className="max-w-[98vw] w-[98vw] h-[95vh] p-0 overflow-hidden">
             {selectedTransformation && (
               <div className="flex flex-col h-full bg-background">
                 {/* Modal Header */}
@@ -1540,9 +1684,9 @@ function App() {
 
                 {/* Main Comparison Area */}
                 <div className="flex-1 overflow-hidden">
-                  <div className="grid lg:grid-cols-3 gap-0 h-full">
-                    {/* Before/After Comparison */}
-                    <div className="lg:col-span-2 border-r border-border">
+                  <div className="grid lg:grid-cols-5 gap-0 h-full">
+                    {/* Before/After Comparison - Now takes up more space */}
+                    <div className="lg:col-span-3 border-r border-border">
                       <div className="h-full bg-card relative overflow-hidden">
                         {comparisonMode === 'split' && (
                           <div className="grid grid-cols-2 h-full">
@@ -1624,8 +1768,8 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Details Sidebar */}
-                    <div className="overflow-y-auto bg-background">
+                    {/* Details Sidebar - Now more compact */}
+                    <div className="lg:col-span-2 overflow-y-auto bg-background">
                       <div className="p-6 space-y-6">
                         {/* Transformation Details */}
                         <Card className="border-0 shadow-sm">
@@ -1990,8 +2134,31 @@ function App() {
     })
     const [videoFile, setVideoFile] = useState<File | null>(null)
     const [isUploading, setIsUploading] = useState(false)
+    const [videoStatus, setVideoStatus] = useState<Record<string, boolean>>({})
     
     const videoInputRef = React.useRef<HTMLInputElement>(null)
+
+    // Check video availability on admin page load
+    React.useEffect(() => {
+      const checkVideos = async () => {
+        const videos = [
+          { name: 'Modern Living Room', path: modernLivingRoomVideo },
+          { name: 'Cozy Bedroom', path: cozyBedroomVideo },
+          { name: 'Kitchen Design', path: kitchenPanVideo }
+        ]
+        
+        const status: Record<string, boolean> = {}
+        
+        for (const video of videos) {
+          const isAvailable = await verifyVideoPath(video.path)
+          status[video.name] = isAvailable
+        }
+        
+        setVideoStatus(status)
+      }
+      
+      checkVideos()
+    }, [])
 
     const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0]
@@ -2134,6 +2301,50 @@ function App() {
               </Button>
             </div>
 
+            {/* Video Status Section */}
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="w-5 h-5" />
+                  Built-in Video Status
+                </CardTitle>
+                <CardDescription>
+                  Check if the main gallery videos are loading correctly
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-4">
+                  {Object.entries(videoStatus).map(([name, isAvailable]) => (
+                    <div key={name} className="flex items-center justify-between p-3 border rounded-lg">
+                      <span className="font-medium">{name}</span>
+                      <div className="flex items-center gap-2">
+                        {isAvailable ? (
+                          <Badge className="bg-green-500 text-white">
+                            <Check className="w-3 h-3 mr-1" />
+                            Available
+                          </Badge>
+                        ) : (
+                          <Badge variant="destructive">
+                            <X className="w-3 h-3 mr-1" />
+                            Not Found
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+                  <h4 className="font-medium mb-2">Video Troubleshooting:</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• Videos should be in <code>/public/videos/</code> directory</li>
+                    <li>• Check exact filename spelling and capitalization</li>
+                    <li>• Visit <a href="/video-test.html" target="_blank" className="text-accent hover:underline">/video-test.html</a> for detailed testing</li>
+                    <li>• Ensure videos are deployed with your application</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Current Videos */}
             <div className="space-y-6">
               <h2 className="text-xl font-bold">Current Gallery Videos</h2>
@@ -2143,13 +2354,12 @@ function App() {
                   {galleryVideos.map((video) => (
                     <Card key={video.id} className="overflow-hidden">
                       <div className="aspect-video bg-muted relative">
-                        <video 
-                          className="w-full h-full object-cover"
-                          controls
+                        <EnhancedVideo 
                           src={video.video}
-                        >
-                          Your browser does not support video playback.
-                        </video>
+                          className="w-full h-full"
+                          controls={true}
+                          autoPlay={false}
+                        />
                       </div>
                       <CardContent className="p-4">
                         <h3 className="font-bold mb-2">{video.title}</h3>
@@ -2319,7 +2529,6 @@ function App() {
   if (currentView === 'workspace') return <VisualizationWorkspace />
   if (currentView === 'gallery') return <GalleryPage />
   if (currentView === 'about') return <AboutPage />
-  if (currentView === 'admin') return <AdminPage />
   
   return <LandingPage />
 }

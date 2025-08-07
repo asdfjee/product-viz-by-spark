@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Deployment Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .video-test { margin: 20px 0; }
+        video { max-width: 400px; height: auto; }
+        .status { margin: 10px 0; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Video Deployment Test</h1>
+    <p>Testing if videos are properly deployed and accessible:</p>
+
+    <div class="video-test">
+        <h3>Modern Living Room Transformation</h3>
+        <video controls preload="metadata">
+            <source src="/videos/modern-living-room-transformation.mp4" type="video/mp4">
+            Video not supported
+        </video>
+        <div class="status" id="status1">Loading...</div>
+    </div>
+
+    <div class="video-test">
+        <h3>Cozy Bedroom Makeover</h3>
+        <video controls preload="metadata">
+            <source src="/videos/Cozy_Room_Transformation_Video_(1).mp4" type="video/mp4">
+            Video not supported
+        </video>
+        <div class="status" id="status2">Loading...</div>
+    </div>
+
+    <div class="video-test">
+        <h3>Minimalist Kitchen Design</h3>
+        <video controls preload="metadata">
+            <source src="/videos/Kitchen_Pan_Video_Generation.mp4" type="video/mp4">
+            Video not supported
+        </video>
+        <div class="status" id="status3">Loading...</div>
+    </div>
+
+    <script>
+        const videos = document.querySelectorAll('video');
+        const statuses = ['status1', 'status2', 'status3'];
+        
+        videos.forEach((video, index) => {
+            const statusDiv = document.getElementById(statuses[index]);
+            
+            video.addEventListener('loadedmetadata', () => {
+                statusDiv.textContent = '✅ Video loaded successfully';
+                statusDiv.className = 'status success';
+            });
+            
+            video.addEventListener('error', (e) => {
+                statusDiv.textContent = '❌ Video failed to load';
+                statusDiv.className = 'status error';
+                console.error('Video error:', e);
+            });
+        });
+
+        // Test direct fetch of video files
+        const testVideoPaths = [
+            '/videos/modern-living-room-transformation.mp4',
+            '/videos/Cozy_Room_Transformation_Video_(1).mp4',
+            '/videos/Kitchen_Pan_Video_Generation.mp4'
+        ];
+
+        testVideoPaths.forEach((path, index) => {
+            fetch(path, { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        console.log(`✅ ${path} is accessible`);
+                    } else {
+                        console.error(`❌ ${path} returned status ${response.status}`);
+                    }
+                })
+                .catch(error => {
+                    console.error(`❌ ${path} failed to load:`, error);
+                });
+        });
+    </script>
+
+    <div style="margin-top: 40px; padding: 20px; background: #f5f5f5; border-radius: 8px;">
+        <h3>Deployment Instructions:</h3>
+        <ol>
+            <li>Ensure all video files are in the <code>public/videos/</code> directory</li>
+            <li>Check that filenames match exactly (including capitalization)</li>
+            <li>Deploy your application to your hosting platform</li>
+            <li>Visit this test page to verify video accessibility</li>
+            <li>Check browser console for any error messages</li>
+        </ol>
+        <p><strong>Expected Files:</strong></p>
+        <ul>
+            <li><code>public/videos/modern-living-room-transformation.mp4</code></li>
+            <li><code>public/videos/Cozy_Room_Transformation_Video_(1).mp4</code></li>
+            <li><code>public/videos/Kitchen_Pan_Video_Generation.mp4</code></li>
+        </ul>
+    </div>
+</body>
+</html>

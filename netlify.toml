@@ -1,0 +1,8 @@
+# netlify.toml
+
+[build]
+  # This command is run to build your site.
+  command = "npm run build"
+
+  # This is the directory that contains your built site.
+  publish = "dist" 

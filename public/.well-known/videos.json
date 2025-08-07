@@ -1,0 +1,20 @@
+{
+  "videos": [
+    {
+      "id": "modern-living-room",
+      "path": "/videos/modern-living-room-transformation.mp4",
+      "title": "Modern Living Room Transformation"
+    },
+    {
+      "id": "cozy-bedroom",
+      "path": "/videos/Cozy_Room_Transformation_Video_(1).mp4",
+      "title": "Cozy Bedroom Makeover"
+    },
+    {
+      "id": "minimalist-kitchen",
+      "path": "/videos/Kitchen_Pan_Video_Generation.mp4",
+      "title": "Minimalist Kitchen Design"
+    }
+  ],
+  "last_updated": "2024-01-15T12:00:00Z"
+}
