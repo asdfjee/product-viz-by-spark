@@ -24,7 +24,7 @@ import {
   Folder,
   Image as ImageIcon,
   Type,
-  Wand2,
+  MagicWand,
   Download,
   ArrowClockwise,
   List,
@@ -672,7 +672,7 @@ const [galleryVideos, setGalleryVideos] = useLocalStorage<any[]>('gallery-videos
           >
             <CardHeader>
               <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-accent/20 transition-colors">
-                <Wand2 className="w-8 h-8 text-accent" />
+                <MagicWand className="w-8 h-8 text-accent" />
               </div>
               <CardTitle className="text-xl">Describe Your Vision</CardTitle>
             </CardHeader>
@@ -1106,7 +1106,7 @@ const [galleryVideos, setGalleryVideos] = useLocalStorage<any[]>('gallery-videos
                   disabled={!uploadedImage || !itemDescription.trim() || !customerEmail.trim() || isSubmitting}
                   onClick={() => submitVisualizationRequest('specific-item')}
                 >
-                  <Wand2 className="w-4 h-4 mr-2" />
+                  <MagicWand className="w-4 h-4 mr-2" />
                   {isSubmitting ? 'Submitting Request...' : 'Submit Visualization Request'}
                 </Button>
                 
