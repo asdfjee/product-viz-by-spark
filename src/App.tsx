@@ -35,7 +35,6 @@ import {
   Settings,
   Trash2
 } from '@phosphor-icons/react'
-import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
 // Video files served from public directory for better production performance
 const modernLivingRoomVideo = '/videos/modern-living-room-transformation.mp4'
@@ -284,11 +283,45 @@ function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   
   // User data persistence
-  const [user, setUser] = useKV('user-profile', null)
-  const [projects, setProjects, deleteProjects] = useKV<Project[]>('user-projects', [])
-  const [currentRequest, setCurrentRequest] = useState<VisualizationRequest | null>(null)
-  const [galleryVideos, setGalleryVideos] = useKV<any[]>('gallery-videos', [])
+  // Custom hook to replace useKV with standard localStorage
+function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void, () => void] {
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      console.error(error);
+      return initialValue;
+    }
+  });
 
+  const setValue = (value: T | ((val: T) => T)) => {
+    try {
+      const valueToStore = value instanceof Function ? value(storedValue) : value;
+      setStoredValue(valueToStore);
+      window.localStorage.setItem(key, JSON.stringify(valueToStore));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  
+  const deleteValue = () => {
+    try {
+      window.localStorage.removeItem(key);
+      setStoredValue(initialValue);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return [storedValue, setValue, deleteValue];
+}
+
+// User data persistence using our new useLocalStorage hook
+const [user, setUser] = useLocalStorage('user-profile', null)
+const [projects, setProjects, deleteProjects] = useLocalStorage<Project[]>('user-projects', [])
+const [currentRequest, setCurrentRequest] = useState<VisualizationRequest | null>(null)
+const [galleryVideos, setGalleryVideos] = useLocalStorage<any[]>('gallery-videos', [])
   // Form states - using useState for smooth typing experience
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [itemDescription, setItemDescription] = useState('')
