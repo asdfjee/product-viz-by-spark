@@ -33,7 +33,7 @@ import {
   Envelope,
   MapPin,
   Phone,
-  Settings,
+  Gear,
   Trash2
 } from '@phosphor-icons/react'
 import { toast, Toaster } from 'sonner'
@@ -2339,7 +2339,7 @@ const [galleryVideos, setGalleryVideos] = useLocalStorage<any[]>('gallery-videos
             <Card className="mb-8">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Settings className="w-5 h-5" />
+                  <Gear className="w-5 h-5" />
                   Built-in Video Status
                 </CardTitle>
                 <CardDescription>
