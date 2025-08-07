@@ -24,7 +24,7 @@ import {
   Plus,
   Folder,
   Image as ImageIcon,
-  Type,
+  TextT,
   MagicWand,
   Download,
   ArrowClockwise,
@@ -2001,7 +2001,7 @@ const [galleryVideos, setGalleryVideos] = useLocalStorage<any[]>('gallery-videos
                   </p>
                 </div>
                 <div className="w-full md:w-80 h-48 bg-muted rounded-lg flex items-center justify-center">
-                  <Type className="w-12 h-12 text-muted-foreground" />
+                  <TextT className="w-12 h-12 text-muted-foreground" />
                 </div>
               </div>
 
