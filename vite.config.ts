@@ -2,8 +2,8 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig, PluginOption } from "vite";
 
-import sparkPlugin from "@github/spark/spark-vite-plugin";
-import createIconImportProxy from "@github/spark/vitePhosphorIconProxyPlugin";
+// We've removed the imports for @github/spark
+
 import { resolve } from 'path'
 
 const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname
@@ -13,9 +13,7 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    // DO NOT REMOVE
-    createIconImportProxy() as PluginOption,
-    sparkPlugin() as PluginOption,
+    // We've removed the spark plugins from here
   ],
   resolve: {
     alias: {
@@ -23,11 +21,8 @@ export default defineConfig({
     }
   },
   build: {
-    // Ensure public assets are properly copied
     assetsDir: 'assets',
-    // Optimize asset handling
-    assetsInlineLimit: 4096, // Keep small assets inline, serve large videos separately
+    assetsInlineLimit: 4096,
   },
-  // Ensure public directory is properly served
   publicDir: 'public',
 });
