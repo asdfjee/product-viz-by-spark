@@ -1,4 +1,4 @@
-// src/App.tsx - FINAL VERSION WITH ALL DETAILED PAGES RESTORED
+// src/App.tsx - FINAL VERSION WITH ALL PAGES FULLY RESTORED
 
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
@@ -177,23 +177,85 @@ const Header = ({ setCurrentView, isMobileMenuOpen, setIsMobileMenuOpen }: any) 
 // --- PAGE COMPONENTS ---
 
 const LandingPage = ({ setCurrentView, setProjects, setSelectedProject, setWorkspaceTab }: any) => {
-    return (
-        <>
-            <div className="relative overflow-hidden">
-                <div className="container mx-auto px-6 py-20 text-center max-w-4xl">
-                    <Badge variant="secondary" className="mb-6"><Sparkle className="w-4 h-4 mr-2" />AI-Powered Interior Design</Badge>
-                    <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8">Visualize Your<span className="block" style={{ color: '#798ab5' }}>Dream Space</span></h1>
-                    <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">Submit your room photo and design preferences. Get custom visualizations delivered to your email in 3-5 business days.</p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Button size="lg" className="text-lg px-8 py-6 h-auto" onClick={() => setCurrentView('dashboard')}>Start Designing<ArrowRight className="ml-2 w-5 h-5" /></Button>
-                        <Button variant="outline" size="lg" className="text-lg px-8 py-6 h-auto" onClick={() => setCurrentView('gallery')}><Play className="mr-2 w-5 h-5" />Watch Demo</Button>
-                    </div>
-                </div>
+  const handleStartDesigning = (tab: 'upload' | 'style') => {
+      const newProject: Project = {
+        id: Date.now().toString(),
+        name: tab === 'upload' ? 'Quick Upload Project' : 'Vision Project',
+        description: `Created from homepage ${tab} step`,
+        createdAt: new Date().toISOString(),
+        visualizationRequests: []
+      };
+      setProjects((currentProjects: Project[] = []) => [...currentProjects, newProject]);
+      setSelectedProject(newProject);
+      setWorkspaceTab(tab);
+      setCurrentView('workspace');
+  };
+  
+  return (
+    <>
+      <div className="relative overflow-hidden">
+        <div className="container mx-auto px-6 py-20">
+          <div className="text-center max-w-4xl mx-auto">
+            <Badge variant="secondary" className="mb-6 text-sm font-medium"><Sparkle className="w-4 h-4 mr-2" />AI-Powered Interior Design</Badge>
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8">Visualize Your<span className="block" style={{ color: '#798ab5' }}>Dream Space</span></h1>
+            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">Submit your room photo and design preferences to our professional team. Get custom visualizations delivered to your email within 3-5 business days.</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button size="lg" className="text-lg px-8 py-6 h-auto" onClick={() => setCurrentView('dashboard')}>Start Designing<ArrowRight className="ml-2 w-5 h-5" /></Button>
+              <Button variant="outline" size="lg" className="text-lg px-8 py-6 h-auto" onClick={() => setCurrentView('gallery')}><Play className="mr-2 w-5 h-5" />Watch Demo</Button>
             </div>
-            {/* Other sections... */}
-            <Footer />
-        </>
-    );
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-6 py-20">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold mb-4">How It Works</h2>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Three simple steps to transform your space</p>
+        </div>
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <Card className="text-center border-0 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 group" onClick={() => handleStartDesigning('upload')}>
+            <CardHeader><div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-accent/20 transition-colors"><Camera className="w-8 h-8 text-accent" /></div><CardTitle className="text-xl">Upload Your Room</CardTitle></CardHeader>
+            <CardContent><p className="text-muted-foreground mb-4">Upload your room photo and let our professional design team analyze the space and create custom visualizations.</p><div className="opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="outline" size="sm">Start Upload →</Button></div></CardContent>
+          </Card>
+          <Card className="text-center border-0 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 group" onClick={() => handleStartDesigning('style')}>
+            <CardHeader><div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-accent/20 transition-colors"><MagicWand className="w-8 h-8 text-accent" /></div><CardTitle className="text-xl">Describe Your Vision</CardTitle></CardHeader>
+            <CardContent><p className="text-muted-foreground mb-4">Describe your vision or upload specific furniture. Our design team will create professional visualizations and email them to you.</p><div className="opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="outline" size="sm">Describe Now →</Button></div></CardContent>
+          </Card>
+          <Card className="text-center border-0 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 group" onClick={() => setCurrentView('gallery')}>
+            <CardHeader><div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-accent/20 transition-colors"><Download className="w-8 h-8 text-accent" /></div><CardTitle className="text-xl">Receive Your Design</CardTitle></CardHeader>
+            <CardContent><p className="text-muted-foreground mb-4">Receive professional-quality visualizations and purchase recommendations delivered to your email within 3-5 business days.</p><div className="opacity-0 group-hover:opacity-100 transition-opacity"><Button variant="outline" size="sm">Receive Results →</Button></div></CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <div className="bg-muted/30 py-20">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4">Professional Design Transformations</h2>
+            <p className="text-xl text-muted-foreground">Real projects completed by our professional design team - delivered via email</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {featuredVisualizationsData.map((viz) => (
+              <Card key={viz.id} className="overflow-hidden border-0 shadow-lg group cursor-pointer hover:shadow-xl transition-shadow" onClick={() => setCurrentView('gallery')}>
+                <div className="relative">
+                  <div className="aspect-video bg-muted relative overflow-hidden"><EnhancedVideo src={viz.video} className="w-full h-full"/></div>
+                  {viz.id !== '3' && (<div className="absolute top-4 right-4"><Badge className="bg-white/90 text-foreground">Before → After</Badge></div>)}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Play className="w-6 h-6 text-white ml-1" /></div>
+                  </div>
+                </div>
+                <CardContent className="p-6">
+                  <p className="font-medium">{viz.description}</p>
+                  <div className="flex items-center mt-4 text-sm text-muted-foreground"><Star className="w-4 h-4 mr-1 fill-current text-accent" /><span>Featured transformation</span></div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+      <Footer />
+    </>
+  );
 };
 
 const CreateProjectDialog = ({ isCreateProjectOpen, setIsCreateProjectOpen, setProjects, setSelectedProject, setCurrentView }: any) => {
