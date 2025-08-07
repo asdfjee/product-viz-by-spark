@@ -22,4 +22,12 @@ export default defineConfig({
       '@': resolve(projectRoot, 'src')
     }
   },
+  build: {
+    // Ensure public assets are properly copied
+    assetsDir: 'assets',
+    // Optimize asset handling
+    assetsInlineLimit: 4096, // Keep small assets inline, serve large videos separately
+  },
+  // Ensure public directory is properly served
+  publicDir: 'public',
 });

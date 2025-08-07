@@ -37,9 +37,114 @@ import {
 } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
-import modernLivingRoomVideo from '@/assets/video/modern-living-room-transformation.mp4'
-import cozyBedroomVideo from '@/assets/video/Cozy_Room_Transformation_Video_(1).mp4'
-import kitchenPanVideo from '@/assets/video/Kitchen_Pan_Video_Generation.mp4'
+// Video files served from public directory for better production performance
+const modernLivingRoomVideo = '/videos/modern-living-room-transformation.mp4'
+const cozyBedroomVideo = '/videos/Cozy_Room_Transformation_Video_(1).mp4'
+const kitchenPanVideo = '/videos/Kitchen_Pan_Video_Generation.mp4'
+
+// Function to verify video availability in development
+const checkVideoAvailability = () => {
+  const videos = [modernLivingRoomVideo, cozyBedroomVideo, kitchenPanVideo]
+  videos.forEach(video => {
+    fetch(video, { method: 'HEAD' })
+      .then(response => {
+        if (!response.ok) {
+          console.warn(`Video may not be available: ${video}`)
+        } else {
+          console.log(`Video available: ${video}`)
+        }
+      })
+      .catch(error => {
+        console.warn(`Failed to check video: ${video}`, error)
+      })
+  })
+}
+
+// Check video availability on app load (only in development)
+if (process.env.NODE_ENV === 'development') {
+  checkVideoAvailability()
+}
+
+// Enhanced Video Component with error handling
+const EnhancedVideo = ({ 
+  src, 
+  className = "", 
+  autoPlay = true, 
+  muted = true, 
+  loop = true, 
+  playsInline = true,
+  controls = false,
+  onError,
+  ...props 
+}: {
+  src: string
+  className?: string
+  autoPlay?: boolean
+  muted?: boolean
+  loop?: boolean
+  playsInline?: boolean
+  controls?: boolean
+  onError?: (e: React.SyntheticEvent<HTMLVideoElement, Event>) => void
+  [key: string]: any
+}) => {
+  const [hasError, setHasError] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  const handleError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+    console.error('Video failed to load:', src)
+    setHasError(true)
+    setIsLoading(false)
+    if (onError) onError(e)
+  }
+
+  const handleLoadStart = () => {
+    setIsLoading(true)
+    setHasError(false)
+  }
+
+  const handleCanPlay = () => {
+    setIsLoading(false)
+  }
+
+  if (hasError) {
+    return (
+      <div className={`bg-gradient-to-br from-muted to-accent/20 flex items-center justify-center ${className}`}>
+        <div className="text-center">
+          <ImageIcon className="w-16 h-16 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">Video unavailable</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className={`relative ${className}`}>
+      {isLoading && (
+        <div className="absolute inset-0 bg-muted flex items-center justify-center z-10">
+          <div className="text-center">
+            <RefreshCw className="w-8 h-8 text-muted-foreground animate-spin mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Loading video...</p>
+          </div>
+        </div>
+      )}
+      <video
+        className={`w-full h-full object-cover ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity`}
+        src={src}
+        autoPlay={autoPlay}
+        muted={muted}
+        loop={loop}
+        playsInline={playsInline}
+        controls={controls}
+        onError={handleError}
+        onLoadStart={handleLoadStart}
+        onCanPlay={handleCanPlay}
+        {...props}
+      >
+        Your browser does not support video playback.
+      </video>
+    </div>
+  )
+}
 
 // Types for our application
 interface Project {
@@ -560,20 +665,10 @@ function App() {
               >
                 <div className="relative">
                   <div className="aspect-video bg-muted relative overflow-hidden">
-                    <video 
-                      className="w-full h-full object-cover"
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                    >
-                      <source src={viz.video} type="video/mp4" />
-                      {/* Fallback for browsers that don't support video */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-muted to-accent/20" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <ImageIcon className="w-12 h-12 text-muted-foreground" />
-                      </div>
-                    </video>
+                    <EnhancedVideo 
+                      src={viz.video}
+                      className="w-full h-full"
+                    />
                   </div>
                   {viz.id !== '3' && (
                     <div className="absolute top-4 right-4">
@@ -1385,20 +1480,10 @@ function App() {
                   <div className="relative">
                     {/* Video/Image Display */}
                     <div className="aspect-[4/3] bg-muted relative overflow-hidden">
-                      <video 
-                        className="w-full h-full object-cover"
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                      >
-                        <source src={item.video} type="video/mp4" />
-                        {/* Fallback */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-muted to-accent/20" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <ImageIcon className="w-16 h-16 text-muted-foreground" />
-                        </div>
-                      </video>
+                      <EnhancedVideo 
+                        src={item.video}
+                        className="w-full h-full"
+                      />
                     </div>
                     
                     {/* Overlay on hover */}
@@ -2161,13 +2246,12 @@ function App() {
                   {galleryVideos.map((video) => (
                     <Card key={video.id} className="overflow-hidden">
                       <div className="aspect-video bg-muted relative">
-                        <video 
-                          className="w-full h-full object-cover"
-                          controls
+                        <EnhancedVideo 
                           src={video.video}
-                        >
-                          Your browser does not support video playback.
-                        </video>
+                          className="w-full h-full"
+                          controls={true}
+                          autoPlay={false}
+                        />
                       </div>
                       <CardContent className="p-4">
                         <h3 className="font-bold mb-2">{video.title}</h3>
