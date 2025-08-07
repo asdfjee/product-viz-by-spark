@@ -277,7 +277,7 @@ const ToggleComparison = ({ transformation }: { transformation: any }) => {
 
 function App() {
   // App state management
-  const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'workspace' | 'gallery' | 'about' | 'admin'>('landing')
+  const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'workspace' | 'gallery' | 'about'>('landing')
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false)
   const [workspaceTab, setWorkspaceTab] = useState('upload')
@@ -433,16 +433,6 @@ function App() {
             >
               About
             </a>
-            <a 
-              href="#"
-              className="text-foreground hover:text-primary transition-colors font-medium text-sm"
-              onClick={(e) => {
-                e.preventDefault()
-                setCurrentView('admin')
-              }}
-            >
-              Admin
-            </a>
             <Button 
               className="ml-4"
               onClick={() => setCurrentView('dashboard')}
@@ -521,17 +511,6 @@ function App() {
                 }}
               >
                 About
-              </a>
-              <a 
-                href="#"
-                className="text-foreground hover:text-primary transition-colors font-medium text-center py-2 text-sm"
-                onClick={(e) => {
-                  e.preventDefault()
-                  setCurrentView('admin')
-                  setIsMobileMenuOpen(false)
-                }}
-              >
-                Admin
               </a>
               <Button 
                 className="mt-2"
@@ -2550,7 +2529,6 @@ function App() {
   if (currentView === 'workspace') return <VisualizationWorkspace />
   if (currentView === 'gallery') return <GalleryPage />
   if (currentView === 'about') return <AboutPage />
-  if (currentView === 'admin') return <AdminPage />
   
   return <LandingPage />
 }
