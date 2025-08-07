@@ -42,6 +42,16 @@ const modernLivingRoomVideo = '/videos/modern-living-room-transformation.mp4'
 const cozyBedroomVideo = '/videos/Cozy_Room_Transformation_Video_(1).mp4'
 const kitchenPanVideo = '/videos/Kitchen_Pan_Video_Generation.mp4'
 
+// Production video verification
+const verifyVideoPath = async (path: string): Promise<boolean> => {
+  try {
+    const response = await fetch(path, { method: 'HEAD' })
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
 // Fallback to check if videos exist and provide alternatives
 const checkVideoPath = (primaryPath: string, fallbacks: string[] = []) => {
   // In production, we'll use the primary path
@@ -51,7 +61,7 @@ const checkVideoPath = (primaryPath: string, fallbacks: string[] = []) => {
 
 
 
-// Enhanced Video Component with error handling and production optimization
+// Enhanced Video Component with better production error handling
 const EnhancedVideo = ({ 
   src, 
   className = "", 
@@ -78,16 +88,23 @@ const EnhancedVideo = ({
   const [retryCount, setRetryCount] = useState(0)
 
   const handleError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
-    console.error('Video failed to load:', src, 'Retry count:', retryCount)
+    console.error('Video failed to load:', src, 'Error:', e.currentTarget.error)
     
-    // Try to reload the video once
-    if (retryCount < 1) {
+    // Log more details about the error
+    const video = e.currentTarget
+    if (video.error) {
+      console.error('Video error code:', video.error.code)
+      console.error('Video error message:', video.error.message)
+    }
+    
+    // Try to reload the video once with a slight delay
+    if (retryCount < 2) {
       setRetryCount(prev => prev + 1)
-      setIsLoading(true)
-      setHasError(false)
-      // Force reload by updating the src
-      const video = e.currentTarget
-      video.load()
+      setTimeout(() => {
+        setIsLoading(true)
+        setHasError(false)
+        video.load()
+      }, 1000)
       return
     }
     
@@ -103,7 +120,7 @@ const EnhancedVideo = ({
 
   const handleCanPlay = () => {
     setIsLoading(false)
-    setRetryCount(0) // Reset retry count on successful load
+    setRetryCount(0)
   }
 
   const handleLoadedData = () => {
@@ -111,13 +128,16 @@ const EnhancedVideo = ({
     setRetryCount(0)
   }
 
+  // Production fallback: show placeholder instead of broken video
   if (hasError) {
     return (
-      <div className={`bg-gradient-to-br from-muted to-accent/20 flex items-center justify-center ${className}`}>
+      <div className={`bg-gradient-to-br from-accent/10 to-accent/5 flex items-center justify-center ${className}`}>
         <div className="text-center">
-          <ImageIcon className="w-16 h-16 text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">Video loading...</p>
-          <p className="text-xs text-muted-foreground mt-1">Check your connection</p>
+          <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-3">
+            <Play className="w-8 h-8 text-accent" />
+          </div>
+          <p className="text-sm font-medium text-foreground">Transformation Video</p>
+          <p className="text-xs text-muted-foreground mt-1">Professional design showcase</p>
         </div>
       </div>
     )
@@ -146,6 +166,7 @@ const EnhancedVideo = ({
         onCanPlay={handleCanPlay}
         onLoadedData={handleLoadedData}
         preload="metadata"
+        crossOrigin="anonymous"
         {...props}
       >
         <source src={src} type="video/mp4" />
@@ -278,28 +299,27 @@ function App() {
   // File input reference for upload functionality
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
-  // Check video availability on app load
+  // Check video availability and log status
   React.useEffect(() => {
-    // Only check in development to avoid unnecessary requests in production
+    // Simple availability check without blocking production
+    const videos = [modernLivingRoomVideo, cozyBedroomVideo, kitchenPanVideo]
+    
+    // Only do extensive checking in development
     if (process.env.NODE_ENV === 'development') {
       const checkVideoAvailability = async () => {
-        const videos = [modernLivingRoomVideo, cozyBedroomVideo, kitchenPanVideo]
-        
         for (const video of videos) {
           try {
             const response = await fetch(video, { method: 'HEAD' })
-            if (!response.ok) {
-              console.warn(`Video may not be available: ${video} (Status: ${response.status})`)
-            } else {
-              console.log(`Video available: ${video}`)
-            }
+            console.log(`Video ${video}:`, response.ok ? 'Available' : `Status ${response.status}`)
           } catch (error) {
             console.warn(`Failed to check video: ${video}`, error)
           }
         }
       }
-      
       checkVideoAvailability()
+    } else {
+      // In production, just log the video paths being used
+      console.log('Production video paths:', videos)
     }
   }, [])
 
@@ -692,7 +712,7 @@ function App() {
           
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {featuredVisualizationsData.map((viz) => (
-              <Card 
+                 <Card 
                 key={viz.id} 
                 className="overflow-hidden border-0 shadow-lg group cursor-pointer hover:shadow-xl transition-shadow"
                 onClick={() => setCurrentView('gallery')}
@@ -702,6 +722,10 @@ function App() {
                     <EnhancedVideo 
                       src={viz.video}
                       className="w-full h-full"
+                      onError={(e) => {
+                        console.error(`Failed to load video: ${viz.video}`)
+                        // Don't block the UI, just log the error
+                      }}
                     />
                   </div>
                   {viz.id !== '3' && (
@@ -1517,6 +1541,10 @@ function App() {
                       <EnhancedVideo 
                         src={item.video}
                         className="w-full h-full"
+                        onError={(e) => {
+                          console.error(`Failed to load gallery video: ${item.video}`, e)
+                          // The EnhancedVideo component already handles the error display
+                        }}
                       />
                     </div>
                     
@@ -2127,8 +2155,31 @@ function App() {
     })
     const [videoFile, setVideoFile] = useState<File | null>(null)
     const [isUploading, setIsUploading] = useState(false)
+    const [videoStatus, setVideoStatus] = useState<Record<string, boolean>>({})
     
     const videoInputRef = React.useRef<HTMLInputElement>(null)
+
+    // Check video availability on admin page load
+    React.useEffect(() => {
+      const checkVideos = async () => {
+        const videos = [
+          { name: 'Modern Living Room', path: modernLivingRoomVideo },
+          { name: 'Cozy Bedroom', path: cozyBedroomVideo },
+          { name: 'Kitchen Design', path: kitchenPanVideo }
+        ]
+        
+        const status: Record<string, boolean> = {}
+        
+        for (const video of videos) {
+          const isAvailable = await verifyVideoPath(video.path)
+          status[video.name] = isAvailable
+        }
+        
+        setVideoStatus(status)
+      }
+      
+      checkVideos()
+    }, [])
 
     const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0]
@@ -2270,6 +2321,50 @@ function App() {
                 Add Video
               </Button>
             </div>
+
+            {/* Video Status Section */}
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="w-5 h-5" />
+                  Built-in Video Status
+                </CardTitle>
+                <CardDescription>
+                  Check if the main gallery videos are loading correctly
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-4">
+                  {Object.entries(videoStatus).map(([name, isAvailable]) => (
+                    <div key={name} className="flex items-center justify-between p-3 border rounded-lg">
+                      <span className="font-medium">{name}</span>
+                      <div className="flex items-center gap-2">
+                        {isAvailable ? (
+                          <Badge className="bg-green-500 text-white">
+                            <Check className="w-3 h-3 mr-1" />
+                            Available
+                          </Badge>
+                        ) : (
+                          <Badge variant="destructive">
+                            <X className="w-3 h-3 mr-1" />
+                            Not Found
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+                  <h4 className="font-medium mb-2">Video Troubleshooting:</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• Videos should be in <code>/public/videos/</code> directory</li>
+                    <li>• Check exact filename spelling and capitalization</li>
+                    <li>• Visit <a href="/video-test.html" target="_blank" className="text-accent hover:underline">/video-test.html</a> for detailed testing</li>
+                    <li>• Ensure videos are deployed with your application</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Current Videos */}
             <div className="space-y-6">
