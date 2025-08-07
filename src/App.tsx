@@ -26,7 +26,7 @@ import {
   Type,
   Wand2,
   Download,
-  RefreshCw,
+  ArrowClockwise,
   List,
   X,
   Envelope,
@@ -147,7 +147,7 @@ const EnhancedVideo = ({
       {isLoading && (
         <div className="absolute inset-0 bg-muted flex items-center justify-center z-10">
           <div className="text-center">
-            <RefreshCw className="w-8 h-8 text-muted-foreground animate-spin mx-auto mb-2" />
+            <ArrowClockwise className="w-8 h-8 text-muted-foreground animate-spin mx-auto mb-2" />
             <p className="text-sm text-muted-foreground">Loading video...</p>
           </div>
         </div>
