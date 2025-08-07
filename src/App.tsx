@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { 
   Camera, 
-  Sparkles, 
+  Sparkle, 
   Upload, 
   ArrowRight, 
   Palette, 
@@ -571,7 +571,7 @@ const [galleryVideos, setGalleryVideos] = useLocalStorage<any[]>('gallery-videos
         <div className="container mx-auto px-6 py-20">
           <div className="text-center max-w-4xl mx-auto">
             <Badge variant="secondary" className="mb-6 text-sm font-medium">
-              <Sparkles className="w-4 h-4 mr-2" />
+              <sparkle className="w-4 h-4 mr-2" />
               AI-Powered Interior Design
             </Badge>
             
@@ -1207,7 +1207,7 @@ const [galleryVideos, setGalleryVideos] = useLocalStorage<any[]>('gallery-videos
                   disabled={!uploadedImage || !styleDescription.trim() || !customerEmail.trim() || isSubmitting}
                   onClick={() => submitVisualizationRequest('style-brainstorm')}
                 >
-                  <Sparkles className="w-4 h-4 mr-2" />
+                  <sparkle className="w-4 h-4 mr-2" />
                   {isSubmitting ? 'Submitting Request...' : 'Submit Style Request'}
                 </Button>
                 
@@ -1931,7 +1931,7 @@ const [galleryVideos, setGalleryVideos] = useLocalStorage<any[]>('gallery-videos
           <div className="grid md:grid-cols-3 gap-8 mb-20">
             <Card className="text-center p-8 border-0 shadow-lg">
               <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Sparkles className="w-8 h-8 text-accent" />
+                <sparkle className="w-8 h-8 text-accent" />
               </div>
               <h3 className="text-xl font-bold mb-4">Professional Design Team</h3>
               <p className="text-muted-foreground">
