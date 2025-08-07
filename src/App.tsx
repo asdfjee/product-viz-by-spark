@@ -39,6 +39,7 @@ import { useKV } from '@github/spark/hooks'
 import { toast } from 'sonner'
 import modernLivingRoomVideo from '@/assets/video/modern-living-room-transformation.mp4'
 import cozyBedroomVideo from '@/assets/video/Cozy_Room_Transformation_Video_(1).mp4'
+import kitchenPanVideo from '@/assets/video/Kitchen_Pan_Video_Generation.mp4'
 
 // Types for our application
 interface Project {
@@ -81,7 +82,7 @@ const featuredVisualizationsData = [
     id: '3',
     before: '/api/placeholder/300/200', 
     after: '/api/placeholder/300/200',
-    video: '/api/placeholder/600/400/video',
+    video: kitchenPanVideo,
     description: 'Minimalist kitchen design'
   }
 ]
@@ -552,7 +553,11 @@ function App() {
           
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {featuredVisualizationsData.map((viz) => (
-              <Card key={viz.id} className="overflow-hidden border-0 shadow-lg group cursor-pointer hover:shadow-xl transition-shadow">
+              <Card 
+                key={viz.id} 
+                className="overflow-hidden border-0 shadow-lg group cursor-pointer hover:shadow-xl transition-shadow"
+                onClick={() => setCurrentView('gallery')}
+              >
                 <div className="relative">
                   <div className="aspect-video bg-muted relative overflow-hidden">
                     <video 
@@ -570,9 +575,11 @@ function App() {
                       </div>
                     </video>
                   </div>
-                  <div className="absolute top-4 right-4">
-                    <Badge className="bg-white/90 text-foreground">Before → After</Badge>
-                  </div>
+                  {viz.id !== '3' && (
+                    <div className="absolute top-4 right-4">
+                      <Badge className="bg-white/90 text-foreground">Before → After</Badge>
+                    </div>
+                  )}
                   {/* Play overlay for visual indication */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                     <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1164,12 +1171,12 @@ function App() {
           id: '3',
           before: '/api/placeholder/400/300',
           after: '/api/placeholder/400/300',
-          video: '/api/placeholder/800/600/video',
-          title: 'Industrial Kitchen Design',
-          description: 'Bold kitchen featuring exposed elements and modern appliances',
-          style: 'Industrial',
+          video: kitchenPanVideo,
+          title: 'Minimalist Kitchen Design',
+          description: 'Clean, functional kitchen featuring sleek lines and modern appliances',
+          style: 'Modern Minimalist',
           room: 'Kitchen',
-          keyFeatures: ['Exposed Brick', 'Metal Accents', 'Open Shelving', 'Dark Palette']
+          keyFeatures: ['Clean Lines', 'Modern Appliances', 'Minimal Clutter', 'Functional Design']
         },
         {
           id: '4',
@@ -1220,14 +1227,25 @@ function App() {
           before: '/api/placeholder/400/300',
           after: '/api/placeholder/400/300',
           video: '/api/placeholder/800/600/video',
-          title: 'Rustic Kitchen Renovation',
+          title: 'Industrial Kitchen Renovation',
+          description: 'Bold kitchen featuring exposed elements and modern appliances',
+          style: 'Industrial',
+          room: 'Kitchen',
+          keyFeatures: ['Exposed Brick', 'Metal Accents', 'Open Shelving', 'Dark Palette']
+        },
+        {
+          id: '9',
+          before: '/api/placeholder/400/300',
+          after: '/api/placeholder/400/300',
+          video: '/api/placeholder/800/600/video',
+          title: 'Rustic Farmhouse Kitchen',
           description: 'Farmhouse elements meet modern functionality',
           style: 'Farmhouse',
           room: 'Kitchen',
           keyFeatures: ['Shaker Cabinets', 'Butcher Block', 'Vintage Hardware', 'Subway Tile']
         },
         {
-          id: '9',
+          id: '10',
           before: '/api/placeholder/400/300',
           after: '/api/placeholder/400/300',
           video: '/api/placeholder/800/600/video',
@@ -1409,7 +1427,7 @@ function App() {
                       <span>•</span>
                       <div className="flex items-center">
                         <Star className="w-3 h-3 mr-1 fill-current text-accent" />
-                        <span>Featured</span>
+                        <span>{item.id === '3' ? 'Featured Design' : 'Featured'}</span>
                       </div>
                     </div>
                     
@@ -1480,7 +1498,7 @@ function App() {
 
         {/* Transformation Detail Modal */}
         <Dialog open={!!selectedTransformation} onOpenChange={() => setSelectedTransformation(null)}>
-          <DialogContent className="max-w-7xl w-[95vw] h-[90vh] p-0 overflow-hidden">
+          <DialogContent className="max-w-[98vw] w-[98vw] h-[95vh] p-0 overflow-hidden">
             {selectedTransformation && (
               <div className="flex flex-col h-full bg-background">
                 {/* Modal Header */}
@@ -1540,9 +1558,9 @@ function App() {
 
                 {/* Main Comparison Area */}
                 <div className="flex-1 overflow-hidden">
-                  <div className="grid lg:grid-cols-3 gap-0 h-full">
-                    {/* Before/After Comparison */}
-                    <div className="lg:col-span-2 border-r border-border">
+                  <div className="grid lg:grid-cols-5 gap-0 h-full">
+                    {/* Before/After Comparison - Now takes up more space */}
+                    <div className="lg:col-span-3 border-r border-border">
                       <div className="h-full bg-card relative overflow-hidden">
                         {comparisonMode === 'split' && (
                           <div className="grid grid-cols-2 h-full">
@@ -1624,8 +1642,8 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Details Sidebar */}
-                    <div className="overflow-y-auto bg-background">
+                    {/* Details Sidebar - Now more compact */}
+                    <div className="lg:col-span-2 overflow-y-auto bg-background">
                       <div className="p-6 space-y-6">
                         {/* Transformation Details */}
                         <Card className="border-0 shadow-sm">
