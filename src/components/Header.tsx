@@ -10,7 +10,6 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
   const location = useLocation()
-  const isAdminAuth = localStorage.getItem('admin-auth')
   
   const navLinks = [
     { path: '/', label: 'Home' },
@@ -18,11 +17,6 @@ export const Header: React.FC<HeaderProps> = ({ isMobileMenuOpen, setIsMobileMen
     { path: '/gallery', label: 'Gallery' },
     { path: '/about', label: 'About' },
   ]
-  
-  // Add admin link if authenticated
-  if (isAdminAuth) {
-    navLinks.push({ path: '/admin', label: 'Admin' })
-  }
 
   return (
     <header className="bg-card border-b border-border sticky top-0 z-50">
