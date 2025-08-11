@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Toaster, toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 
 // Import page components
 import { Header } from '@/components/Header'
@@ -16,7 +17,10 @@ import { AboutPage } from '@/components/AboutPage'
 import { AdminPage } from '@/components/AdminPage'
 import { AdminLogin } from '@/components/AdminLogin'
 
-// Helper hook for localStorage
+// Import Supabase project API
+import { projectAPI, UserProject } from '@/lib/supabase'
+
+// Helper hook for localStorage (kept for gallery videos and migration)
 function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void, () => void] {
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {
@@ -50,8 +54,8 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
   return [storedValue, setValue, deleteValue];
 }
 
-// Project interface for backward compatibility
-interface Project {
+// Legacy Project interface for backward compatibility with localStorage
+interface LegacyProject {
   id: string
   name: string
   description: string
@@ -64,30 +68,43 @@ interface Project {
 const CreateProjectDialog = ({ 
   isCreateProjectOpen, 
   setIsCreateProjectOpen, 
-  setProjects, 
-  setSelectedProject 
-}: any) => {
+  onProjectCreated
+}: {
+  isCreateProjectOpen: boolean
+  setIsCreateProjectOpen: (open: boolean) => void
+  onProjectCreated: (project: UserProject) => void
+}) => {
   const [localProjectForm, setLocalProjectForm] = useState({ name: '', description: '' });
+  const [isCreating, setIsCreating] = useState(false);
 
-  const handleCreateProject = () => {
-    if (localProjectForm.name.trim()) {
-      const newProject: Project = {
-        id: Date.now().toString(),
+  const handleCreateProject = async () => {
+    if (!localProjectForm.name.trim()) return;
+    
+    setIsCreating(true);
+    try {
+      const newProject = await projectAPI.create({
         name: localProjectForm.name,
         description: localProjectForm.description,
-        createdAt: new Date().toISOString(),
-        visualizationRequests: []
-      };
-      setProjects((currentProjects: Project[] = []) => [...currentProjects, newProject]);
-      setSelectedProject(newProject);
+        thumbnail: null,
+        visualization_requests: []
+      });
+      
+      onProjectCreated(newProject);
       setLocalProjectForm({ name: '', description: '' });
       setIsCreateProjectOpen(false);
       toast.success('Project created successfully!');
+    } catch (error) {
+      console.error('Failed to create project:', error);
+      toast.error('Failed to create project. Please try again.');
+    } finally {
+      setIsCreating(false);
     }
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) { setLocalProjectForm({ name: '', description: '' }); }
+    if (!open) { 
+      setLocalProjectForm({ name: '', description: '' });
+    }
     setIsCreateProjectOpen(open);
   };
   
@@ -107,6 +124,7 @@ const CreateProjectDialog = ({
               onChange={(e) => setLocalProjectForm(prev => ({ ...prev, name: e.target.value }))} 
               placeholder="e.g., Living Room Makeover" 
               autoComplete="off"
+              disabled={isCreating}
             />
           </div>
           <div className="space-y-2">
@@ -118,12 +136,21 @@ const CreateProjectDialog = ({
               placeholder="Describe your vision..." 
               rows={3} 
               autoComplete="off"
+              disabled={isCreating}
             />
           </div>
         </div>
         <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={() => handleOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleCreateProject} disabled={!localProjectForm.name.trim()}>Create Project</Button>
+          <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isCreating}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleCreateProject} 
+            disabled={!localProjectForm.name.trim() || isCreating}
+          >
+            {isCreating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            Create Project
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
@@ -131,12 +158,101 @@ const CreateProjectDialog = ({
 };
 
 function App() {
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedProject, setSelectedProject] = useState<UserProject | null>(null);
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  const [projects, setProjects] = useLocalStorage<Project[]>('user-projects', []);
+  // State for projects (now from Supabase)
+  const [projects, setProjects] = useState<UserProject[]>([]);
+  const [isProjectsLoading, setIsProjectsLoading] = useState(true);
+  const [projectsError, setProjectsError] = useState<string | null>(null);
+  
+  // Keep localStorage for gallery videos for now
   const [galleryVideos, setGalleryVideos] = useLocalStorage<any[]>('gallery-videos', []);
+
+  // Migration and project loading
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const loadProjects = async () => {
+    setIsProjectsLoading(true);
+    setProjectsError(null);
+    
+    try {
+      // Try to load projects from Supabase
+      const supabaseProjects = await projectAPI.getAll();
+      
+      // Check for legacy localStorage projects and migrate them
+      const localStorageProjects = JSON.parse(localStorage.getItem('user-projects') || '[]') as LegacyProject[];
+      
+      if (localStorageProjects.length > 0 && supabaseProjects.length === 0) {
+        console.log('Migrating projects from localStorage to Supabase...');
+        try {
+          const migratedProjects = await projectAPI.migrateFromLocalStorage(localStorageProjects);
+          setProjects(migratedProjects);
+          
+          // Clear localStorage after successful migration
+          localStorage.removeItem('user-projects');
+          toast.success('Projects migrated to cloud storage successfully!');
+        } catch (migrationError) {
+          console.error('Migration failed:', migrationError);
+          // If migration fails, keep localStorage projects in state but don't persist them
+          setProjects(localStorageProjects.map(p => ({
+            id: p.id,
+            name: p.name,
+            description: p.description,
+            created_at: p.createdAt,
+            updated_at: p.createdAt,
+            user_id: null,
+            thumbnail: p.thumbnail || null,
+            visualization_requests: p.visualizationRequests || []
+          })));
+          toast.error('Unable to sync projects to cloud. Using local storage.');
+        }
+      } else {
+        setProjects(supabaseProjects);
+      }
+    } catch (error) {
+      console.error('Failed to load projects:', error);
+      setProjectsError('Failed to load projects. Please try again.');
+      
+      // Fallback to localStorage if Supabase fails
+      try {
+        const localStorageProjects = JSON.parse(localStorage.getItem('user-projects') || '[]') as LegacyProject[];
+        setProjects(localStorageProjects.map(p => ({
+          id: p.id,
+          name: p.name,
+          description: p.description,
+          created_at: p.createdAt,
+          updated_at: p.createdAt,
+          user_id: null,
+          thumbnail: p.thumbnail || null,
+          visualization_requests: p.visualizationRequests || []
+        })));
+        if (localStorageProjects.length > 0) {
+          toast.error('Cloud storage unavailable. Using local storage.');
+        }
+      } catch (localError) {
+        console.error('Failed to load from localStorage:', localError);
+      }
+    } finally {
+      setIsProjectsLoading(false);
+    }
+  };
+
+  const handleProjectCreated = async (newProject: UserProject) => {
+    setProjects(prev => [newProject, ...prev]);
+    setSelectedProject(newProject);
+    
+    // Refresh projects list to ensure consistency
+    try {
+      const updatedProjects = await projectAPI.getAll();
+      setProjects(updatedProjects);
+    } catch (error) {
+      console.error('Failed to refresh projects:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -148,8 +264,7 @@ function App() {
       <CreateProjectDialog
         isCreateProjectOpen={isCreateProjectOpen}
         setIsCreateProjectOpen={setIsCreateProjectOpen}
-        setProjects={setProjects}
-        setSelectedProject={setSelectedProject}
+        onProjectCreated={handleProjectCreated}
       />
       
       <main>
@@ -157,7 +272,15 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route 
             path="/dashboard" 
-            element={<ProjectDashboard setIsCreateProjectOpen={setIsCreateProjectOpen} />} 
+            element={
+              <ProjectDashboard 
+                setIsCreateProjectOpen={setIsCreateProjectOpen}
+                projects={projects}
+                isLoading={isProjectsLoading}
+                error={projectsError}
+                onRetry={loadProjects}
+              />
+            } 
           />
           <Route 
             path="/gallery" 
