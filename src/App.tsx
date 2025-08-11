@@ -1,4 +1,4 @@
-// src/App.tsx - FINAL VERSION WITH ALL PAGES FULLY RESTORED
+// src/App.tsx - FINAL VERSION WITH ALL DETAILED PAGES RESTORED
 
 import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
@@ -103,12 +103,29 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
   return [storedValue, setValue, deleteValue];
 }
 
+const verifyVideoPath = async (path: string): Promise<boolean> => {
+  try {
+    const response = await fetch(path, { method: 'HEAD' });
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
+
 // --- REUSABLE UI COMPONENTS ---
 
 const EnhancedVideo = ({ src, className = "", ...props }: { src: string, className?: string, [key: string]: any }) => {
   const [hasError, setHasError] = useState(false);
-  useEffect(() => { setHasError(false); }, [src]);
-  const handleError = () => { console.error(`Video failed to load: ${src}`); setHasError(true); };
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    setHasError(false);
+  }, [src]);
+
+  const handleError = () => {
+    console.error(`Video failed to load: ${src}`);
+    setHasError(true);
+  };
 
   if (hasError) {
     return (
@@ -122,7 +139,18 @@ const EnhancedVideo = ({ src, className = "", ...props }: { src: string, classNa
   }
 
   return (
-    <video className={`w-full h-full object-cover ${className}`} src={src} autoPlay muted loop playsInline onError={handleError} preload="metadata" {...props}>
+    <video
+      ref={videoRef}
+      className={`w-full h-full object-cover ${className}`}
+      src={src}
+      autoPlay
+      muted
+      loop
+      playsInline
+      onError={handleError}
+      preload="metadata"
+      {...props}
+    >
       <source src={src} type="video/mp4" />
       Your browser does not support video playback.
     </video>
@@ -246,7 +274,10 @@ const LandingPage = ({ setCurrentView, setProjects, setSelectedProject, setWorks
                 </div>
                 <CardContent className="p-6">
                   <p className="font-medium">{viz.description}</p>
-                  <div className="flex items-center mt-4 text-sm text-muted-foreground"><Star className="w-4 h-4 mr-1 fill-current text-accent" /><span>Featured transformation</span></div>
+                  <div className="flex items-center mt-4 text-sm text-muted-foreground">
+                    <Star className="w-4 h-4 mr-1 fill-current text-accent" />
+                    <span>Featured transformation</span>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -257,6 +288,7 @@ const LandingPage = ({ setCurrentView, setProjects, setSelectedProject, setWorks
     </>
   );
 };
+
 const CreateProjectDialog = ({ isCreateProjectOpen, setIsCreateProjectOpen, setProjects, setSelectedProject, setCurrentView }: any) => {
     const [localProjectForm, setLocalProjectForm] = useState({ name: '', description: '' });
 
@@ -278,258 +310,340 @@ const CreateProjectDialog = ({ isCreateProjectOpen, setIsCreateProjectOpen, setP
       }
     };
 
+    const handleCancelProject = () => {
+      setLocalProjectForm({ name: '', description: '' });
+      setIsCreateProjectOpen(false);
+    }
+
     const handleOpenChange = (open: boolean) => {
       if (!open) {
         setLocalProjectForm({ name: '', description: '' });
       }
       setIsCreateProjectOpen(open);
-    };
-    
-    return (
-        <Dialog open={isCreateProjectOpen} onOpenChange={handleOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Create New Project</DialogTitle>
-                    <DialogDescription>
-                      Start a new interior design project. You can add multiple room visualizations to each project.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="project-name">Project Name</Label>
-                        <Input 
-                            id="project-name" 
-                            value={localProjectForm.name} 
-                            onChange={(e) => setLocalProjectForm(prev => ({ ...prev, name: e.target.value }))} 
-                            placeholder="e.g., Living Room Makeover" 
-                            autoComplete="off"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="project-description">Description</Label>
-                        <Textarea 
-                            id="project-description" 
-                            value={localProjectForm.description} 
-                            onChange={(e) => setLocalProjectForm(prev => ({ ...prev, description: e.target.value }))} 
-                            placeholder="Describe your vision for this space..." 
-                            rows={3}
-                            autoComplete="off"
-                        />
-                    </div>
-                </div>
-                <div className="flex justify-end gap-3">
-                    <Button variant="outline" onClick={() => handleOpenChange(false)}>Cancel</Button>
-                    <Button onClick={handleCreateProject} disabled={!localProjectForm.name.trim()}>Create Project</Button>
-                </div>
-            </DialogContent>
-        </Dialog>
-    );
-};
-};
+    }
 
-const ProjectDashboard = ({ setIsCreateProjectOpen }: any) => {
     return (
-        <>
-            <div className="container mx-auto px-6 py-20">
-                <Card className="text-center py-16 max-w-2xl mx-auto">
-                    <CardContent>
-                        <Folder className="w-20 h-20 text-muted-foreground mx-auto mb-6" />
-                        <CardTitle className="text-3xl mb-4">Ready to Design?</CardTitle>
-                        <CardDescription className="text-lg mb-8">Create your first project to start visualizing your dream space.</CardDescription>
-                        <Button onClick={() => setIsCreateProjectOpen(true)} size="lg" className="text-lg px-8 py-6 h-auto"><Plus className="w-5 h-5 mr-2" />Create New Project</Button>
-                    </CardContent>
-                </Card>
+      <Dialog key="create-project-dialog" open={isCreateProjectOpen} onOpenChange={handleOpenChange}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Project</DialogTitle>
+            <DialogDescription>
+              Start a new interior design project. You can add multiple room visualizations to each project.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="project-name">Project Name</Label>
+              <Input
+                value={localProjectForm.name}
+                onChange={(e) => setLocalProjectForm(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="e.g., Living Room Makeover"
+                autoComplete="off"
+              />
             </div>
-            <Footer />
-        </>
-    );
-};
+            
+            <div className="space-y-2">
+              <Label htmlFor="project-description">Description</Label>
+              <Textarea
+                id="project-description"
+                value={localProjectForm.description}
+                onChange={(e) => setLocalProjectForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Describe your vision for this space..."
+                rows={3}
+                autoComplete="off"
+              />
+            </div>
+          </div>
+        
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={handleCancelProject}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateProject} disabled={!localProjectForm.name.trim()}>
+              Create Project
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    )
+  }
 
-const VisualizationWorkspace = ({ selectedProject, setCurrentView, ...formProps }: any) => {
-    return <div>Workspace Content</div>;
-};
+  // Project Dashboard Component
+  const ProjectDashboard = ({ setIsCreateProjectOpen }: any) => (
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      {/* Simple Create Project View */}
+      <div className="container mx-auto px-6 py-20">
+        <Card className="text-center py-16 max-w-2xl mx-auto">
+          <CardContent>
+            <Folder className="w-20 h-20 text-muted-foreground mx-auto mb-6" />
+            <CardTitle className="text-3xl mb-4">Ready to Design?</CardTitle>
+            <CardDescription className="text-lg mb-8">
+              Create your first project to start visualizing your dream space with AI-powered interior design
+            </CardDescription>
+            <Button 
+              onClick={() => setIsCreateProjectOpen(true)}
+              size="lg"
+              className="text-lg px-8 py-6 h-auto"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Create New Project
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
 
-const GalleryPage = ({ galleryVideos, setCurrentView }: any) => {
-  const [activeRoomFilter, setActiveRoomFilter] = useState('All Rooms');
-  const [activeStyleFilter, setActiveStyleFilter] = useState('All Styles');
+      <CreateProjectDialog />
+      
+      <Footer />
+    </div>
+  )
+
+  // Input components for descriptions
+  const ItemDescriptionInput = () => (
+    <div className="space-y-2">
+      <Label htmlFor="item-description">Describe the item you want to add</Label>
+      <Textarea
+        id="item-description"
+        value={itemDescription}
+        onChange={(e) => setItemDescription(e.target.value)}
+        placeholder="e.g., A modern gray sectional sofa with clean lines and metal legs"
+        rows={4}
+        autoComplete="off"
+      />
+    </div>
+  )
+
+  const StyleDescriptionInput = () => (
+    <div className="space-y-2">
+      <Label htmlFor="style-description">Describe your desired style or vibe</Label>
+      <Textarea
+        id="style-description"
+        value={styleDescription}
+        onChange={(e) => setStyleDescription(e.target.value)}
+        placeholder="e.g., Cozy Scandinavian living room with warm textures and natural wood accents"
+        rows={4}
+        autoComplete="off"
+      />
+    </div>
+  )
+
+  const submitVisualizationRequest = (type: 'specific-item' | 'style-brainstorm') => {
+    if (!uploadedImage || !customerEmail.trim()) {
+      toast.error('Please upload an image and provide your email address.')
+      return
+    }
+
+    const description = type === 'specific-item' ? itemDescription : styleDescription
+    if (!description.trim()) {
+      toast.error(`Please describe your ${type === 'specific-item' ? 'item' : 'style'}.`)
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+      
+      // Calculate estimated delivery (3-5 business days)
+      const now = new Date()
+      const deliveryDate = new Date(now)
+      deliveryDate.setDate(now.getDate() + 5) // 5 business days
+      
+      const newRequest: VisualizationRequest = {
+        id: Date.now().toString(),
+        type,
+        originalImage: uploadedImage,
+        description,
+        createdAt: now.toISOString(),
+        status: 'submitted',
+        customerEmail,
+        estimatedDelivery: deliveryDate.toLocaleDateString()
+      }
+
+      // Update projects with new request
+      if (selectedProject) {
+        setProjects(currentProjects => 
+          (currentProjects || []).map(project => 
+            project.id === selectedProject.id
+              ? { ...project, visualizationRequests: [...project.visualizationRequests, newRequest] }
+              : project
+          )
+        )
+        
+        // Update selected project
+        setSelectedProject(prev => prev ? {
+          ...prev,
+          visualizationRequests: [...prev.visualizationRequests, newRequest]
+        } : null)
+      }
+
+      // Clear form
+      setItemDescription('')
+      setStyleDescription('')
+      setUploadedImage(null)
+      
+      toast.success(`Request submitted successfully! You'll receive your visualization at ${customerEmail} within 3-5 business days.`)
+      
+    } catch (error) {
+      toast.error('Failed to submit request. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Email input component
+  const EmailInput = () => (
+    <div className="space-y-2">
+      <Label htmlFor="customer-email">Your Email Address</Label>
+      <Input
+        id="customer-email"
+        type="email"
+        value={customerEmail}
+        onChange={(e) => setCustomerEmail(e.target.value)}
+        placeholder="your@email.com"
+        autoComplete="email"
+        required
+      />
+      <p className="text-xs text-muted-foreground">
+        We'll send your visualization results to this email within 3-5 business days.
+      </p>
+    </div>
+  )
+  
+
+  const [activeRoomFilter, setActiveRoomFilter] = useState('All Rooms')
+  const [activeStyleFilter, setActiveStyleFilter] = useState('All Styles')
+  const [selectedTransformation, setSelectedTransformation] = useState<any>(null)
+  const [comparisonMode, setComparisonMode] = useState<'split' | 'slide' | 'toggle'>('split')
+  const [sliderPosition, setSliderPosition] = useState(50)
 
   const galleryItems = useMemo(() => {
     const builtInItems = [
-      { id: 'b1', video: modernLivingRoomVideo, title: 'Modern Living Room', description: 'A complete makeover...', style: 'Modern', room: 'Living Room' },
-      { id: 'b2', video: cozyBedroomVideo, title: 'Scandinavian Bedroom', description: 'Cozy design...', style: 'Scandinavian', room: 'Bedroom' },
-      { id: 'b3', video: kitchenPanVideo, title: 'Minimalist Kitchen', description: 'Clean, functional kitchen...', style: 'Minimalist', room: 'Kitchen' },
-    ];
-    return [...builtInItems, ...(galleryVideos || [])];
-  }, [galleryVideos]);
+      { id: '1', before: '/api/placeholder/400/300', after: '/api/placeholder/400/300', video: modernLivingRoomVideo, title: 'Modern Living Room Transformation', description: 'A complete makeover featuring contemporary furniture and warm lighting', style: 'Modern Minimalist', room: 'Living Room', keyFeatures: ['Modern Furniture', 'Natural Light', 'Neutral Palette', 'Clean Lines'] },
+      { id: '2', before: '/api/placeholder/400/300', after: '/api/placeholder/400/300', video: cozyBedroomVideo, title: 'Scandinavian Bedroom Retreat', description: 'Cozy bedroom design with natural textures and clean lines', style: 'Scandinavian', room: 'Bedroom', keyFeatures: ['Natural Textures', 'Hygge Vibes', 'Light Woods', 'Minimal Clutter'] },
+      { id: '3', before: '/api/placeholder/400/300', after: '/api/placeholder/400/300', video: kitchenPanVideo, title: 'Minimalist Kitchen Design', description: 'Clean, functional kitchen featuring sleek lines and modern appliances', style: 'Modern Minimalist', room: 'Kitchen', keyFeatures: ['Clean Lines', 'Modern Appliances', 'Minimal Clutter', 'Functional Design'] },
+      { id: '4', before: '/api/placeholder/400/300', after: '/api/placeholder/400/300', video: '/api/placeholder/800/600/video', title: 'Bohemian Chic Dining Room', description: 'Eclectic dining space with vibrant colors and mixed textures', style: 'Bohemian', room: 'Dining Room', keyFeatures: ['Mixed Patterns', 'Vibrant Colors', 'Vintage Pieces', 'Global Textiles'] },
+      { id: '5', before: '/api/placeholder/400/300', after: '/api/placeholder/400/300', video: '/api/placeholder/800/600/video', title: 'Mid-Century Modern Office', description: 'Productive workspace with vintage-inspired furniture', style: 'Mid-Century Modern', room: 'Office', keyFeatures: ['Vintage Style', 'Rich Woods', 'Geometric Patterns', 'Bold Colors'] },
+      { id: '6', before: '/api/placeholder/400/300', after: '/api/placeholder/400/300', video: '/api/placeholder/800/600/video', title: 'Cozy Farmhouse Living Room', description: 'Rustic charm meets modern comfort in this inviting space', style: 'Farmhouse', room: 'Living Room', keyFeatures: ['Rustic Woods', 'Neutral Tones', 'Vintage Accents', 'Cozy Textiles'] },
+      { id: '7', before: '/api/placeholder/400/300', after: '/api/placeholder/400/300', video: '/api/placeholder/800/600/video', title: 'Minimalist Bedroom Sanctuary', description: 'Clean lines and neutral tones create a peaceful retreat', style: 'Modern Minimalist', room: 'Bedroom', keyFeatures: ['Clean Lines', 'Neutral Palette', 'Quality Materials', 'Functional Design'] },
+      { id: '8', before: '/api/placeholder/400/300', after: '/api/placeholder/400/300', video: '/api/placeholder/800/600/video', title: 'Industrial Kitchen Renovation', description: 'Bold kitchen featuring exposed elements and modern appliances', style: 'Industrial', room: 'Kitchen', keyFeatures: ['Exposed Brick', 'Metal Accents', 'Open Shelving', 'Dark Palette'] },
+      { id: '9', before: '/api/placeholder/400/300', after: '/api/placeholder/400/300', video: '/api/placeholder/800/600/video', title: 'Rustic Farmhouse Kitchen', description: 'Farmhouse elements meet modern functionality', style: 'Farmhouse', room: 'Kitchen', keyFeatures: ['Shaker Cabinets', 'Butcher Block', 'Vintage Hardware', 'Subway Tile'] },
+      { id: '10', before: '/api/placeholder/400/300', after: '/api/placeholder/400/300', video: '/api/placeholder/800/600/video', title: 'Contemporary Dining Space', description: 'Sleek design perfect for entertaining guests', style: 'Modern Minimalist', room: 'Dining Room', keyFeatures: ['Sleek Design', 'Statement Lighting', 'Quality Materials', 'Entertainment Ready'] }
+    ]
+    return [...builtInItems, ...(galleryVideos || [])]
+  }, [galleryVideos])
 
-  const filteredItems = galleryItems.filter(item => 
-    (activeRoomFilter === 'All Rooms' || item.room === activeRoomFilter) &&
-    (activeStyleFilter === 'All Styles' || item.style === activeStyleFilter)
-  );
-
-  return (
-    <>
-      <div className="bg-muted/30 py-16">
-        <div className="container mx-auto px-6 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Transformation Gallery</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Discover amazing room transformations and get inspired.</p>
-        </div>
-      </div>
-      <div className="container mx-auto px-6 py-8">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredItems.map(item => (
-            <Card key={item.id} className="overflow-hidden group cursor-pointer">
-              <div className="aspect-[4/3] bg-muted relative">
-                <EnhancedVideo src={item.video} />
-              </div>
-              <CardContent className="p-6">
-                <h3 className="font-bold text-lg mb-2">{item.title}</h3>
-                <p className="text-muted-foreground text-sm">{item.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-      <Footer />
-    </>
-  );
-};
-
-const AboutPage = () => (
-    <>
-      <div className="bg-muted/30 py-20">
-        <div className="container mx-auto px-6 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">About Product Viz</h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">We're revolutionizing interior design by making it accessible, interactive, and instant. Our AI-powered platform empowers anyone to visualize and shop for home furnishings within their own space, transforming interior design from guesswork into creativity.</p>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-6 py-20">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">We provide professional interior design visualization services powered by AI technology. Submit your room photos and design preferences, and receive custom visualizations delivered directly to your email within 3-5 business days.</p>
+  const renderCurrentView = () => {
+    switch (currentView) {
+      case 'landing': return <LandingPage setCurrentView={setCurrentView} setProjects={setProjects} setSelectedProject={setSelectedProject} setWorkspaceTab={() => {}} />
+      case 'dashboard': return <ProjectDashboard setIsCreateProjectOpen={setIsCreateProjectOpen} />
+      case 'workspace': return <VisualizationWorkspace selectedProject={selectedProject} setCurrentView={setCurrentView}  />
+      case 'gallery': return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        
+        {/* Gallery Header */}
+        <div className="bg-muted/30 py-16">
+          <div className="container mx-auto px-6 text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Transformation Gallery
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Discover amazing room transformations created with our AI-powered interior design platform. 
+              Get inspired by real makeovers from our community.
+            </p>
           </div>
+        </div>
 
-          <div className="grid md:grid-cols-3 gap-8 mb-20">
-            <Card className="text-center p-8 border-0 shadow-lg">
-              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6"><Sparkle className="w-8 h-8 text-accent" /></div>
-              <h3 className="text-xl font-bold mb-4">Professional Design Team</h3>
-              <p className="text-muted-foreground">Our experienced interior designers use advanced AI tools to create realistic, contextual design solutions.</p>
-            </Card>
-            <Card className="text-center p-8 border-0 shadow-lg">
-              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6"><Camera className="w-8 h-8 text-accent" /></div>
-              <h3 className="text-xl font-bold mb-4">Photo-Realistic Results</h3>
-              <p className="text-muted-foreground">See exactly how furniture will look in your actual room with accurate rendering.</p>
-            </Card>
-            <Card className="text-center p-8 border-0 shadow-lg">
-              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6"><Download className="w-8 h-8 text-accent" /></div>
-              <h3 className="text-xl font-bold mb-4">Email Delivery Service</h3>
-              <p className="text-muted-foreground">Receive high-quality visualizations delivered directly to your email within 3-5 business days.</p>
-            </Card>
-          </div>
+        {/* Filters Section */}
+        <div className="container mx-auto px-6 py-8">
+          {/* Filter Controls */}
+          <div className="bg-card rounded-lg p-6 mb-8 shadow-sm border">
+            <div className="flex flex-col lg:flex-row gap-6">
+              {/* Room Type Filters */}
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-muted-foreground mb-3">Filter by Room</h3>
+                <div className="flex flex-wrap gap-2">
+                  {(['All Rooms', 'Living Room', 'Bedroom', 'Kitchen', 'Dining Room', 'Office'] as const).map((room) => (
+                    <Button
+                      key={room}
+                      variant={activeRoomFilter === room ? 'default' : 'outline'}
+                      size="sm"
+                      className="rounded-full"
+                      onClick={() => setActiveRoomFilter(room)}
+                    >
+                      {room}
+                    </Button>
+                  ))}
+                </div>
+              </div>
 
-          <div className="bg-card rounded-2xl p-8 md:p-12">
-            <h2 className="text-3xl font-bold text-center mb-12">How Product Viz Works</h2>
-            <div className="space-y-12">
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                <div className="flex-1"><div className="flex items-center gap-4 mb-4"><div className="w-10 h-10 bg-accent text-accent-foreground rounded-full flex items-center justify-center font-bold">1</div><h3 className="text-xl font-bold">Upload Your Space</h3></div><p className="text-muted-foreground">Upload your room photo and submit your request. Our design team will analyze the space.</p></div>
-                <div className="w-full md:w-80 h-48 bg-muted rounded-lg flex items-center justify-center"><Camera className="w-12 h-12 text-muted-foreground" /></div>
+              {/* Style Filters */}
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-muted-foreground mb-3">Filter by Style</h3>
+                <div className="flex flex-wrap gap-2">
+                  {(['All Styles', 'Modern Minimalist', 'Scandinavian', 'Industrial', 'Bohemian', 'Mid-Century Modern', 'Farmhouse'] as const).map((style) => (
+                    <Button
+                      key={style}
+                      variant={activeStyleFilter === style ? 'default' : 'outline'}
+                      size="sm"
+                      className="rounded-full"
+                      onClick={() => setActiveStyleFilter(style)}
+                    >
+                      {style}
+                    </Button>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-col md:flex-row-reverse items-center gap-8">
-                <div className="flex-1"><div className="flex items-center gap-4 mb-4"><div className="w-10 h-10 bg-accent text-accent-foreground rounded-full flex items-center justify-center font-bold">2</div><h3 className="text-xl font-bold">Describe Your Vision</h3></div><p className="text-muted-foreground">Describe your vision or upload specific furniture photos. Our designers will interpret your preferences.</p></div>
-                <div className="w-full md:w-80 h-48 bg-muted rounded-lg flex items-center justify-center"><TextT className="w-12 h-12 text-muted-foreground" /></div>
+            </div>
+
+            {/* Active Filters & Results Count */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-6 pt-4 border-t">
+              <div className="flex items-center gap-2">
+                {activeRoomFilter !== 'All Rooms' && (
+                  <Badge variant="secondary" className="gap-1">
+                    {activeRoomFilter}
+                    <button 
+                      onClick={() => setActiveRoomFilter('All Rooms')}
+                      className="ml-1 hover:bg-secondary-foreground/20 rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                )}
+                {activeStyleFilter !== 'All Styles' && (
+                  <Badge variant="secondary" className="gap-1">
+                    {activeStyleFilter}
+                    <button 
+                      onClick={() => setActiveStyleFilter('All Styles')}
+                      className="ml-1 hover:bg-secondary-foreground/20 rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                )}
+                {(activeRoomFilter !== 'All Rooms' || activeStyleFilter !== 'All Styles') && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setActiveRoomFilter('All Rooms')
+                      setActiveStyleFilter('All Styles')
+                    }}
+                    className="text-xs h-6 px-2"
+                  >
+                    Clear all
+                  </Button>
+                )}
               </div>
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                <div className="flex-1"><div className="flex items-center gap-4 mb-4"><div className="w-10 h-10 bg-accent text-accent-foreground rounded-full flex items-center justify-center font-bold">3</div><h3 className="text-xl font-bold">Receive Professional Results</h3></div><p className="text-muted-foreground">Within 3-5 business days, receive professional-quality visualizations delivered to your email.</p></div>
-                <div className="w-full md:w-80 h-48 bg-muted rounded-lg flex items-center justify-center"><Download className="w-12 h-12 text-muted-foreground" /></div>
+              <div className="text-sm text-muted-foreground">
+                {filteredItems.length} {filteredItems.length === 1 ? 'transformation' : 'transformations'} found
               </div>
             </div>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-8 mt-20 text-center">
-            <div><div className="text-4xl font-bold text-accent mb-2">10K+</div><p className="text-muted-foreground">Rooms Transformed</p></div>
-            <div><div className="text-4xl font-bold text-accent mb-2">25K+</div><p className="text-muted-foreground">Happy Users</p></div>
-            <div><div className="text-4xl font-bold text-accent mb-2">50+</div><p className="text-muted-foreground">Retail Partners</p></div>
-            <div><div className="text-4xl font-bold text-accent mb-2">98%</div><p className="text-muted-foreground">Satisfaction Rate</p></div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-muted/30 py-20">
-        <div className="container mx-auto px-6 max-w-4xl">
-          <div className="text-center mb-12"><h2 className="text-3xl font-bold mb-4">Get in Touch</h2><p className="text-lg text-muted-foreground">Have questions? We'd love to hear from you.</p></div>
-          <div className="grid md:grid-cols-2 gap-12">
-            <Card className="p-8"><h3 className="text-xl font-bold mb-6">Send us a message</h3><form className="space-y-4"><div className="grid grid-cols-2 gap-4"><div><Label htmlFor="firstName">First Name</Label><Input id="firstName" placeholder="John" /></div><div><Label htmlFor="lastName">Last Name</Label><Input id="lastName" placeholder="Doe" /></div></div><div><Label htmlFor="email">Email</Label><Input id="email" type="email" placeholder="john@example.com" /></div><div><Label htmlFor="subject">Subject</Label><Input id="subject" placeholder="How can we help?" /></div><div><Label htmlFor="message">Message</Label><Textarea id="message" rows={4} placeholder="Your message..." /></div><Button className="w-full"><Envelope className="w-4 h-4 mr-2" />Send Message</Button></form></Card>
-            <div className="space-y-8"><div><h3 className="text-xl font-bold mb-6">Contact Information</h3><div className="space-y-4"><div className="flex items-center gap-4"><div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center"><Envelope className="w-6 h-6 text-accent" /></div><div><p className="font-medium">Email</p><a href="mailto:hello@productviz.com" className="text-accent hover:underline">hello@productviz.com</a></div></div><div className="flex items-center gap-4"><div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center"><MapPin className="w-6 h-6 text-accent" /></div><div><p className="font-medium">Office</p><p className="text-muted-foreground">San Francisco, CA</p></div></div><div className="flex items-center gap-4"><div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center"><Phone className="w-6 h-6 text-accent" /></div><div><p className="font-medium">Response Time</p><p className="text-muted-foreground">Within 24 hours</p></div></div></div></div><Card className="p-6 bg-accent/5 border-accent/20"><h4 className="font-bold mb-3">Need immediate help?</h4><p className="text-sm text-muted-foreground mb-4">Check out our help documentation or community forum.</p><div className="flex gap-2"><Button variant="outline" size="sm">Help Center</Button><Button variant="outline" size="sm">Community</Button></div></Card></div>
-          </div>
-        </div>
-      </div>
-
-      <Footer />
-    </>
-);
-
-// --- THE MAIN APP COMPONENT ---
-
-function App() {
-  const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'workspace' | 'gallery' | 'about'>('landing');
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
-  const [projects, setProjects] = useLocalStorage<Project[]>('user-projects', []);
-  const [galleryVideos, setGalleryVideos] = useLocalStorage<any[]>('gallery-videos', []);
-  
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [itemDescription, setItemDescription] = useState('');
-  const [styleDescription, setStyleDescription] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
-
-  const workspaceFormProps = {
-      uploadedImage, setUploadedImage,
-      itemDescription, setItemDescription,
-      styleDescription, setStyleDescription,
-      customerEmail, setCustomerEmail
-  };
-
-  const renderCurrentView = () => {
-    switch (currentView) {
-      case 'landing':
-        return <LandingPage setCurrentView={setCurrentView} setProjects={setProjects} setSelectedProject={setSelectedProject} setWorkspaceTab={() => {}} />;
-      case 'dashboard':
-        return <ProjectDashboard setIsCreateProjectOpen={setIsCreateProjectOpen} />;
-      case 'workspace':
-        return <VisualizationWorkspace selectedProject={selectedProject} setCurrentView={setCurrentView} {...workspaceFormProps} />;
-      case 'gallery':
-        return <GalleryPage galleryVideos={galleryVideos} setCurrentView={setCurrentView} />;
-      case 'about':
-        return <AboutPage />;
-      default:
-        return <LandingPage setCurrentView={setCurrentView} setProjects={setProjects} setSelectedProject={setSelectedProject} setWorkspaceTab={() => {}} />;
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-background">
-      <Header 
-        setCurrentView={setCurrentView} 
-        isMobileMenuOpen={isMobileMenuOpen}
-        setIsMobileMenuOpen={setIsMobileMenuOpen}
-      />
-      <CreateProjectDialog
-        isCreateProjectOpen={isCreateProjectOpen}
-        setIsCreateProjectOpen={setIsCreateProjectOpen}
-        setProjects={setProjects}
-        setSelectedProject={setSelectedProject}
-        setCurrentView={setCurrentView}
-      />
-      <main>
-        {renderCurrentView()}
-      </main>
-      <Toaster />
-    </div>
-  );
-}
-
-export default App;
+          {/* Gallery Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredItems.length > 0 ? (
+              filteredItems.map((
