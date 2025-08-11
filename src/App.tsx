@@ -36,6 +36,9 @@ import {
   Trash
 } from '@phosphor-icons/react'
 
+// Import Supabase components - will be null if not configured
+import { supabase, STORAGE_BUCKET } from '@/lib/supabase'
+
 // --- INTERFACES AND STATIC DATA ---
 
 interface Project {
@@ -147,6 +150,7 @@ const Header = ({ setCurrentView, isMobileMenuOpen, setIsMobileMenuOpen }: any) 
             <a href="#" className="text-foreground hover:text-primary transition-colors font-medium text-sm" onClick={(e) => { e.preventDefault(); setCurrentView('landing'); }}>Home</a>
             <a href="#" className="text-foreground hover:text-primary transition-colors font-medium text-sm" onClick={(e) => { e.preventDefault(); setCurrentView('dashboard'); }}>Projects</a>
             <a href="#" className="text-foreground hover:text-primary transition-colors font-medium text-sm" onClick={(e) => { e.preventDefault(); setCurrentView('gallery'); }}>Gallery</a>
+            <a href="#" className="text-foreground hover:text-primary transition-colors font-medium text-sm" onClick={(e) => { e.preventDefault(); setCurrentView('admin'); }}>Admin</a>
             <a href="#" className="text-foreground hover:text-primary transition-colors font-medium text-sm" onClick={(e) => { e.preventDefault(); setCurrentView('about'); }}>About</a>
             <Button className="ml-4" onClick={() => setCurrentView('dashboard')}>Get Started</Button>
           </nav>
@@ -160,7 +164,7 @@ const Header = ({ setCurrentView, isMobileMenuOpen, setIsMobileMenuOpen }: any) 
         {isMobileMenuOpen && (
           <nav className="md:hidden mt-6 pt-6 border-t">
             <div className="flex flex-col gap-4">
-              {(['landing', 'dashboard', 'gallery', 'about'] as const).map(view => (
+              {(['landing', 'dashboard', 'gallery', 'admin', 'about'] as const).map(view => (
                 <a key={view} href="#" className="text-foreground hover:text-primary font-medium text-center py-2"
                   onClick={(e) => { e.preventDefault(); setCurrentView(view); setIsMobileMenuOpen(false); }}>
                   {view.charAt(0).toUpperCase() + view.slice(1)}
@@ -312,43 +316,159 @@ const VisualizationWorkspace = ({ selectedProject, setCurrentView, ...formProps 
 const GalleryPage = ({ galleryVideos, setCurrentView }: any) => {
   const [activeRoomFilter, setActiveRoomFilter] = useState('All Rooms');
   const [activeStyleFilter, setActiveStyleFilter] = useState('All Styles');
+  const [dbProjects, setDbProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch projects from Supabase
+  React.useEffect(() => {
+    const fetchProjects = async () => {
+      if (!supabase) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('gallery_projects')
+          .select('*')
+          .order('featured', { ascending: false })
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.warn('Error fetching from database:', error);
+          setDbProjects([]);
+        } else {
+          // Transform database format to component format
+          const transformedProjects = (data || []).map(project => ({
+            id: project.id,
+            video: project.video_url,
+            title: project.title,
+            description: project.description,
+            style: project.style_type,
+            room: project.room_type,
+            featured: project.featured,
+            thumbnail: project.thumbnail_url
+          }));
+          setDbProjects(transformedProjects);
+        }
+      } catch (error) {
+        console.warn('Failed to fetch projects:', error);
+        setDbProjects([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   const galleryItems = useMemo(() => {
+    // Fallback hardcoded items for when database is not available
     const builtInItems = [
-      { id: 'b1', video: modernLivingRoomVideo, title: 'Modern Living Room', description: 'A complete makeover...', style: 'Modern', room: 'Living Room' },
-      { id: 'b2', video: cozyBedroomVideo, title: 'Scandinavian Bedroom', description: 'Cozy design...', style: 'Scandinavian', room: 'Bedroom' },
-      { id: 'b3', video: kitchenPanVideo, title: 'Minimalist Kitchen', description: 'Clean, functional kitchen...', style: 'Minimalist', room: 'Kitchen' },
+      { id: 'b1', video: modernLivingRoomVideo, title: 'Modern Living Room', description: 'A complete makeover featuring sleek furniture and contemporary design elements.', style: 'Modern', room: 'Living Room' },
+      { id: 'b2', video: cozyBedroomVideo, title: 'Scandinavian Bedroom', description: 'Cozy design with natural wood elements and minimalist Nordic aesthetics.', style: 'Scandinavian', room: 'Bedroom' },
+      { id: 'b3', video: kitchenPanVideo, title: 'Minimalist Kitchen', description: 'Clean, functional kitchen design with streamlined appliances and storage solutions.', style: 'Minimalist', room: 'Kitchen' },
     ];
-    return [...builtInItems, ...(galleryVideos || [])];
-  }, [galleryVideos]);
+
+    // Use database projects if available, otherwise use built-in items + localStorage videos
+    if (dbProjects.length > 0) {
+      return dbProjects;
+    } else {
+      return [...builtInItems, ...(galleryVideos || [])];
+    }
+  }, [dbProjects, galleryVideos]);
 
   const filteredItems = galleryItems.filter(item => 
     (activeRoomFilter === 'All Rooms' || item.room === activeRoomFilter) &&
     (activeStyleFilter === 'All Styles' || item.style === activeStyleFilter)
   );
 
+  // Get unique room and style types for filters
+  const roomTypes = ['All Rooms', ...Array.from(new Set(galleryItems.map(item => item.room)))];
+  const styleTypes = ['All Styles', ...Array.from(new Set(galleryItems.map(item => item.style)))];
+
   return (
     <>
       <div className="bg-muted/30 py-16">
         <div className="container mx-auto px-6 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Transformation Gallery</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Discover amazing room transformations and get inspired.</p>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Discover amazing room transformations and get inspired by our professional design work.</p>
         </div>
       </div>
+
       <div className="container mx-auto px-6 py-8">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredItems.map(item => (
-            <Card key={item.id} className="overflow-hidden group cursor-pointer">
-              <div className="aspect-[4/3] bg-muted relative">
-                <EnhancedVideo src={item.video} />
-              </div>
-              <CardContent className="p-6">
-                <h3 className="font-bold text-lg mb-2">{item.title}</h3>
-                <p className="text-muted-foreground text-sm">{item.description}</p>
-              </CardContent>
-            </Card>
-          ))}
+        {/* Filter Controls */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="room-filter" className="text-sm font-medium">Filter by Room:</Label>
+              <select
+                id="room-filter"
+                value={activeRoomFilter}
+                onChange={(e) => setActiveRoomFilter(e.target.value)}
+                className="p-2 border rounded-md bg-background"
+              >
+                {roomTypes.map(room => (
+                  <option key={room} value={room}>{room}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="style-filter" className="text-sm font-medium">Filter by Style:</Label>
+              <select
+                id="style-filter"
+                value={activeStyleFilter}
+                onChange={(e) => setActiveStyleFilter(e.target.value)}
+                className="p-2 border rounded-md bg-background"
+              >
+                {styleTypes.map(style => (
+                  <option key={style} value={style}>{style}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="flex items-end">
+            <p className="text-sm text-muted-foreground">
+              Showing {filteredItems.length} of {galleryItems.length} projects
+            </p>
+          </div>
         </div>
+
+        {loading ? (
+          <div className="text-center py-16">
+            <ArrowClockwise className="w-8 h-8 animate-spin mx-auto mb-4" />
+            <p>Loading gallery projects...</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredItems.map(item => (
+              <Card key={item.id} className="overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow">
+                <div className="aspect-[4/3] bg-muted relative">
+                  <EnhancedVideo src={item.video} />
+                  {item.featured && (
+                    <Badge className="absolute top-2 left-2 bg-accent">Featured</Badge>
+                  )}
+                </div>
+                <CardContent className="p-6">
+                  <h3 className="font-bold text-lg mb-2">{item.title}</h3>
+                  <p className="text-muted-foreground text-sm mb-3">{item.description}</p>
+                  <div className="flex gap-2">
+                    <Badge variant="outline" className="text-xs">{item.room}</Badge>
+                    <Badge variant="outline" className="text-xs">{item.style}</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {filteredItems.length === 0 && !loading && (
+          <div className="text-center py-16">
+            <ImageIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-xl font-bold mb-2">No Projects Found</h3>
+            <p className="text-muted-foreground">Try adjusting your filters or check back later for new projects.</p>
+          </div>
+        )}
       </div>
       <Footer />
     </>
@@ -430,10 +550,425 @@ const AboutPage = () => (
     </>
 );
 
+const AdminPage = () => {
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<any>(null);
+  const [newProject, setNewProject] = useState({
+    title: '',
+    description: '',
+    room_type: 'Living Room',
+    style_type: 'Modern',
+    video_url: '',
+    thumbnail_url: '',
+    featured: false
+  });
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+
+  const roomTypes = ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Office', 'Dining Room'];
+  const styleTypes = ['Modern', 'Scandinavian', 'Minimalist', 'Traditional', 'Industrial', 'Bohemian'];
+
+  const fetchProjects = async () => {
+    if (!supabase) {
+      setLoading(false);
+      toast.error('Supabase not configured. Please check your environment variables.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('gallery_projects')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setProjects(data || []);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      toast.error('Failed to load gallery projects');
+      setProjects([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const uploadFile = async (file: File, type: 'video' | 'thumbnail'): Promise<string | null> => {
+    if (!supabase) {
+      toast.error('Supabase not configured');
+      return null;
+    }
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+      const filePath = `${type}s/${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(filePath, file);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error(`Error uploading ${type}:`, error);
+      toast.error(`Failed to upload ${type}`);
+      return null;
+    }
+  };
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingVideo(true);
+    const url = await uploadFile(file, 'video');
+    if (url) {
+      setNewProject(prev => ({ ...prev, video_url: url }));
+      toast.success('Video uploaded successfully!');
+    }
+    setUploadingVideo(false);
+  };
+
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingThumbnail(true);
+    const url = await uploadFile(file, 'thumbnail');
+    if (url) {
+      setNewProject(prev => ({ ...prev, thumbnail_url: url }));
+      toast.success('Thumbnail uploaded successfully!');
+    }
+    setUploadingThumbnail(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supabase) {
+      toast.error('Supabase not configured');
+      return;
+    }
+
+    if (!newProject.title || !newProject.description || !newProject.video_url) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      if (editingProject) {
+        const { error } = await supabase
+          .from('gallery_projects')
+          .update(newProject)
+          .eq('id', editingProject.id);
+
+        if (error) throw error;
+        toast.success('Project updated successfully!');
+      } else {
+        const { error } = await supabase
+          .from('gallery_projects')
+          .insert([newProject]);
+
+        if (error) throw error;
+        toast.success('Project added successfully!');
+      }
+
+      setIsAddDialogOpen(false);
+      setEditingProject(null);
+      setNewProject({
+        title: '',
+        description: '',
+        room_type: 'Living Room',
+        style_type: 'Modern',
+        video_url: '',
+        thumbnail_url: '',
+        featured: false
+      });
+      fetchProjects();
+    } catch (error) {
+      console.error('Error saving project:', error);
+      toast.error('Failed to save project');
+    }
+  };
+
+  const handleEdit = (project: any) => {
+    setEditingProject(project);
+    setNewProject({ ...project });
+    setIsAddDialogOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!supabase) {
+      toast.error('Supabase not configured');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to delete this project?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('gallery_projects')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      toast.success('Project deleted successfully!');
+      fetchProjects();
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      toast.error('Failed to delete project');
+    }
+  };
+
+  const resetForm = () => {
+    setEditingProject(null);
+    setNewProject({
+      title: '',
+      description: '',
+      room_type: 'Living Room',
+      style_type: 'Modern',
+      video_url: '',
+      thumbnail_url: '',
+      featured: false
+    });
+  };
+
+  return (
+    <>
+      <div className="bg-muted/30 py-16">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">Gallery Admin</h1>
+              <p className="text-xl text-muted-foreground">Manage your gallery projects and media</p>
+            </div>
+            <Button 
+              onClick={() => {
+                resetForm();
+                setIsAddDialogOpen(true);
+              }}
+              className="flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add Project
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-6 py-8">
+        {!supabase ? (
+          <Card className="p-8 text-center">
+            <CardContent>
+              <Gear className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-bold mb-2">Supabase Not Configured</h3>
+              <p className="text-muted-foreground mb-4">
+                Please configure your Supabase credentials in the environment variables to use the admin features.
+              </p>
+              <div className="text-left bg-muted/50 p-4 rounded-lg">
+                <p className="text-sm font-mono">
+                  VITE_SUPABASE_URL=your-supabase-project-url<br />
+                  VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : loading ? (
+          <div className="text-center py-16">
+            <ArrowClockwise className="w-8 h-8 animate-spin mx-auto mb-4" />
+            <p>Loading projects...</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {projects.map(project => (
+              <Card key={project.id} className="overflow-hidden">
+                <div className="aspect-video bg-muted relative">
+                  {project.video_url ? (
+                    <EnhancedVideo src={project.video_url} />
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <ImageIcon className="w-12 h-12 text-muted-foreground" />
+                    </div>
+                  )}
+                  {project.featured && (
+                    <Badge className="absolute top-2 left-2 bg-accent">Featured</Badge>
+                  )}
+                </div>
+                <CardContent className="p-4">
+                  <h3 className="font-bold text-lg mb-2">{project.title}</h3>
+                  <p className="text-muted-foreground text-sm mb-3 line-clamp-2">{project.description}</p>
+                  <div className="flex gap-2 mb-3">
+                    <Badge variant="outline" className="text-xs">{project.room_type}</Badge>
+                    <Badge variant="outline" className="text-xs">{project.style_type}</Badge>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => handleEdit(project)}>
+                      <Gear className="w-3 h-3 mr-1" />Edit
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => handleDelete(project.id)}>
+                      <Trash className="w-3 h-3 mr-1" />Delete
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
+        setIsAddDialogOpen(open);
+        if (!open) resetForm();
+      }}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingProject ? 'Edit Project' : 'Add New Project'}
+            </DialogTitle>
+            <DialogDescription>
+              Fill in the project details and upload media files.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Title *</Label>
+                <Input
+                  id="title"
+                  value={newProject.title}
+                  onChange={(e) => setNewProject(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Project title"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="featured">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="featured"
+                      checked={newProject.featured}
+                      onChange={(e) => setNewProject(prev => ({ ...prev, featured: e.target.checked }))}
+                      className="rounded"
+                    />
+                    Featured Project
+                  </div>
+                </Label>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description *</Label>
+              <Textarea
+                id="description"
+                value={newProject.description}
+                onChange={(e) => setNewProject(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Project description"
+                rows={3}
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="room_type">Room Type</Label>
+                <select
+                  id="room_type"
+                  value={newProject.room_type}
+                  onChange={(e) => setNewProject(prev => ({ ...prev, room_type: e.target.value }))}
+                  className="w-full p-2 border rounded-md"
+                >
+                  {roomTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="style_type">Style Type</Label>
+                <select
+                  id="style_type"
+                  value={newProject.style_type}
+                  onChange={(e) => setNewProject(prev => ({ ...prev, style_type: e.target.value }))}
+                  className="w-full p-2 border rounded-md"
+                >
+                  {styleTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="video">Video File *</Label>
+              <div className="flex gap-2">
+                <input
+                  type="file"
+                  id="video"
+                  accept="video/*"
+                  onChange={handleVideoUpload}
+                  className="flex-1 p-2 border rounded-md"
+                  disabled={uploadingVideo}
+                />
+                {uploadingVideo && <ArrowClockwise className="w-6 h-6 animate-spin" />}
+              </div>
+              {newProject.video_url && (
+                <p className="text-sm text-green-600">✓ Video uploaded successfully</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="thumbnail">Thumbnail (Optional)</Label>
+              <div className="flex gap-2">
+                <input
+                  type="file"
+                  id="thumbnail"
+                  accept="image/*"
+                  onChange={handleThumbnailUpload}
+                  className="flex-1 p-2 border rounded-md"
+                  disabled={uploadingThumbnail}
+                />
+                {uploadingThumbnail && <ArrowClockwise className="w-6 h-6 animate-spin" />}
+              </div>
+              {newProject.thumbnail_url && (
+                <p className="text-sm text-green-600">✓ Thumbnail uploaded successfully</p>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={uploadingVideo || uploadingThumbnail || !newProject.title || !newProject.description || !newProject.video_url}
+              >
+                {editingProject ? 'Update Project' : 'Add Project'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Footer />
+    </>
+  );
+};
+
 // --- THE MAIN APP COMPONENT ---
 
 function App() {
-  const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'workspace' | 'gallery' | 'about'>('landing');
+  const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'workspace' | 'gallery' | 'admin' | 'about'>('landing');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -463,6 +998,8 @@ function App() {
         return <VisualizationWorkspace selectedProject={selectedProject} setCurrentView={setCurrentView} {...workspaceFormProps} />;
       case 'gallery':
         return <GalleryPage galleryVideos={galleryVideos} setCurrentView={setCurrentView} />;
+      case 'admin':
+        return <AdminPage />;
       case 'about':
         return <AboutPage />;
       default:
