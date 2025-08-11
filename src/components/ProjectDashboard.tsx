@@ -31,6 +31,8 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
   error, 
   onRetry 
 }) => {
+  const navigate = useNavigate();
+
   if (isLoading) {
     return (
       <>
@@ -119,7 +121,19 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <Card key={project.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+            <Card
+              key={project.id}
+              className="hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => navigate(`/project/${project.id}`)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  navigate(`/project/${project.id}`);
+                }
+              }}
+            >
               <CardContent className="p-6">
                 {project.thumbnail && (
                   <img 
