@@ -257,9 +257,74 @@ const LandingPage = ({ setCurrentView, setProjects, setSelectedProject, setWorks
     </>
   );
 };
-
 const CreateProjectDialog = ({ isCreateProjectOpen, setIsCreateProjectOpen, setProjects, setSelectedProject, setCurrentView }: any) => {
-    return <Dialog open={isCreateProjectOpen} onOpenChange={setIsCreateProjectOpen}>{/* ... Dialog Content ... */}</Dialog>;
+    const [localProjectForm, setLocalProjectForm] = useState({ name: '', description: '' });
+
+    const handleCreateProject = () => {
+      if (localProjectForm.name.trim()) {
+        const newProject: Project = {
+          id: Date.now().toString(),
+          name: localProjectForm.name,
+          description: localProjectForm.description,
+          createdAt: new Date().toISOString(),
+          visualizationRequests: []
+        };
+        setProjects((currentProjects: Project[] = []) => [...currentProjects, newProject]);
+        setSelectedProject(newProject);
+        setLocalProjectForm({ name: '', description: '' });
+        setIsCreateProjectOpen(false);
+        setCurrentView('workspace');
+        toast.success('Project created successfully!');
+      }
+    };
+
+    const handleOpenChange = (open: boolean) => {
+      if (!open) {
+        setLocalProjectForm({ name: '', description: '' });
+      }
+      setIsCreateProjectOpen(open);
+    };
+    
+    return (
+        <Dialog open={isCreateProjectOpen} onOpenChange={handleOpenChange}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Create New Project</DialogTitle>
+                    <DialogDescription>
+                      Start a new interior design project. You can add multiple room visualizations to each project.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="project-name">Project Name</Label>
+                        <Input 
+                            id="project-name" 
+                            value={localProjectForm.name} 
+                            onChange={(e) => setLocalProjectForm(prev => ({ ...prev, name: e.target.value }))} 
+                            placeholder="e.g., Living Room Makeover" 
+                            autoComplete="off"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="project-description">Description</Label>
+                        <Textarea 
+                            id="project-description" 
+                            value={localProjectForm.description} 
+                            onChange={(e) => setLocalProjectForm(prev => ({ ...prev, description: e.target.value }))} 
+                            placeholder="Describe your vision for this space..." 
+                            rows={3}
+                            autoComplete="off"
+                        />
+                    </div>
+                </div>
+                <div className="flex justify-end gap-3">
+                    <Button variant="outline" onClick={() => handleOpenChange(false)}>Cancel</Button>
+                    <Button onClick={handleCreateProject} disabled={!localProjectForm.name.trim()}>Create Project</Button>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+};
 };
 
 const ProjectDashboard = ({ setIsCreateProjectOpen }: any) => {
