@@ -16,6 +16,7 @@ import { GalleryPage } from '@/components/GalleryPage'
 import { AboutPage } from '@/components/AboutPage'
 import { AdminPage } from '@/components/AdminPage'
 import { AdminLogin } from '@/components/AdminLogin'
+import ProjectPage from '@/components/ProjectPage'
 
 // Import Supabase project API
 import { projectAPI, UserProject } from '@/lib/supabase'
@@ -215,7 +216,6 @@ function App() {
       }
     } catch (error) {
       console.error('Failed to load projects:', error);
-      setProjectsError('Failed to load projects. Please try again.');
       
       // Fallback to localStorage if Supabase fails
       try {
@@ -232,9 +232,13 @@ function App() {
         })));
         if (localStorageProjects.length > 0) {
           toast.error('Cloud storage unavailable. Using local storage.');
+          setProjectsError(null); // Clear error since we have local projects
+        } else {
+          setProjectsError('Failed to load projects. Please try again.');
         }
       } catch (localError) {
         console.error('Failed to load from localStorage:', localError);
+        setProjectsError('Failed to load projects. Please try again.');
       }
     } finally {
       setIsProjectsLoading(false);
@@ -282,6 +286,7 @@ function App() {
               />
             } 
           />
+          <Route path="/project/:id" element={<ProjectPage />} />
           <Route 
             path="/gallery" 
             element={<GalleryPage galleryVideos={galleryVideos} />} 

@@ -144,6 +144,68 @@ export const projectAPI = {
     return data || []
   },
 
+  async getById(id: string): Promise<UserProject | null> {
+    if (!supabase) {
+      // Fallback to localStorage
+      try {
+        const localStorageProjects = JSON.parse(localStorage.getItem('user-projects') || '[]');
+        const project = localStorageProjects.find((p: any) => p.id === id);
+        if (project) {
+          // Convert legacy format to UserProject format
+          return {
+            id: project.id,
+            name: project.name,
+            description: project.description,
+            created_at: project.createdAt || new Date().toISOString(),
+            updated_at: project.createdAt || new Date().toISOString(),
+            user_id: null,
+            thumbnail: project.thumbnail || null,
+            visualization_requests: project.visualizationRequests || []
+          };
+        }
+        return null;
+      } catch (error) {
+        console.error('Failed to load from localStorage:', error);
+        throw new Error('Supabase not configured and localStorage unavailable');
+      }
+    }
+    
+    try {
+      const { data, error } = await supabase
+        .from('user_projects')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (error) throw error
+      return data
+    } catch (error) {
+      // If Supabase fails, fallback to localStorage
+      console.warn('Supabase query failed, falling back to localStorage:', error);
+      try {
+        const localStorageProjects = JSON.parse(localStorage.getItem('user-projects') || '[]');
+        const project = localStorageProjects.find((p: any) => p.id === id);
+        if (project) {
+          // Convert legacy format to UserProject format
+          return {
+            id: project.id,
+            name: project.name,
+            description: project.description,
+            created_at: project.createdAt || new Date().toISOString(),
+            updated_at: project.createdAt || new Date().toISOString(),
+            user_id: null,
+            thumbnail: project.thumbnail || null,
+            visualization_requests: project.visualizationRequests || []
+          };
+        }
+        return null;
+      } catch (localError) {
+        console.error('Failed to load from localStorage:', localError);
+        throw error; // Re-throw original error
+      }
+    }
+  },
+
   async create(project: Omit<UserProject, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<UserProject> {
     if (!supabase) {
       throw new Error('Supabase not configured')
