@@ -84,3 +84,6 @@ Notes
 - After this, unauthenticated (anon) users cannot select/insert rows.
 - Ensure your Supabase project auth settings permit email/password sign-up/sign-in.
 - If you require email confirmations, users must verify their email before they can sign in.
+- In Supabase → Authentication → URL configuration, set Site URL to your app origin
+- Optional: Add <your-origin>/auth/callback to Redirect URLs
+- The app sets emailRedirectTo to /auth/callback during sign-up and handles the redirect
