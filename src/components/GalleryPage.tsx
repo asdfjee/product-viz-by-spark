@@ -67,6 +67,110 @@ const fallbackGalleryItems = [
     room_type: 'Kitchen',
     featured: false
   },
+  // Industrial style transformations
+  { 
+    id: 'b4', 
+    video_url: '/videos/industrial-loft-transformation.mp4', 
+    title: 'Industrial Loft Living Room', 
+    description: 'Raw materials, exposed brick, and metal fixtures create an urban industrial aesthetic', 
+    style_type: 'Industrial', 
+    room_type: 'Living Room',
+    featured: true
+  },
+  { 
+    id: 'b5', 
+    video_url: '/videos/industrial-office-transformation.mp4', 
+    title: 'Industrial Office Workspace', 
+    description: 'Functional workspace with industrial pipes, concrete surfaces, and vintage lighting', 
+    style_type: 'Industrial', 
+    room_type: 'Office',
+    featured: false
+  },
+  // Bohemian/Boho transformations
+  { 
+    id: 'b6', 
+    video_url: '/videos/boho-bedroom-transformation.mp4', 
+    title: 'Bohemian Bedroom Retreat', 
+    description: 'Eclectic mix of patterns, textures, and warm earth tones for a free-spirited sanctuary', 
+    style_type: 'Bohemian', 
+    room_type: 'Bedroom',
+    featured: false
+  },
+  { 
+    id: 'b7', 
+    video_url: '/videos/boho-living-room-transformation.mp4', 
+    title: 'Boho Living Room', 
+    description: 'Layered textiles, vintage furniture, and plants create a relaxed bohemian atmosphere', 
+    style_type: 'Bohemian', 
+    room_type: 'Living Room',
+    featured: false
+  },
+  // Traditional/Classic styles
+  { 
+    id: 'b8', 
+    video_url: '/videos/classic-dining-room-transformation.mp4', 
+    title: 'Classic Dining Room', 
+    description: 'Elegant traditional design with rich wood finishes and timeless furnishings', 
+    style_type: 'Traditional', 
+    room_type: 'Dining Room',
+    featured: false
+  },
+  { 
+    id: 'b9', 
+    video_url: '/videos/traditional-bathroom-transformation.mp4', 
+    title: 'Traditional Bathroom', 
+    description: 'Classic bathroom with marble surfaces, vintage fixtures, and sophisticated details', 
+    style_type: 'Traditional', 
+    room_type: 'Bathroom',
+    featured: false
+  },
+  // Contemporary transformations
+  { 
+    id: 'b10', 
+    video_url: '/videos/contemporary-kitchen-transformation.mp4', 
+    title: 'Contemporary Kitchen', 
+    description: 'Sleek modern design with high-end appliances and innovative storage solutions', 
+    style_type: 'Contemporary', 
+    room_type: 'Kitchen',
+    featured: true
+  },
+  { 
+    id: 'b11', 
+    video_url: '/videos/contemporary-office-transformation.mp4', 
+    title: 'Contemporary Home Office', 
+    description: 'Modern workspace with clean lines, smart technology integration, and ergonomic design', 
+    style_type: 'Contemporary', 
+    room_type: 'Office',
+    featured: false
+  },
+  // Rustic/Farmhouse styles
+  { 
+    id: 'b12', 
+    video_url: '/videos/rustic-dining-room-transformation.mp4', 
+    title: 'Rustic Dining Room', 
+    description: 'Warm farmhouse style with reclaimed wood, vintage decor, and cozy country charm', 
+    style_type: 'Rustic', 
+    room_type: 'Dining Room',
+    featured: false
+  },
+  { 
+    id: 'b13', 
+    video_url: '/videos/farmhouse-kitchen-transformation.mp4', 
+    title: 'Farmhouse Kitchen', 
+    description: 'Country kitchen with shiplap walls, apron sink, and rustic wooden accents', 
+    style_type: 'Rustic', 
+    room_type: 'Kitchen',
+    featured: false
+  },
+  { 
+    id: 'b14', 
+    video_url: '/videos/rustic-bathroom-transformation.mp4', 
+    title: 'Rustic Bathroom', 
+    description: 'Spa-like retreat with natural stone, wood beams, and vintage farmhouse fixtures', 
+    style_type: 'Rustic', 
+    room_type: 'Bathroom',
+    featured: false
+  },
 ];
 
 interface GalleryPageProps {
