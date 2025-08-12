@@ -17,6 +17,8 @@ import { AboutPage } from '@/components/AboutPage'
 import { AdminPage } from '@/components/AdminPage'
 import { AdminLogin } from '@/components/AdminLogin'
 import ProjectPage from '@/components/ProjectPage'
+import RequireAuth from '@/components/RequireAuth'
+import LoginPage from '@/components/LoginPage'
 
 // Import Supabase project API
 import { projectAPI, UserProject } from '@/lib/supabase'
@@ -274,19 +276,29 @@ function App() {
       <main>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route 
             path="/dashboard" 
             element={
-              <ProjectDashboard 
-                setIsCreateProjectOpen={setIsCreateProjectOpen}
-                projects={projects}
-                isLoading={isProjectsLoading}
-                error={projectsError}
-                onRetry={loadProjects}
-              />
+              <RequireAuth>
+                <ProjectDashboard 
+                  setIsCreateProjectOpen={setIsCreateProjectOpen}
+                  projects={projects}
+                  isLoading={isProjectsLoading}
+                  error={projectsError}
+                  onRetry={loadProjects}
+                />
+              </RequireAuth>
             } 
           />
-          <Route path="/project/:id" element={<ProjectPage />} />
+          <Route 
+            path="/project/:id" 
+            element={
+              <RequireAuth>
+                <ProjectPage />
+              </RequireAuth>
+            } 
+          />
           <Route 
             path="/gallery" 
             element={<GalleryPage galleryVideos={galleryVideos} />} 

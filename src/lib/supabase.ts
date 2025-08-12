@@ -116,17 +116,6 @@ export const galleryAPI = {
   }
 }
 
-// Generate a temporary user identifier for projects before user auth is implemented
-function generateTempUserId(): string {
-  // Use a combination of localStorage and browser characteristics for a stable temp ID
-  let tempUserId = localStorage.getItem('temp_user_id')
-  if (!tempUserId) {
-    tempUserId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    localStorage.setItem('temp_user_id', tempUserId)
-  }
-  return tempUserId
-}
-
 // Project operations with fallback handling
 export const projectAPI = {
   async getAll(): Promise<UserProject[]> {
@@ -134,92 +123,46 @@ export const projectAPI = {
       console.warn('Supabase not configured, returning empty array')
       return []
     }
-    
+
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData.user) return []
+
     const { data, error } = await supabase
       .from('user_projects')
       .select('*')
+      .eq('user_id', userData.user.id)
       .order('created_at', { ascending: false })
-    
+
     if (error) throw error
     return data || []
   },
 
   async getById(id: string): Promise<UserProject | null> {
     if (!supabase) {
-      // Fallback to localStorage
-      try {
-        const localStorageProjects = JSON.parse(localStorage.getItem('user-projects') || '[]');
-        const project = localStorageProjects.find((p: any) => p.id === id);
-        if (project) {
-          // Convert legacy format to UserProject format
-          return {
-            id: project.id,
-            name: project.name,
-            description: project.description,
-            created_at: project.createdAt || new Date().toISOString(),
-            updated_at: project.createdAt || new Date().toISOString(),
-            user_id: null,
-            thumbnail: project.thumbnail || null,
-            visualization_requests: project.visualizationRequests || []
-          };
-        }
-        return null;
-      } catch (error) {
-        console.error('Failed to load from localStorage:', error);
-        throw new Error('Supabase not configured and localStorage unavailable');
-      }
+      throw new Error('Supabase not configured')
     }
-    
-    try {
-      const { data, error } = await supabase
-        .from('user_projects')
-        .select('*')
-        .eq('id', id)
-        .single()
 
-      if (error) throw error
-      return data
-    } catch (error) {
-      // If Supabase fails, fallback to localStorage
-      console.warn('Supabase query failed, falling back to localStorage:', error);
-      try {
-        const localStorageProjects = JSON.parse(localStorage.getItem('user-projects') || '[]');
-        const project = localStorageProjects.find((p: any) => p.id === id);
-        if (project) {
-          // Convert legacy format to UserProject format
-          return {
-            id: project.id,
-            name: project.name,
-            description: project.description,
-            created_at: project.createdAt || new Date().toISOString(),
-            updated_at: project.createdAt || new Date().toISOString(),
-            user_id: null,
-            thumbnail: project.thumbnail || null,
-            visualization_requests: project.visualizationRequests || []
-          };
-        }
-        return null;
-      } catch (localError) {
-        console.error('Failed to load from localStorage:', localError);
-        throw error; // Re-throw original error
-      }
-    }
+    const { data, error } = await supabase
+      .from('user_projects')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (error) throw error
+    return data
   },
 
   async create(project: Omit<UserProject, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<UserProject> {
     if (!supabase) {
       throw new Error('Supabase not configured')
     }
-    
+
     const { data, error } = await supabase
       .from('user_projects')
-      .insert({
-        ...project,
-        user_id: generateTempUserId()
-      })
+      .insert({ ...project })
       .select()
       .single()
-    
+
     if (error) throw error
     return data
   },
@@ -228,14 +171,14 @@ export const projectAPI = {
     if (!supabase) {
       throw new Error('Supabase not configured')
     }
-    
+
     const { data, error } = await supabase
       .from('user_projects')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single()
-    
+
     if (error) throw error
     return data
   },
@@ -244,23 +187,21 @@ export const projectAPI = {
     if (!supabase) {
       throw new Error('Supabase not configured')
     }
-    
+
     const { error } = await supabase
       .from('user_projects')
       .delete()
       .eq('id', id)
-    
+
     if (error) throw error
   },
 
-  // Migration function to move localStorage projects to Supabase
   async migrateFromLocalStorage(localProjects: any[]): Promise<UserProject[]> {
     if (!supabase || !localProjects.length) {
       return []
     }
 
     const migratedProjects: UserProject[] = []
-    
     for (const localProject of localProjects) {
       try {
         const migratedProject = await this.create({
@@ -274,7 +215,7 @@ export const projectAPI = {
         console.error('Failed to migrate project:', localProject.name, error)
       }
     }
-    
+
     return migratedProjects
   }
 }
