@@ -2,6 +2,9 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Separator } from '@/components/ui/separator'
 import { galleryAPI, GalleryProject } from '@/lib/supabase'
 
 const EnhancedVideo = ({ src, className = "", ...props }: { src: string, className?: string, [key: string]: any }) => {
@@ -38,8 +41,218 @@ const Footer = () => (
   </footer>
 );
 
+// TransformationModal Component
+interface TransformationModalProps {
+  transformation: TransformationItem | null;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const TransformationModal: React.FC<TransformationModalProps> = ({ transformation, isOpen, onClose }) => {
+  const [activeMediaIndex, setActiveMediaIndex] = useState(0);
+
+  if (!transformation) return null;
+
+  const allMedia = [
+    { type: 'video' as const, url: transformation.video_url, caption: 'Main transformation video' },
+    ...(transformation.additional_media || [])
+  ];
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-6xl max-h-[90vh] w-[95vw] p-0">
+        <ScrollArea className="max-h-[90vh]">
+          <div className="p-6">
+            <DialogHeader className="mb-6">
+              <DialogTitle className="text-2xl md:text-3xl font-bold">
+                {transformation.title}
+              </DialogTitle>
+              <div className="flex gap-2 mt-2">
+                {transformation.room_type && (
+                  <Badge variant="secondary">{transformation.room_type}</Badge>
+                )}
+                {transformation.style_type && (
+                  <Badge variant="outline">{transformation.style_type}</Badge>
+                )}
+                {transformation.featured && (
+                  <Badge className="bg-accent text-accent-foreground">Featured</Badge>
+                )}
+              </div>
+            </DialogHeader>
+
+            {/* Main Media Section */}
+            <div className="mb-8">
+              <div className="aspect-video bg-muted rounded-lg overflow-hidden mb-4">
+                {allMedia[activeMediaIndex]?.type === 'video' ? (
+                  <EnhancedVideo 
+                    src={allMedia[activeMediaIndex].url} 
+                    className="w-full h-full"
+                  />
+                ) : (
+                  <img 
+                    src={allMedia[activeMediaIndex]?.url} 
+                    alt={allMedia[activeMediaIndex]?.caption}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+              
+              {/* Media Navigation */}
+              {allMedia.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {allMedia.map((media, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setActiveMediaIndex(index)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                        activeMediaIndex === index 
+                          ? 'border-primary ring-2 ring-primary/20' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      {media.type === 'video' ? (
+                        <div className="w-full h-full bg-muted flex items-center justify-center">
+                          <div className="text-xs">▶️</div>
+                        </div>
+                      ) : (
+                        <img 
+                          src={media.url} 
+                          alt={media.caption}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+              
+              {/* Media Caption */}
+              {allMedia[activeMediaIndex]?.caption && (
+                <p className="text-sm text-muted-foreground mt-2 italic">
+                  {allMedia[activeMediaIndex].caption}
+                </p>
+              )}
+            </div>
+
+            {/* Before/After Section */}
+            {transformation.before_after && (
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-4">Before & After</h3>
+                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Before</h4>
+                    <div className="aspect-video rounded-lg overflow-hidden">
+                      <img 
+                        src={transformation.before_after.before_url}
+                        alt="Before transformation"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">After</h4>
+                    <div className="aspect-video rounded-lg overflow-hidden">
+                      <img 
+                        src={transformation.before_after.after_url}
+                        alt="After transformation"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <p className="text-muted-foreground">
+                  {transformation.before_after.description}
+                </p>
+                <Separator className="mt-6" />
+              </div>
+            )}
+
+            {/* Detailed Description */}
+            {transformation.detailed_description && (
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-4">About This Transformation</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {transformation.detailed_description}
+                </p>
+                <Separator className="mt-6" />
+              </div>
+            )}
+
+            {/* Process Description */}
+            {transformation.process_description && (
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-4">Design Process</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {transformation.process_description}
+                </p>
+                <Separator className="mt-6" />
+              </div>
+            )}
+
+            {/* Style Characteristics */}
+            {transformation.style_characteristics && transformation.style_characteristics.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-4">Style Characteristics</h3>
+                <ul className="space-y-2">
+                  {transformation.style_characteristics.map((characteristic, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <span className="text-primary mt-1">•</span>
+                      <span className="text-muted-foreground">{characteristic}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Separator className="mt-6" />
+              </div>
+            )}
+
+            {/* Room Specifications */}
+            {transformation.room_specifications && transformation.room_specifications.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-xl font-semibold mb-4">Room Specifications</h3>
+                <ul className="space-y-2">
+                  {transformation.room_specifications.map((spec, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <span className="text-primary mt-1">•</span>
+                      <span className="text-muted-foreground">{spec}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Enhanced transformation interface
+interface TransformationItem {
+  id: string;
+  video_url: string;
+  title: string;
+  description: string;
+  style_type: string;
+  room_type: string;
+  featured: boolean;
+  detailed_description?: string;
+  process_description?: string;
+  style_characteristics?: string[];
+  room_specifications?: string[];
+  additional_media?: Array<{
+    type: 'image' | 'video';
+    url: string;
+    caption: string;
+  }>;
+  before_after?: {
+    before_url: string;
+    after_url: string;
+    description: string;
+  };
+}
+
 // Fallback data for when Supabase is not available or has no data
-const fallbackGalleryItems = [
+const fallbackGalleryItems: TransformationItem[] = [
   { 
     id: 'b1', 
     video_url: '/videos/modern-living-room-transformation.mp4', 
@@ -47,7 +260,42 @@ const fallbackGalleryItems = [
     description: 'A complete makeover with contemporary furniture and clean lines', 
     style_type: 'Modern', 
     room_type: 'Living Room',
-    featured: true
+    featured: true,
+    detailed_description: 'This stunning modern living room transformation showcases the power of minimalist design principles combined with functional elegance. The space features clean geometric lines, a neutral color palette with strategic accent colors, and carefully curated furnishings that emphasize both form and function. The design philosophy centers around creating an uncluttered environment that promotes relaxation while maintaining visual interest through texture and subtle contrasts.',
+    process_description: 'The transformation began with a complete room redesign, removing outdated furniture and dated color schemes. We focused on creating an open, airy feel by selecting low-profile furniture pieces and implementing a monochromatic base with warm wood accents. The lighting design incorporates both ambient and task lighting to create depth and warmth throughout different times of day.',
+    style_characteristics: [
+      'Clean geometric lines and minimal ornamentation',
+      'Neutral color palette with strategic accent colors',
+      'Mix of natural materials (wood, stone, metal)',
+      'Low-profile, functional furniture pieces',
+      'Emphasis on negative space and visual breathing room',
+      'Strategic use of texture for visual interest'
+    ],
+    room_specifications: [
+      'LED recessed lighting with dimmer controls',
+      'Hardwood flooring with area rug definition',
+      'Floor-to-ceiling windows maximizing natural light',
+      'Built-in storage solutions to maintain clean lines',
+      'Smart home integration for lighting and temperature',
+      'Professional color consultation for optimal palette'
+    ],
+    additional_media: [
+      {
+        type: 'image',
+        url: '/images/modern-living-detail-1.jpg',
+        caption: 'Close-up view of the custom-built entertainment center with hidden cable management'
+      },
+      {
+        type: 'image', 
+        url: '/images/modern-living-detail-2.jpg',
+        caption: 'Texture details showing the interplay between smooth and textured surfaces'
+      },
+      {
+        type: 'video',
+        url: '/videos/modern-living-walkthrough.mp4',
+        caption: 'Complete walkthrough showcasing the transformed space from multiple angles'
+      }
+    ]
   },
   { 
     id: 'b2', 
@@ -56,7 +304,37 @@ const fallbackGalleryItems = [
     description: 'Cozy design with natural textures and warm lighting', 
     style_type: 'Scandinavian', 
     room_type: 'Bedroom',
-    featured: false
+    featured: false,
+    detailed_description: 'This serene Scandinavian bedroom embodies the concept of "hygge" - creating a cozy, comfortable atmosphere that promotes well-being and contentment. The design focuses on natural materials, soft textures, and a calming color palette that encourages rest and relaxation. Every element has been carefully chosen to create a harmonious balance between simplicity and warmth.',
+    process_description: 'The transformation emphasized natural light optimization and the introduction of organic textures. We selected furniture with clean lines but warm wood tones, incorporated layers of soft textiles, and created a reading nook that encourages relaxation. The color scheme was kept intentionally muted to promote tranquility.',
+    style_characteristics: [
+      'Light wood furniture with natural grain patterns',
+      'Soft, muted color palette (whites, grays, natural tones)',
+      'Layered textiles for warmth and comfort',
+      'Emphasis on natural light and minimal window treatments',
+      'Functional design with hidden storage solutions',
+      'Incorporation of natural elements and plants'
+    ],
+    room_specifications: [
+      'Blackout curtains for optimal sleep environment',
+      'Adjustable bedside lighting for reading',
+      'Natural fiber rugs and organic cotton bedding',
+      'Built-in storage bench with soft cushioning',
+      'Temperature-controlled environment with smart thermostat',
+      'Air-purifying plants for improved sleep quality'
+    ],
+    additional_media: [
+      {
+        type: 'image',
+        url: '/images/scandi-bedroom-detail-1.jpg',
+        caption: 'Natural wood nightstand with integrated charging station and soft ambient lighting'
+      },
+      {
+        type: 'image',
+        url: '/images/scandi-bedroom-detail-2.jpg',
+        caption: 'Cozy reading corner with layered textiles and natural light'
+      }
+    ]
   },
   { 
     id: 'b3', 
@@ -65,7 +343,25 @@ const fallbackGalleryItems = [
     description: 'Clean, functional kitchen design with minimal clutter', 
     style_type: 'Minimalist', 
     room_type: 'Kitchen',
-    featured: false
+    featured: false,
+    detailed_description: 'This minimalist kitchen transformation demonstrates how less truly can be more. By eliminating visual clutter and focusing on essential functions, we created a space that is both highly functional and visually serene. The design philosophy centers around the idea that every element should serve a purpose while contributing to the overall aesthetic harmony.',
+    process_description: 'The renovation involved removing upper cabinets to create an open, airy feel, implementing hidden storage solutions, and selecting appliances that blend seamlessly with the cabinetry. We focused on creating clean sight lines and ensuring that every surface can be easily maintained.',
+    style_characteristics: [
+      'Handleless cabinetry with push-to-open mechanisms',
+      'Monochromatic color scheme with subtle variations',
+      'Hidden storage solutions to maintain clean lines',
+      'Integrated appliances for seamless appearance',
+      'Minimal decorative elements with maximum impact',
+      'High-quality materials with superior craftsmanship'
+    ],
+    room_specifications: [
+      'Quartz countertops with integrated sink',
+      'LED strip lighting under cabinets and in toe kicks',
+      'Soft-close drawers and cabinet doors',
+      'Hidden range hood integrated into cabinetry',
+      'Smart appliances with touch controls',
+      'Easy-to-clean surfaces throughout'
+    ]
   },
   // Industrial style transformations
   { 
@@ -75,7 +371,42 @@ const fallbackGalleryItems = [
     description: 'Raw materials, exposed brick, and metal fixtures create an urban industrial aesthetic', 
     style_type: 'Industrial', 
     room_type: 'Living Room',
-    featured: true
+    featured: true,
+    detailed_description: 'This industrial loft transformation celebrates the raw beauty of urban architecture while creating a comfortable, livable space. The design embraces the building\'s original character - exposed brick walls, steel beams, and concrete floors - while introducing modern comforts and carefully curated furnishings that complement the space\'s industrial heritage.',
+    process_description: 'The transformation focused on preserving and highlighting the existing architectural elements while improving functionality and comfort. We restored the original brick walls, refinished the concrete floors with a protective sealant, and introduced strategic lighting to warm the space. Industrial-style furniture and fixtures were selected to complement the existing structure.',
+    style_characteristics: [
+      'Exposed brick walls with restored mortar',
+      'Steel beam ceiling structure left visible',
+      'Concrete floors with polished finish',
+      'Metal fixtures and hardware throughout',
+      'Leather and distressed wood furniture',
+      'Edison bulb lighting and industrial fixtures'
+    ],
+    room_specifications: [
+      'Restored original hardwood where applicable',
+      'Industrial pendant lighting with Edison bulbs',
+      'Climate control system hidden within existing ductwork',
+      'Sound dampening treatments for urban noise',
+      'Original windows restored and weather-sealed',
+      'Custom steel and wood furniture pieces'
+    ],
+    additional_media: [
+      {
+        type: 'image',
+        url: '/images/industrial-loft-detail-1.jpg',
+        caption: 'Detail of restored brick wall with custom steel shelving unit'
+      },
+      {
+        type: 'video',
+        url: '/videos/industrial-loft-lighting.mp4',
+        caption: 'Evening lighting showcase demonstrating the warm ambiance'
+      }
+    ],
+    before_after: {
+      before_url: '/images/industrial-loft-before.jpg',
+      after_url: '/images/industrial-loft-after.jpg',
+      description: 'Before: Raw, unfinished space with potential. After: Refined industrial aesthetic with modern comfort.'
+    }
   },
   { 
     id: 'b5', 
@@ -183,6 +514,18 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ galleryVideos = [] }) 
   const [supabaseItems, setSupabaseItems] = useState<GalleryProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTransformation, setSelectedTransformation] = useState<TransformationItem | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleTransformationClick = (transformation: TransformationItem) => {
+    setSelectedTransformation(transformation);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedTransformation(null);
+  };
 
   // Load gallery items from Supabase on component mount
   useEffect(() => {
@@ -205,7 +548,7 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ galleryVideos = [] }) 
     loadGalleryItems();
   }, []);
 
-  const galleryItems = useMemo(() => {
+  const galleryItems: TransformationItem[] = useMemo(() => {
     // Combine Supabase items with fallback items and local storage items
     const combined = [
       ...fallbackGalleryItems,
@@ -289,7 +632,11 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ galleryVideos = [] }) 
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredItems.map(item => (
-            <Card key={item.id} className="overflow-hidden group cursor-pointer">
+            <Card 
+              key={item.id} 
+              className="overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => handleTransformationClick(item)}
+            >
               <div className="aspect-[4/3] bg-muted relative">
                 <EnhancedVideo src={item.video_url} />
                 {item.featured && (
@@ -297,6 +644,13 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ galleryVideos = [] }) 
                     <Badge className="bg-accent text-accent-foreground">Featured</Badge>
                   </div>
                 )}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3">
+                    <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
+                </div>
               </div>
               <CardContent className="p-6">
                 <h3 className="font-bold text-lg mb-2">{item.title}</h3>
@@ -320,7 +674,15 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ galleryVideos = [] }) 
           </div>
         )}
       </div>
+      
       <Footer />
+      
+      {/* Transformation Modal */}
+      <TransformationModal 
+        transformation={selectedTransformation}
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+      />
     </>
   );
 };
