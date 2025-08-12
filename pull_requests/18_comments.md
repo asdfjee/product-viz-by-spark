@@ -1,0 +1,1 @@
+Requesting to add an enhanced popup feature for viewing transformation details with extended content, multiple photos/videos, and detailed descriptions of each transformation and the design process.
