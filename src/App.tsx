@@ -19,6 +19,7 @@ import { AdminLogin } from '@/components/AdminLogin'
 import ProjectPage from '@/components/ProjectPage'
 import RequireAuth from '@/components/RequireAuth'
 import LoginPage from '@/components/LoginPage'
+import AuthCallback from '@/components/AuthCallback'
 
 // Import Supabase project API
 import { projectAPI, UserProject } from '@/lib/supabase'
@@ -277,6 +278,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route 
             path="/dashboard" 
             element={
