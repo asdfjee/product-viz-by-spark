@@ -1,8 +1,8 @@
-# netlify.toml
-
 [build]
-  # This command is run to build your site.
   command = "npm run build"
+  publish = "dist"
 
-  # This is the directory that contains your built site.
-  publish = "dist" 
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200 
