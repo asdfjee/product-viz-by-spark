@@ -25,7 +25,7 @@ const LoginPage: React.FC = () => {
         navigate(from, { replace: true })
       } else {
         await signUp(email, password)
-        toast.success('Account created. You can now sign in.')
+        toast.success('Check your email to confirm your account. After confirming, you\'ll be redirected back here.')
         setMode('signin')
       }
     } catch (err: any) {
