@@ -4,7 +4,7 @@ You've just launched your brand-new Spark Template Codespace — everything’s 
 This template is your blank canvas. It comes with a minimal setup to help you get started quickly with Spark development.
 
 🚀 What's Inside?
-- A clean, minimal Spark environment
+- A clean, minimal Spark environmen
 - Pre-configured for local development
 - Ready to scale with your ideas
   
