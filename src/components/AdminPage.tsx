@@ -14,48 +14,65 @@ import { Trash, Pen, Plus, Upload, Star } from '@phosphor-icons/react'
 import { galleryAPI, GalleryProject } from '@/lib/supabase'
 import { useNavigate } from 'react-router-dom'
 
-interface VideoFormData {
+interface MediaFormData {
   title: string
   description: string
   room_type: string
   style_type: string
   featured: boolean
+  media_type: 'video' | 'image'
 }
 
-const initialFormData: VideoFormData = {
+const initialFormData: MediaFormData = {
   title: '',
   description: '',
   room_type: '',
   style_type: '',
-  featured: false
+  featured: false,
+  media_type: 'video'
 }
 
 const roomTypes = ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Dining Room', 'Office', 'Hallway']
 const styleTypes = ['Modern', 'Scandinavian', 'Minimalist', 'Industrial', 'Traditional', 'Contemporary', 'Rustic']
 
-const VideoUploadZone = ({ onVideoUploaded }: { onVideoUploaded: (url: string) => void }) => {
+const MediaUploadZone = ({ 
+  onMediaUploaded, 
+  mediaType 
+}: { 
+  onMediaUploaded: (url: string) => void
+  mediaType: 'video' | 'image'
+}) => {
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
 
   const handleFileUpload = async (file: File) => {
-    if (!file.type.startsWith('video/')) {
+    // Validate file type based on media type
+    if (mediaType === 'video' && !file.type.startsWith('video/')) {
       toast.error('Please upload a video file (mp4, mov, avi)')
       return
     }
+    
+    if (mediaType === 'image' && !file.type.startsWith('image/')) {
+      toast.error('Please upload an image file (jpg, png, gif, webp)')
+      return
+    }
 
-    if (file.size > 100 * 1024 * 1024) { // 100MB limit
-      toast.error('File size must be less than 100MB')
+    // Size limits
+    const maxSize = mediaType === 'video' ? 100 * 1024 * 1024 : 10 * 1024 * 1024 // 100MB for video, 10MB for image
+    if (file.size > maxSize) {
+      const sizeLimit = mediaType === 'video' ? '100MB' : '10MB'
+      toast.error(`File size must be less than ${sizeLimit}`)
       return
     }
 
     setUploading(true)
     try {
-      const url = await galleryAPI.uploadVideo(file)
-      onVideoUploaded(url)
-      toast.success('Video uploaded successfully!')
+      const url = await galleryAPI.uploadMedia(file, mediaType)
+      onMediaUploaded(url)
+      toast.success(`${mediaType === 'video' ? 'Video' : 'Image'} uploaded successfully!`)
     } catch (error) {
       console.error('Upload error:', error)
-      toast.error('Failed to upload video')
+      toast.error(`Failed to upload ${mediaType}`)
     } finally {
       setUploading(false)
     }
@@ -88,21 +105,24 @@ const VideoUploadZone = ({ onVideoUploaded }: { onVideoUploaded: (url: string) =
     >
       <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
       <h3 className="text-lg font-medium mb-2">
-        {uploading ? 'Uploading...' : 'Drop video files here'}
+        {uploading ? 'Uploading...' : `Drop ${mediaType} files here`}
       </h3>
       <p className="text-sm text-muted-foreground mb-4">
-        or click to browse (mp4, mov, avi - max 100MB)
+        {mediaType === 'video' 
+          ? 'or click to browse (mp4, mov, avi - max 100MB)'
+          : 'or click to browse (jpg, png, gif, webp - max 10MB)'
+        }
       </p>
       <input
         type="file"
-        accept="video/*"
+        accept={mediaType === 'video' ? 'video/*' : 'image/*'}
         onChange={handleFileSelect}
         className="hidden"
-        id="video-upload"
+        id={`${mediaType}-upload`}
         disabled={uploading}
       />
       <Button asChild variant="outline" disabled={uploading}>
-        <label htmlFor="video-upload" className="cursor-pointer">
+        <label htmlFor={`${mediaType}-upload`} className="cursor-pointer">
           Choose File
         </label>
       </Button>
@@ -117,7 +137,7 @@ const VideoUploadZone = ({ onVideoUploaded }: { onVideoUploaded: (url: string) =
   )
 }
 
-const VideoFormDialog = ({ 
+const MediaFormDialog = ({ 
   isOpen, 
   onClose, 
   onSubmit, 
@@ -126,12 +146,12 @@ const VideoFormDialog = ({
 }: {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: VideoFormData & { video_url?: string }) => void
-  initialData?: Partial<VideoFormData>
+  onSubmit: (data: MediaFormData & { video_url?: string }) => void
+  initialData?: Partial<MediaFormData>
   title: string
 }) => {
-  const [formData, setFormData] = useState<VideoFormData>(initialFormData)
-  const [videoUrl, setVideoUrl] = useState('')
+  const [formData, setFormData] = useState<MediaFormData>(initialFormData)
+  const [mediaUrl, setMediaUrl] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
@@ -139,7 +159,7 @@ const VideoFormDialog = ({
       setFormData({ ...initialFormData, ...initialData })
     } else {
       setFormData(initialFormData)
-      setVideoUrl('')
+      setMediaUrl('')
     }
   }, [initialData, isOpen])
 
@@ -149,14 +169,14 @@ const VideoFormDialog = ({
       return
     }
 
-    if (!initialData && !videoUrl) {
-      toast.error('Please upload a video')
+    if (!initialData && !mediaUrl) {
+      toast.error(`Please upload a ${formData.media_type}`)
       return
     }
 
     setSubmitting(true)
     try {
-      await onSubmit({ ...formData, video_url: videoUrl })
+      await onSubmit({ ...formData, video_url: mediaUrl })
       onClose()
     } catch (error) {
       console.error('Submit error:', error)
@@ -171,13 +191,34 @@ const VideoFormDialog = ({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            {initialData ? 'Edit video details' : 'Add a new video to the gallery'}
+            {initialData ? 'Edit media details' : 'Add new media to the gallery'}
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">
           {!initialData && (
-            <VideoUploadZone onVideoUploaded={setVideoUrl} />
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="media_type">Media Type *</Label>
+                <Select
+                  value={formData.media_type}
+                  onValueChange={(value: 'video' | 'image') => setFormData(prev => ({ ...prev, media_type: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select media type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="video">Video</SelectItem>
+                    <SelectItem value="image">Image</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <MediaUploadZone 
+                onMediaUploaded={setMediaUrl} 
+                mediaType={formData.media_type}
+              />
+            </>
           )}
           
           <div className="grid grid-cols-2 gap-4">
@@ -243,14 +284,14 @@ const VideoFormDialog = ({
               checked={formData.featured}
               onCheckedChange={(checked) => setFormData(prev => ({ ...prev, featured: checked }))}
             />
-            <Label htmlFor="featured">Featured video</Label>
+            <Label htmlFor="featured">Featured {formData.media_type}</Label>
           </div>
         </div>
         
         <div className="flex justify-end gap-3 pt-4">
           <Button variant="outline" onClick={onClose}>Cancel</Button>
           <Button onClick={handleSubmit} disabled={submitting}>
-            {submitting ? 'Saving...' : (initialData ? 'Update' : 'Add Video')}
+            {submitting ? 'Saving...' : (initialData ? 'Update' : `Add ${formData.media_type}`)}
           </Button>
         </div>
       </DialogContent>
@@ -260,7 +301,7 @@ const VideoFormDialog = ({
 
 export const AdminPage = () => {
   const navigate = useNavigate()
-  const [videos, setVideos] = useState<GalleryProject[]>([])
+  const [mediaItems, setMediaItems] = useState<GalleryProject[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogState, setDialogState] = useState<{
     isOpen: boolean
@@ -276,25 +317,25 @@ export const AdminPage = () => {
     }
   }, [navigate])
 
-  // Load videos
-  const loadVideos = async () => {
+  // Load media items
+  const loadMediaItems = async () => {
     try {
       setLoading(true)
       const data = await galleryAPI.getAll()
-      setVideos(data)
+      setMediaItems(data)
     } catch (error) {
-      console.error('Failed to load videos:', error)
-      toast.error('Failed to load videos')
+      console.error('Failed to load media items:', error)
+      toast.error('Failed to load media items')
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    loadVideos()
+    loadMediaItems()
   }, [])
 
-  const handleAddVideo = async (data: VideoFormData & { video_url?: string }) => {
+  const handleAddMedia = async (data: MediaFormData & { video_url?: string }) => {
     try {
       await galleryAPI.create({
         title: data.title,
@@ -302,18 +343,19 @@ export const AdminPage = () => {
         room_type: data.room_type,
         style_type: data.style_type,
         video_url: data.video_url!,
-        thumbnail_url: data.video_url!, // Using video URL as thumbnail for now
-        featured: data.featured
+        thumbnail_url: data.video_url!, // Using media URL as thumbnail for now
+        featured: data.featured,
+        media_type: data.media_type
       })
-      toast.success('Video added successfully!')
-      loadVideos()
+      toast.success(`${data.media_type === 'video' ? 'Video' : 'Image'} added successfully!`)
+      loadMediaItems()
     } catch (error) {
-      console.error('Failed to add video:', error)
-      toast.error('Failed to add video')
+      console.error('Failed to add media:', error)
+      toast.error('Failed to add media')
     }
   }
 
-  const handleEditVideo = async (data: VideoFormData) => {
+  const handleEditMedia = async (data: MediaFormData) => {
     if (!dialogState.data) return
     
     try {
@@ -324,24 +366,25 @@ export const AdminPage = () => {
         style_type: data.style_type,
         featured: data.featured
       })
-      toast.success('Video updated successfully!')
-      loadVideos()
+      const mediaType = dialogState.data.media_type || 'video'
+      toast.success(`${mediaType === 'video' ? 'Video' : 'Image'} updated successfully!`)
+      loadMediaItems()
     } catch (error) {
-      console.error('Failed to update video:', error)
-      toast.error('Failed to update video')
+      console.error('Failed to update media:', error)
+      toast.error('Failed to update media')
     }
   }
 
-  const handleDeleteVideo = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this video?')) return
+  const handleDeleteMedia = async (id: string, mediaType: string = 'video') => {
+    if (!confirm(`Are you sure you want to delete this ${mediaType}?`)) return
     
     try {
       await galleryAPI.delete(id)
-      toast.success('Video deleted successfully!')
-      loadVideos()
+      toast.success(`${mediaType === 'video' ? 'Video' : 'Image'} deleted successfully!`)
+      loadMediaItems()
     } catch (error) {
-      console.error('Failed to delete video:', error)
-      toast.error('Failed to delete video')
+      console.error('Failed to delete media:', error)
+      toast.error('Failed to delete media')
     }
   }
 
@@ -355,14 +398,14 @@ export const AdminPage = () => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold">Gallery Administration</h1>
-          <p className="text-muted-foreground mt-2">Manage gallery videos and content</p>
+          <p className="text-muted-foreground mt-2">Manage gallery media and content</p>
         </div>
         <div className="flex gap-4">
           <Button
             onClick={() => setDialogState({ isOpen: true, mode: 'add' })}
           >
             <Plus className="w-4 h-4 mr-2" />
-            Add Video
+            Add Media
           </Button>
           <Button variant="outline" onClick={handleLogout}>
             Logout
@@ -372,21 +415,22 @@ export const AdminPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Gallery Videos ({videos.length})</CardTitle>
+          <CardTitle>Gallery Media ({mediaItems.length})</CardTitle>
           <CardDescription>
-            Manage video content in the gallery
+            Manage media content in the gallery
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">Loading videos...</p>
+              <p className="text-muted-foreground">Loading media...</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Title</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Room Type</TableHead>
                   <TableHead>Style Type</TableHead>
                   <TableHead>Featured</TableHead>
@@ -395,20 +439,25 @@ export const AdminPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {videos.map((video) => (
-                  <TableRow key={video.id}>
-                    <TableCell className="font-medium">{video.title}</TableCell>
+                {mediaItems.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">{item.title}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{video.room_type}</Badge>
+                      <Badge variant={item.media_type === 'video' ? 'default' : 'secondary'}>
+                        {item.media_type === 'video' ? 'Video' : 'Image'}
+                      </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{video.style_type}</Badge>
+                      <Badge variant="secondary">{item.room_type}</Badge>
                     </TableCell>
                     <TableCell>
-                      {video.featured && <Star className="w-4 h-4 text-accent" />}
+                      <Badge variant="outline">{item.style_type}</Badge>
                     </TableCell>
                     <TableCell>
-                      {new Date(video.created_at).toLocaleDateString()}
+                      {item.featured && <Star className="w-4 h-4 text-accent" />}
+                    </TableCell>
+                    <TableCell>
+                      {new Date(item.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
@@ -418,7 +467,7 @@ export const AdminPage = () => {
                           onClick={() => setDialogState({ 
                             isOpen: true, 
                             mode: 'edit', 
-                            data: video 
+                            data: item 
                           })}
                         >
                           <Pen className="w-4 h-4" />
@@ -426,7 +475,7 @@ export const AdminPage = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDeleteVideo(video.id)}
+                          onClick={() => handleDeleteMedia(item.id, item.media_type)}
                         >
                           <Trash className="w-4 h-4" />
                         </Button>
@@ -438,24 +487,24 @@ export const AdminPage = () => {
             </Table>
           )}
           
-          {!loading && videos.length === 0 && (
+          {!loading && mediaItems.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">No videos in the gallery yet.</p>
+              <p className="text-muted-foreground mb-4">No media in the gallery yet.</p>
               <Button onClick={() => setDialogState({ isOpen: true, mode: 'add' })}>
                 <Plus className="w-4 h-4 mr-2" />
-                Add First Video
+                Add First Media
               </Button>
             </div>
           )}
         </CardContent>
       </Card>
 
-      <VideoFormDialog
+      <MediaFormDialog
         isOpen={dialogState.isOpen}
         onClose={() => setDialogState({ isOpen: false, mode: 'add' })}
-        onSubmit={dialogState.mode === 'add' ? handleAddVideo : handleEditVideo}
+        onSubmit={dialogState.mode === 'add' ? handleAddMedia : handleEditMedia}
         initialData={dialogState.data}
-        title={dialogState.mode === 'add' ? 'Add New Video' : 'Edit Video'}
+        title={dialogState.mode === 'add' ? 'Add New Media' : 'Edit Media'}
       />
     </div>
   )
