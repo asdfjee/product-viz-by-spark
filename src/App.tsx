@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Toaster, toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import React, { useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Toaster, toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 // Import page components
 import { Header } from '@/components/Header'
