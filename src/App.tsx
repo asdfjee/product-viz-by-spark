@@ -22,7 +22,9 @@ import LoginPage from '@/components/LoginPage'
 import AuthCallback from '@/components/AuthCallback'
 import MediaLibraryButton from '@/components/MediaLibraryButton'
 
-// Import Supabase project API
+// Import the Media Library Modal
+import MediaLibraryModal from '@/components/MediaLibraryModal'
+
 import { projectAPI, UserProject } from '@/lib/supabase'
 
 // Helper hook for localStorage (kept for gallery videos and migration)
@@ -212,6 +214,9 @@ function App() {
   // Keep localStorage for gallery videos for now
   const [galleryVideos, setGalleryVideos] = useLocalStorage<any[]>('gallery-videos', []);
 
+  // State for the Media Library Modal trigger
+  const [showMediaLibrary, setShowMediaLibrary] = useState(false);
+
   // Migration and project loading
   useEffect(() => {
     loadProjects();
@@ -299,13 +304,35 @@ function App() {
     }
   };
 
+  // Handler for demo trigger to show the Media Library modal
+  const handleMediaLibraryInsert = (url: string) => {
+    toast.success(`Media selected: ${url}`);
+    setShowMediaLibrary(false);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header 
         isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
-      
+
+      {/* Modal trigger button on top for demo */}
+      <div className="flex w-full justify-center py-4 bg-background">
+        <Button 
+          className="bg-blue-600 text-white"
+          onClick={() => setShowMediaLibrary(true)}
+        >
+          Open Media Library
+        </Button>
+      </div>
+      {showMediaLibrary && (
+        <MediaLibraryModal
+          onInsert={handleMediaLibraryInsert}
+          onClose={() => setShowMediaLibrary(false)}
+        />
+      )}
+
       <CreateProjectDialog
         isCreateProjectOpen={isCreateProjectOpen}
         setIsCreateProjectOpen={setIsCreateProjectOpen}
