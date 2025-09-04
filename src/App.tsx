@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { Toaster, toast } from 'react-hot-toast';
 
 import Header from './components/Header';
 import Button from './components/ui/Button';
