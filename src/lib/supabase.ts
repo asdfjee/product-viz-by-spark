@@ -19,7 +19,6 @@ export interface GalleryProject {
   featured: boolean
   created_at: string
   updated_at: string
-  media_type: 'video' | 'image'
 }
 
 export interface UserProject {
@@ -47,12 +46,7 @@ export const galleryAPI = {
       .order('created_at', { ascending: false })
     
     if (error) throw error
-    
-    // Provide backward compatibility for items without media_type
-    return (data || []).map(item => ({
-      ...item,
-      media_type: item.media_type || 'video'
-    }))
+    return data || []
   },
 
   async create(project: Omit<GalleryProject, 'id' | 'created_at' | 'updated_at'>): Promise<GalleryProject> {
@@ -106,29 +100,6 @@ export const galleryAPI = {
     
     const fileExt = file.name.split('.').pop()
     const fileName = `${Date.now()}.${fileExt}`
-    const bucketName = import.meta.env.VITE_SUPABASE_STORAGE_BUCKET || 'gallery-media'
-    
-    const { data, error } = await supabase.storage
-      .from(bucketName)
-      .upload(fileName, file)
-    
-    if (error) throw error
-    
-    const { data: { publicUrl } } = supabase.storage
-      .from(bucketName)
-      .getPublicUrl(fileName)
-    
-    return publicUrl
-  },
-
-  async uploadMedia(file: File, mediaType: 'video' | 'image'): Promise<string> {
-    if (!supabase) {
-      throw new Error('Supabase not configured')
-    }
-    
-    const fileExt = file.name.split('.').pop()
-    const prefix = mediaType === 'video' ? 'videos' : 'images'
-    const fileName = `${prefix}/${Date.now()}.${fileExt}`
     const bucketName = import.meta.env.VITE_SUPABASE_STORAGE_BUCKET || 'gallery-media'
     
     const { data, error } = await supabase.storage

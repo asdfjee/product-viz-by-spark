@@ -54,11 +54,7 @@ const TransformationModal: React.FC<TransformationModalProps> = ({ transformatio
   if (!transformation) return null;
 
   const allMedia = [
-    { 
-      type: (transformation.media_type || 'video') as const, 
-      url: transformation.video_url, 
-      caption: `Main transformation ${transformation.media_type || 'video'}`
-    },
+    { type: 'video' as const, url: transformation.video_url, caption: 'Main transformation video' },
     ...(transformation.additional_media || [])
   ];
 
@@ -239,7 +235,6 @@ interface TransformationItem {
   style_type: string;
   room_type: string;
   featured: boolean;
-  media_type?: 'video' | 'image';
   detailed_description?: string;
   process_description?: string;
   style_characteristics?: string[];
@@ -564,8 +559,7 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ galleryVideos = [] }) 
         description: item.description,
         style_type: item.style_type,
         room_type: item.room_type,
-        featured: item.featured,
-        media_type: item.media_type || 'video'
+        featured: item.featured
       })),
       ...(galleryVideos || [])
     ];
@@ -644,15 +638,7 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ galleryVideos = [] }) 
               onClick={() => handleTransformationClick(item)}
             >
               <div className="aspect-[4/3] bg-muted relative">
-                {item.media_type === 'image' ? (
-                  <img 
-                    src={item.video_url} 
-                    alt={item.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <EnhancedVideo src={item.video_url} />
-                )}
+                <EnhancedVideo src={item.video_url} />
                 {item.featured && (
                   <div className="absolute top-4 right-4">
                     <Badge className="bg-accent text-accent-foreground">Featured</Badge>
@@ -660,15 +646,9 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ galleryVideos = [] }) 
                 )}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-full p-3">
-                    {item.media_type === 'image' ? (
-                      <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                      </svg>
-                    ) : (
-                      <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                    )}
+                    <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
                   </div>
                 </div>
               </div>
