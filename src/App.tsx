@@ -20,7 +20,6 @@ import ProjectPage from '@/components/ProjectPage'
 import RequireAuth from '@/components/RequireAuth'
 import LoginPage from '@/components/LoginPage'
 import AuthCallback from '@/components/AuthCallback'
-import MediaLibraryButton from '@/components/MediaLibraryButton'
 
 // Import the Media Library Modal
 import MediaLibraryModal from '@/components/MediaLibraryModal'
@@ -83,7 +82,6 @@ const CreateProjectDialog = ({
 }) => {
   const [localProjectForm, setLocalProjectForm] = useState({ name: '', description: '' });
   const [isCreating, setIsCreating] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState<string>('');
 
   const handleCreateProject = async () => {
     if (!localProjectForm.name.trim()) return;
@@ -93,13 +91,12 @@ const CreateProjectDialog = ({
       const newProject = await projectAPI.create({
         name: localProjectForm.name,
         description: localProjectForm.description,
-        thumbnail: selectedMedia || null,
+        thumbnail: null,
         visualization_requests: []
       });
       
       onProjectCreated(newProject);
       setLocalProjectForm({ name: '', description: '' });
-      setSelectedMedia('');
       setIsCreateProjectOpen(false);
       toast.success('Project created successfully!');
     } catch (error) {
@@ -113,14 +110,8 @@ const CreateProjectDialog = ({
   const handleOpenChange = (open: boolean) => {
     if (!open) { 
       setLocalProjectForm({ name: '', description: '' });
-      setSelectedMedia('');
     }
     setIsCreateProjectOpen(open);
-  };
-
-  const handleMediaSelected = (url: string) => {
-    setSelectedMedia(url);
-    toast.success('Media added to project!');
   };
   
   return (
@@ -153,35 +144,6 @@ const CreateProjectDialog = ({
               autoComplete="off"
               disabled={isCreating}
             />
-          </div>
-          <div className="space-y-2">
-            <Label>Project Media (Optional)</Label>
-            <div className="flex flex-col gap-3">
-              {selectedMedia && (
-                <div className="relative rounded-lg overflow-hidden border">
-                  <img 
-                    src={selectedMedia} 
-                    alt="Selected media" 
-                    className="w-full h-32 object-cover"
-                  />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2 bg-black/50 text-white hover:bg-black/70"
-                    onClick={() => setSelectedMedia('')}
-                  >
-                    ×
-                  </Button>
-                </div>
-              )}
-              <MediaLibraryButton 
-                onMediaSelected={handleMediaSelected}
-                variant="outline"
-                className="w-full"
-              >
-                {selectedMedia ? 'Change Media' : 'Add Project Media'}
-              </MediaLibraryButton>
-            </div>
           </div>
         </div>
         <div className="flex justify-end gap-3">

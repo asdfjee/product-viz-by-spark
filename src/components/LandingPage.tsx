@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowRight, Play, Camera, MagicWand, Download, Star } from '@phosphor-icons/react'
 import { useNavigate } from 'react-router-dom'
-import MediaLibraryButton from '@/components/MediaLibraryButton'
 
 const EnhancedVideo = ({ src, className = "", ...props }: { src: string, className?: string, [key: string]: any }) => {
   const [hasError, setHasError] = React.useState(false);
@@ -53,12 +52,6 @@ const featuredVisualizationsData = [
 export const LandingPage = () => {  
   const navigate = useNavigate();
   
-  const handleMediaSelected = (url: string) => {
-    console.log('Media selected:', url)
-    // Optional: You could do something with the selected media here
-    // For demo purposes, we just log it
-  }
-  
   return (
     <>
       <div className="relative overflow-hidden">
@@ -80,12 +73,6 @@ export const LandingPage = () => {
               <Button variant="outline" size="lg" className="text-lg px-8 py-6 h-auto" onClick={() => navigate('/gallery')}>
                 <Play className="mr-2 w-5 h-5" />Watch Demo
               </Button>
-              <MediaLibraryButton 
-                onMediaSelected={handleMediaSelected}
-                variant="ghost"
-                size="lg"
-                className="text-lg px-8 py-6 h-auto"
-              />
             </div>
           </div>
         </div>
